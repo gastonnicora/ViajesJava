@@ -1,0 +1,22 @@
+URLs importantes
+
+Documentación JSON:
+
+http://localhost:8080/v3/api-docs
+
+Interfaz Swagger:
+
+http://localhost:8080/swagger-ui/index.html
+http://localhost:8080/swagger-ui.html
+
+
+la documentación JSON:
+http://localhost:8080/v3/api-docs
+
+
+search process by port
+
+netstat -ano | findstr :3306
+
+kill process (change <PID> with pid)
+taskkill /PID <PID> /F

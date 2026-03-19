@@ -1,0 +1,29 @@
+package com.gastonnicora.trips.dtos.request.User;
+
+import java.util.Set;
+
+import com.gastonnicora.trips.enums.Role;
+
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+
+public class UserRole {
+    @NotEmpty(message = "Debe seleccionar al menos un rol")
+    @NotNull(message = "Debe seleccionar al menos un rol")
+    private Set<Role> roles;
+
+
+    public UserRole(Set<Role> roles) {
+        this.roles = roles;
+    }
+
+    public Set<Role> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(Set<Role> roles) {
+        this.roles = roles;
+    }
+
+
+}

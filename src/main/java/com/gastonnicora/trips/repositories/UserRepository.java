@@ -1,0 +1,17 @@
+package com.gastonnicora.trips.repositories;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.gastonnicora.trips.entitys.User;
+
+
+public interface UserRepository extends JpaRepository<User, UUID> {
+
+    Optional<User> findByEmailAndEnabled(String email, boolean enabled);
+    List<User> findByEmail(String email);
+    Optional<User> findByUuid(UUID uuid);
+}
