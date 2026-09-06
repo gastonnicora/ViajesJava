@@ -19,7 +19,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.gastonnicora.trips.dtos.entities.UserDTO;
 import com.gastonnicora.trips.dtos.response.company.AddressResponse;
 import com.gastonnicora.trips.dtos.response.company.AddressResponse.Address;
 import com.gastonnicora.trips.helpers.CompanyApiTestClient;
@@ -47,17 +46,13 @@ public class PostCompanyTest {
     private String token;
     private CompanyApiTestClient companyApi;
 
-    private String email;
-    private final String password = "goodPassword";
-
     @BeforeEach
     void setup() throws Exception {
         when(geocodingService.obtenerDireccion(anyDouble(), anyDouble()))
                 .thenReturn(new AddressResponse("calle falsa 123",
                         new Address("calle falsa", "123", "barrio", "ciudad", "departamento", "estado", "pais")));
-        UserDTO user = UserTestFactory.registerUser(mockMvc, "User", password);
-        this.email = user.getEmail();
-        token = UserTestFactory.login(mockMvc, email, password).getToken();
+
+        token = UserTestFactory.registerAndLogin(mockMvc);
         this.companyApi = new CompanyApiTestClient(mockMvc, objectMapper).withToken(token);
 
     }

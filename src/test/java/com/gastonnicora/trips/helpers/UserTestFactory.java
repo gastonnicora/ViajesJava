@@ -58,6 +58,19 @@ public class UserTestFactory {
         return mapper.readValue(responseJson, LoginResponse.class);
     }
 
+    public static String registerAndLogin(MockMvc mockMvc)throws Exception{
+        String pass= "goodPassword";
+        UserDTO user = UserTestFactory.registerUser(
+                mockMvc,
+                "UserGeneric",
+                pass
+        );
+
+        return UserTestFactory
+                .login(mockMvc, user.getEmail(), pass)
+                .getToken();
+    }
+
     public static String userJson(String name, String lastname, String email, String password, String confirmPassword) {
         return """
                     {
