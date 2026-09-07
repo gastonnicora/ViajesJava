@@ -2,7 +2,6 @@ package com.gastonnicora.trips.helpers;
 
 import static org.mockito.ArgumentMatchers.anyDouble;
 import static org.mockito.Mockito.when;
-
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 

@@ -7,10 +7,8 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 
 import com.gastonnicora.trips.dtos.entities.CompanyDTO;
-import com.gastonnicora.trips.dtos.entities.VehicleDTO;
 import com.gastonnicora.trips.dtos.entities.WorkerDTO;
 import com.gastonnicora.trips.dtos.request.company.CompanyCreate;
-import com.gastonnicora.trips.dtos.request.vehicle.VehicleCreate;
 import com.gastonnicora.trips.dtos.response.ListResponse;
 import com.gastonnicora.trips.dtos.response.company.AddressResponse;
 import com.gastonnicora.trips.dtos.response.worker.WorkersByCompany;
@@ -27,6 +25,7 @@ import static com.gastonnicora.trips.utils.SecurityUtils.getCurrentUserUuid;
 
 import jakarta.transaction.Transactional;
 // TODO 🚀: refactorizar para que solo contenga lo de company
+
 /**
  * Servicio de gestión de empresas.
  * <p>
@@ -47,7 +46,6 @@ public class CompanyService {
     private final CompanyMapper companyMapper;
     private final GeocodingService geocodingService;
     private final WorkerService workerService;
-    private final VehicleService vehicleService;
 
     /**
      * Constructor que inicializa los servicios necesarios para la gestión de
@@ -63,13 +61,12 @@ public class CompanyService {
      * @param workerService Servicio de gestión de trabajadores.
      */
     public CompanyService(UserService userService, CompanyRepository companyRepository, CompanyMapper companyMapper,
-            GeocodingService geocodingService, WorkerService workerService, VehicleService vehicleService) {
+            GeocodingService geocodingService, WorkerService workerService) {
         this.userService = userService;
         this.companyRepository = companyRepository;
         this.companyMapper = companyMapper;
         this.geocodingService = geocodingService;
         this.workerService = workerService;
-        this.vehicleService = vehicleService;
     }
 
     /**
@@ -391,33 +388,4 @@ public class CompanyService {
         return workerService.updateWorker(userUuid, companyUuid, roles);
     }
 
-    /**
-     * Crea un nuevo vehículo asociado a una empresa.
-     *
-     * @param companyUuid UUID de la empresa a la que se asociará el vehicle.
-     * @param vehicleCreate DTO que contiene los datos del vehículo a crear.
-     * @return DTO del vehículo creado.
-     * @throws ConflictException si ya existe un vehículo con la misma patente para la
-     * empresa.
-     * @see VehicleService#createVehicle(Company, VehicleCreate)
-     * @see CompanyService#getCompanyEntity(UUID)
-     */
-    public VehicleDTO createVehicle(UUID companyUuid, VehicleCreate vehicleCreate) {
-        Company company = this.getCompanyEntity(companyUuid);
-        return vehicleService.createVehicle(company, vehicleCreate);
-    }
-
-    /**
-     * Elimina un vehículo existente asociado a una empresa.
-     *
-     * @param companyUuid UUID de la empresa a la que está asociado el vehicle.
-     * @param vehicleUuid UUID del vehículo a eliminar.
-     * @throws NotFoundException si no existe un vehículo con el UUID proporcionado.
-     * @see CompanyService#getCompanyEntity(UUID)
-     * @see VehicleService#deleteVehicle(UUID)
-     */
-    public void deleteVehicle(UUID companyUuid, UUID vehicleUuid) {
-        this.getCompanyEntity(companyUuid);
-        vehicleService.deleteVehicle(vehicleUuid); // TODO 🚀: verificar propiedad de la empresa
-    }
 }

@@ -10,6 +10,7 @@ import com.gastonnicora.trips.dtos.request.vehicle.VehicleCreate;
 import com.gastonnicora.trips.entities.Company;
 import com.gastonnicora.trips.entities.Vehicle;
 import com.gastonnicora.trips.exceptions.ConflictException;
+import com.gastonnicora.trips.exceptions.ForbiddenException;
 import com.gastonnicora.trips.exceptions.NotFoundException;
 import com.gastonnicora.trips.mappers.VehicleMapper;
 import com.gastonnicora.trips.repositories.VehicleRepository;
@@ -19,18 +20,17 @@ public class VehicleService {
 
     private final VehicleRepository vehicleRepository;
     private final VehicleMapper vehicleMapper;
+    private final CompanyService companyService;
 
-    public VehicleService(VehicleRepository vehicleRepository, VehicleMapper vehicleMapper) {
+    public VehicleService(VehicleRepository vehicleRepository, VehicleMapper vehicleMapper,CompanyService companyService) {
         this.vehicleRepository = vehicleRepository;
         this.vehicleMapper = vehicleMapper;
+        this.companyService = companyService;
     }
 
     public Vehicle findByUuid(UUID vehicleUuid) {
 
-        Vehicle vehicle = vehicleRepository.findByUuid(vehicleUuid).orElseThrow(() -> new NotFoundException("Vehículo no encontrado"));
-        if (!vehicle.isActive()) {
-            throw new NotFoundException("Vehículo no encontrado");
-        }
+        Vehicle vehicle = vehicleRepository.findByUuidAndActiveTrue(vehicleUuid).orElseThrow(() -> new NotFoundException("Vehículo no encontrado"));
         return vehicle;
     }
 
@@ -43,7 +43,8 @@ public class VehicleService {
      * @throws ConflictException si ya existe un vehículo con la misma patente para la
      * empresa.
      */
-    public VehicleDTO createVehicle(Company company, VehicleCreate vehicleCreate) {
+    public VehicleDTO createVehicle(UUID companyuUuid, VehicleCreate vehicleCreate) {
+        Company company = companyService.getCompanyEntity(companyuUuid);
         Optional<Vehicle> existingVehicle = vehicleRepository.findByCompanyUuidAndPlate(company.getUuid(), vehicleCreate.getPlate());
         if (existingVehicle.isPresent()) {
             throw new ConflictException("Ya existe un vehículo con la misma patente para esta empresa");
@@ -58,8 +59,12 @@ public class VehicleService {
      * @param vehicleUuid UUID del vehículo a eliminar.
      * @throws NotFoundException si no existe un vehículo con el UUID proporcionado.
      */
-    public void deleteVehicle(UUID vehicleUuid) {
+    public void deleteVehicle(UUID companyUuid,UUID vehicleUuid) {
+        Company company = companyService.getCompanyEntity(companyUuid);
         Vehicle existingVehicle = findByUuid(vehicleUuid);
+        if (company.getUuid() != existingVehicle.getCompany().getUuid()){
+            throw new ForbiddenException("Acceso denegado");
+        }
         existingVehicle.setActive(false);
         vehicleRepository.save(existingVehicle);
     }

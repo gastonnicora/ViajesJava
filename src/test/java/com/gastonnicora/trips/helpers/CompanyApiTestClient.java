@@ -173,30 +173,5 @@ public class CompanyApiTestClient {
                 .header("User-Agent", "JUnit-Test"));
     }
 
-    public ResultActions createVehicle(UUID companyUuid, String plate, String model, Integer capacity) throws Exception {
-
-        VehicleCreate body = new VehicleCreate(
-                plate,
-                model,
-                capacity
-        );
-
-        String json = objectMapper.writeValueAsString(body);
-
-        return mockMvc.perform(post("/api/companies/" + companyUuid + "/vehicle")
-                .header("Authorization", "Bearer " + token)
-                .contentType(MediaType.APPLICATION_JSON)
-                .header("User-Agent", "JUnit-Test")
-                .content(json));
-    }
-    public ResultActions deleteVehicle(UUID companyUuid, UUID vehicleUuid)
-            throws Exception {
-
-        return mockMvc.perform(delete(
-                "/api/companies/" + companyUuid + "/vehicle/" + vehicleUuid)
-                .header("Authorization", "Bearer " + token)
-                .contentType(MediaType.APPLICATION_JSON)
-                .header("User-Agent", "JUnit-Test"));
-    }
 
 }

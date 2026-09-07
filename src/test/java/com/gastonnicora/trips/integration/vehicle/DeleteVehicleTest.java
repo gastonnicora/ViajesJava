@@ -1,8 +1,5 @@
 package com.gastonnicora.trips.integration.vehicle;
 
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -13,6 +10,7 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.gastonnicora.trips.dtos.entities.CompanyDTO;
 import com.gastonnicora.trips.helpers.CompanyTestFactory;
@@ -28,7 +26,7 @@ import tools.jackson.databind.ObjectMapper;
 @SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
-public class GetVehicleTest {
+class DeleteVehicleTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -50,40 +48,60 @@ public class GetVehicleTest {
     @BeforeEach
     void setup() throws Exception {
 
-        this.token = UserTestFactory.registerAndLogin(mockMvc);
+        token = UserTestFactory.registerAndLogin(mockMvc);
+
+
+        vehicleApi = new VehicleApiTestClient(
+                mockMvc,
+                objectMapper
+        ).withToken(token);
+
+
 
         company = new CompanyTestFactory(mockMvc, objectMapper, token, geocodingService).createCompany();
 
         vehicleUuid = new VehicleTestFactory(mockMvc, objectMapper, token).createVehicle(company.getUuid()).getUuid();
 
-        this.vehicleApi = new VehicleApiTestClient(
-                mockMvc,
-                objectMapper
-        ).withToken(token);
     }
 
     @Test
-    void shouldGetVehicleSuccessfully() throws Exception {
+    void shouldDeleteVehicleSuccessfully() throws Exception {
 
         vehicleApi
-                .getVehicle(
+                .deleteVehicle(
                         company.getUuid(),
                         vehicleUuid
                 )
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.plate").exists())
-                .andExpect(jsonPath("$.plate").value("AA123BB"));
+                .andExpect(status().isOk());
+
+        vehicleApi
+                .deleteVehicle(
+                        company.getUuid(),
+                        vehicleUuid
+                )
+                .andExpect(status().isNotFound());
     }
 
     @Test
     void shouldReturnNotFoundWhenVehicleDoesNotExist() throws Exception {
 
         vehicleApi
-                .getVehicle(
+                .deleteVehicle(
                         company.getUuid(),
                         UUID.randomUUID()
                 )
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void shouldReturnForbiddenWhenCompanyDoesNotExist() throws Exception {
+
+        vehicleApi
+                .deleteVehicle(
+                        UUID.randomUUID(),
+                        vehicleUuid
+                )
+                .andExpect(status().isForbidden());
     }
 
     @Test
@@ -96,11 +114,29 @@ public class GetVehicleTest {
                 );
 
         apiWithoutToken
-                .getVehicle(
+                .deleteVehicle(
                         company.getUuid(),
                         vehicleUuid
                 )
                 .andExpect(status().isUnauthorized());
     }
 
+    @Test
+    void shouldReturnForbiddenWhenUserDoesNotHavePermission() throws Exception {
+
+        String token = UserTestFactory.registerAndLogin(mockMvc);
+
+        VehicleApiTestClient anotherUserApi
+                = new VehicleApiTestClient(
+                        mockMvc,
+                        objectMapper
+                ).withToken(token);
+
+        anotherUserApi
+                .deleteVehicle(
+                        company.getUuid(),
+                        vehicleUuid
+                )
+                .andExpect(status().isForbidden());
+    }
 }

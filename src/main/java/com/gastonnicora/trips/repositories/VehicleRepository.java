@@ -19,6 +19,8 @@ public interface VehicleRepository extends JpaRepository<Vehicle, UUID> {
 
     Optional<Vehicle> findByUuid(UUID uuid);
 
+    Optional<Vehicle> findByUuidAndActiveTrue(UUID uuid);
+
     List<Vehicle> findAllByCompanyUuid(UUID companyUuid);
 
     Optional<Vehicle> findByCompanyUuidAndPlate(UUID companyUuid, String plate);

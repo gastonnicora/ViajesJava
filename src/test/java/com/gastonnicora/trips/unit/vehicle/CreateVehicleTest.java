@@ -17,6 +17,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
 
 import com.gastonnicora.trips.dtos.entities.VehicleDTO;
 import com.gastonnicora.trips.dtos.request.vehicle.VehicleCreate;
@@ -25,6 +26,7 @@ import com.gastonnicora.trips.entities.Vehicle;
 import com.gastonnicora.trips.exceptions.ConflictException;
 import com.gastonnicora.trips.mappers.VehicleMapper;
 import com.gastonnicora.trips.repositories.VehicleRepository;
+import com.gastonnicora.trips.services.CompanyService;
 import com.gastonnicora.trips.services.VehicleService;
 
 @ExtendWith(MockitoExtension.class)
@@ -38,6 +40,9 @@ class CreateVehicleTest {
 
     @Mock
     private VehicleMapper vehicleMapper;
+
+    @Mock
+    private CompanyService companyService ;
 
     @Test
     void shouldCreateVehicleSuccessfully() {
@@ -54,6 +59,8 @@ class CreateVehicleTest {
                 "123456789"
         );
         company.setUuid(companyUuid);
+
+        when(companyService.getCompanyEntity(company.getUuid())).thenReturn(company);
 
         VehicleCreate vehicleCreate = new VehicleCreate(
                 "AA123BB",
@@ -84,7 +91,7 @@ class CreateVehicleTest {
                 .thenReturn(expectedDTO);
 
         VehicleDTO result = vehicleService.createVehicle(
-                company,
+                company.getUuid(),
                 vehicleCreate
         );
 
@@ -129,6 +136,8 @@ class CreateVehicleTest {
         );
         company.setUuid(companyUuid);
 
+        when(companyService.getCompanyEntity(company.getUuid())).thenReturn(company);
+        
         VehicleCreate vehicleCreate = new VehicleCreate(
                 "AA123BB",
                 "Mercedes Benz",
@@ -150,7 +159,7 @@ class CreateVehicleTest {
         ConflictException exception = assertThrows(
                 ConflictException.class,
                 () -> vehicleService.createVehicle(
-                        company,
+                        company.getUuid(),
                         vehicleCreate
                 )
         );

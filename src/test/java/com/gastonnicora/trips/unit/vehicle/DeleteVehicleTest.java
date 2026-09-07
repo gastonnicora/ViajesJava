@@ -13,10 +13,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.gastonnicora.trips.entities.Vehicle;
 import com.gastonnicora.trips.entities.Company;
+import com.gastonnicora.trips.entities.Vehicle;
 import com.gastonnicora.trips.exceptions.NotFoundException;
 import com.gastonnicora.trips.repositories.VehicleRepository;
+import com.gastonnicora.trips.services.CompanyService;
 import com.gastonnicora.trips.services.VehicleService;
 
 @ExtendWith(MockitoExtension.class)
@@ -28,15 +29,24 @@ public class DeleteVehicleTest {
     @Mock
     private VehicleRepository vehicleRepository;
 
+    @Mock
+    private CompanyService companyService ;
+
     @Test
     void shouldDeleteVehicleSuccessfully() {
         Company company = new Company();
         company.setUuid(java.util.UUID.randomUUID());
+        
+        when(companyService.getCompanyEntity(company.getUuid())).thenReturn(company);
+        
         Vehicle vehicle = new Vehicle();
         vehicle.setActive(true);
         vehicle.setCompany(company);
-        when(vehicleRepository.findByUuid(vehicle.getUuid())).thenReturn(Optional.of(vehicle));
-        vehicleService.deleteVehicle(vehicle.getUuid());
+
+        when(vehicleRepository.findByUuidAndActiveTrue(vehicle.getUuid())).thenReturn(Optional.of(vehicle));
+
+        vehicleService.deleteVehicle(company.getUuid(),vehicle.getUuid());
+
         verify(vehicleRepository).save(vehicle);
         assertFalse(vehicle.isActive());
     }
@@ -45,11 +55,17 @@ public class DeleteVehicleTest {
     void shouldNotDeleteVehicleIfNotFound() {
         Company company = new Company();
         company.setUuid(java.util.UUID.randomUUID());
+        
+        when(companyService.getCompanyEntity(company.getUuid())).thenReturn(company);
+        
         Vehicle vehicle = new Vehicle();
         vehicle.setCompany(company);
-        when(vehicleRepository.findByUuid(vehicle.getUuid())).thenReturn(Optional.empty());
-        assertThrows(NotFoundException.class, () -> vehicleService.deleteVehicle(vehicle.getUuid()));
-        verify(vehicleRepository).findByUuid(vehicle.getUuid());
+        
+        when(vehicleRepository.findByUuidAndActiveTrue(vehicle.getUuid())).thenReturn(Optional.empty());
+        
+        assertThrows(NotFoundException.class, () -> vehicleService.deleteVehicle(company.getUuid(),vehicle.getUuid()));
+        
+        verify(vehicleRepository).findByUuidAndActiveTrue(vehicle.getUuid());
         verify(vehicleRepository, never()).save(new Vehicle());
     }
 }
