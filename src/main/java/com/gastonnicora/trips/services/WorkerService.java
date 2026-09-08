@@ -13,6 +13,8 @@ import com.gastonnicora.trips.entities.Company;
 import com.gastonnicora.trips.entities.User;
 import com.gastonnicora.trips.entities.Worker;
 import com.gastonnicora.trips.enums.RoleCompany;
+import com.gastonnicora.trips.exceptions.BadRequestException;
+import com.gastonnicora.trips.exceptions.ConflictException;
 import com.gastonnicora.trips.exceptions.NotFoundException;
 import com.gastonnicora.trips.mappers.WorkerMapper;
 import com.gastonnicora.trips.repositories.WorkerRepository;
@@ -62,7 +64,22 @@ public class WorkerService {
      * @return {@link WorkerDTO} del worker creado.
      */
     public WorkerDTO createWorker(User user, Company company, Set<RoleCompany> roles) {
+        this.verfyRole(roles);
+        if (workerRepository.findByUserUuidAndCompanyUuidAndActiveTrue(user.getUuid(), company.getUuid())
+            .isPresent()) {
+                throw  new ConflictException("Ya existe el trabajador");
+        }
         return WorkerMapper.toDTO(workerRepository.save(new Worker(user, company, roles)));
+    }
+
+    private void verfyRole(Set<RoleCompany> roles) {
+        if (roles == null || roles.isEmpty()) {
+            throw new BadRequestException("Se debe asignar al menos un rol al trabajador");
+        }
+
+        if (roles.contains(RoleCompany.OWNER)) {
+            throw new BadRequestException("No se puede asignar el rol de OWNER a un trabajador");
+        }
     }
 
     /**
@@ -85,7 +102,7 @@ public class WorkerService {
      * trabajadores.
      */
     public WorkersByCompany getWorkersByCompany(UUID company) {
-        List<Worker> workers = workerRepository.findAllByCompanyUuid(company);
+        List<Worker> workers = workerRepository.findAllByCompanyUuidAndActiveTrue(company);
         return WorkerMapper.toWorkersByCompanyDTO(workers);
     }
 
@@ -97,9 +114,9 @@ public class WorkerService {
      * trabajos.
      */
     public WorkersByUser getWorkersByUser(UUID user) {
-        List<Worker> workers = workerRepository.findAllByUserUuid(user);
+        List<Worker> workers = workerRepository.findAllByUserUuidAndActiveTrue(user);
         if (workers == null || workers.isEmpty()) { //TODO: Falta testear este caso
-            throw new NotFoundException("El usuario no tiene trabajadores");
+            throw new NotFoundException("El usuario no tiene trabajos");
         }
         return WorkerMapper.toWorkersByUserDTO(workers);
     }
@@ -126,6 +143,7 @@ public class WorkerService {
      */
     @Transactional
     public WorkerDTO updateWorker(UUID user, UUID company, Set<RoleCompany> roles) {
+        this.verfyRole(roles);
         Worker worker = this.getWorker(user, company);
         worker.setRoles(roles);
         worker = workerRepository.save(worker);
@@ -140,7 +158,8 @@ public class WorkerService {
      * @return {@link Worker} del worker.
      */
     private Worker getWorker(UUID user, UUID company) {
-        return workerRepository.findByUserUuidAndCompanyUuid(user, company).orElseThrow(() -> new NotFoundException("Relación entre usuario y empresa no encontrada"));
+        return workerRepository.findByUserUuidAndCompanyUuidAndActiveTrue(user, company)
+                .orElseThrow(() -> new NotFoundException("Relación entre usuario y empresa no encontrada"));
     }
 
     /**
@@ -149,8 +168,14 @@ public class WorkerService {
      * @param owner UUID del usuario.
      * @return Lista de {@link Worker} del worker.
      */
-    public List<Worker> getWorkersByOwner(UUID owner) {
-        return workerRepository.findAllByUserUuidAndRolesContains(owner, RoleCompany.OWNER);
+    public List<Company> getCompaniesByOwner(UUID owner) {
+        List<Worker> workers = workerRepository.findAllByUserUuidAndRolesContainsAndActiveTrue(owner, RoleCompany.OWNER);
+        if (workers.isEmpty()) {
+            throw new NotFoundException("Empresas no encontradas");
+        }
+        return workers.stream()
+                .map(worker -> worker.getCompany())
+                .toList();
     }
 
 }

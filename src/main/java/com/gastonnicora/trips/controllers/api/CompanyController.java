@@ -1,5 +1,7 @@
 package com.gastonnicora.trips.controllers.api;
 
+import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -17,10 +19,15 @@ import com.gastonnicora.trips.dtos.entities.WorkerDTO;
 import com.gastonnicora.trips.dtos.request.company.CompanyCreate;
 import com.gastonnicora.trips.dtos.request.company.WorkerCreate;
 import com.gastonnicora.trips.dtos.response.ListResponse;
-import com.gastonnicora.trips.dtos.response.worker.WorkersByCompany;
+import com.gastonnicora.trips.entities.Company;
+import com.gastonnicora.trips.entities.User;
+import com.gastonnicora.trips.enums.RoleCompany;
 import com.gastonnicora.trips.exceptions.BadRequestException;
 import com.gastonnicora.trips.exceptions.ValidationException;
 import com.gastonnicora.trips.services.CompanyService;
+import com.gastonnicora.trips.services.UserService;
+import com.gastonnicora.trips.services.WorkerService;
+import static com.gastonnicora.trips.utils.SecurityUtils.getCurrentUserUuid;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -50,6 +57,8 @@ import jakarta.validation.Valid;
 public class CompanyController {
 
     private final CompanyService companyService;
+    private final WorkerService workerService;
+    private final UserService userService;
 
     /**
      * Constructor del controlador CompanyController.
@@ -57,8 +66,10 @@ public class CompanyController {
      * @param companyService Servicio de empresa que maneja la lógica de negocio
      * relacionada con las empresas.
      */
-    public CompanyController(CompanyService companyService) {
+    public CompanyController(CompanyService companyService, WorkerService workerService, UserService userService) {
         this.companyService = companyService;
+        this.workerService = workerService;
+        this.userService = userService;
     }
 
     /**
@@ -86,8 +97,14 @@ public class CompanyController {
      */
     @PostMapping
     @SecurityRequirement(name = "bearerAuth")
-    public CompanyDTO postMethodName(@Valid @RequestBody CompanyCreate company) {
-        return companyService.createCompany(company);
+    public CompanyDTO postMethodName(@Valid @RequestBody CompanyCreate companyCreate) {
+        User currentUser = userService.getUser(getCurrentUserUuid());
+
+        CompanyDTO companyDTO = companyService.createCompany(companyCreate);
+        Company company = companyService.getCompanyEntity(companyDTO.getUuid());
+
+        workerService.createWorker(currentUser, company, Set.of(RoleCompany.OWNER));
+        return companyDTO;
     }
 
     /**
@@ -122,7 +139,9 @@ public class CompanyController {
     @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN')")
     @Operation(summary = "Obtener empresas del usuario", description = "Obtiene las empresas del usuario")
     public ListResponse<CompanyDTO> getCompaniesByUser(@PathVariable UUID uuid) {
-        return companyService.getCompaniesByUser(uuid);
+        userService.getUser(uuid);
+        List<Company> companies = workerService.getCompaniesByOwner(uuid);
+        return companyService.toListResponse(companies);
     }
 
     /**
@@ -138,7 +157,10 @@ public class CompanyController {
     @SecurityRequirement(name = "bearerAuth")
     @Operation(summary = "Obtener empresas del usuario actual", description = "Obtiene las empresas del usuario actual")
     public ListResponse<CompanyDTO> getCompaniesByCurrentUser() {
-        return companyService.getCompaniesByCurrentUser();
+        UUID uuid = getCurrentUserUuid();
+        userService.getUser(uuid);
+        List<Company> companies = workerService.getCompaniesByOwner(uuid);
+        return companyService.toListResponse(companies);
     }
 
     /**
@@ -186,99 +208,10 @@ public class CompanyController {
         companyService.deleteCompany(uuid);
     }
 
-    /**
-     * Agrega un trabajador a una empresa.
-     * <p>
-     * Este endpoint agrega un trabajador a una empresa por su UUID.
-     * </p>
-     *
-     * @param uuid UUID de la empresa a la que se quiere agregar el trabajador.
-     * @param workerCreate {@link WorkerCreate} con los datos del trabajador a
-     * agregar.
-     * @return {@link WorkerDTO} con los datos del trabajador agregado.
-     * @see CompanyService#createWorker(UUID, UUID, Set<RoleCompany>)
-     */
-    @PostMapping("/{uuid}/worker")
-    @SecurityRequirement(name = "bearerAuth")
-    @PreAuthorize("@companySecurity.hasAnyRole(#uuid, "
-            + "T(com.gastonnicora.trips.enums.RoleCompany).OWNER, "
-            + "T(com.gastonnicora.trips.enums.RoleCompany).ADMIN, "
-            + "T(com.gastonnicora.trips.enums.RoleCompany).HR_MANAGER)")
-    @Operation(summary = "Agregar worker a empresa", description = "Agrega un worker a una empresa por su UUID")
-    public WorkerDTO createWorker(@PathVariable("uuid") UUID uuid, @RequestBody @Valid WorkerCreate workerCreate) {
-        return companyService.createWorker(workerCreate.getUserUuid(), uuid, workerCreate.getRoles());
-    }
+    
 
-    /**
-     * Obtiene los trabajadores de una empresa.
-     * <p>
-     * Este endpoint devuelve los trabajadores asociados a una empresa
-     * identificada por su UUID.
-     * </p>
-     *
-     * @param uuid UUID de la empresa.
-     * @return {@link WorkersByCompany} con los trabajadores de la empresa.
-     * @see CompanyService#getWorkersByCompany(UUID)
-     */
-    @GetMapping("/{uuid}/workers")
-    @SecurityRequirement(name = "bearerAuth")
-    @PreAuthorize("@companySecurity.hasAnyRole(#uuid, "
-            + "T(com.gastonnicora.trips.enums.RoleCompany).OWNER, "
-            + "T(com.gastonnicora.trips.enums.RoleCompany).ADMIN, "
-            + "T(com.gastonnicora.trips.enums.RoleCompany).HR_MANAGER)")
-    @Operation(summary = "Obtener trabajadores de empresa", description = "Obtiene los trabajadores de una empresa por su uuid")
-    public WorkersByCompany getWorkersByCompany(@PathVariable("uuid") UUID uuid) {
-        return companyService.getWorkersByCompany(uuid);
-    }
 
-    /**
-     * Actualiza los roles de un trabajador en una empresa.
-     * <p>
-     * Este endpoint actualiza los roles de un trabajador en una empresa por su
-     * UUID.
-     * </p>
-     *
-     * @param companyUuid UUID de la empresa.
-     * @param userUuid UUID del trabajador.
-     * @param workerCreate {@link WorkerCreate} con los nuevos roles del
-     * trabajador.
-     * @return {@link WorkerDTO} con los datos del trabajador actualizado.
-     * @see CompanyService#updateWorker(UUID, UUID, Set<RoleCompany>)
-     */
-    @PutMapping("/{companyUuid}/worker/{userUuid}")
-    @SecurityRequirement(name = "bearerAuth")
-    @PreAuthorize("@companySecurity.hasAnyRole(#companyUuid, "
-            + "T(com.gastonnicora.trips.enums.RoleCompany).OWNER, "
-            + "T(com.gastonnicora.trips.enums.RoleCompany).ADMIN, "
-            + "T(com.gastonnicora.trips.enums.RoleCompany).HR_MANAGER)")
-    @Operation(summary = "Actualizar roles de trabajador en empresa", description = "Actualiza los roles de un trabajador en una empresa por su UUID")
-    public WorkerDTO updateWorkerRoles(@PathVariable("companyUuid") UUID companyUuid,
-            @PathVariable("userUuid") UUID userUuid,
-            @RequestBody @Valid WorkerCreate workerCreate) {
-        return companyService.updateWorker(userUuid, companyUuid, workerCreate.getRoles());
-    }
-
-    /**
-     * Elimina un trabajador de una empresa.
-     * <p>
-     * Este endpoint elimina un trabajador de una empresa por su UUID.
-     * </p>
-     *
-     * @param companyUuid UUID de la empresa.
-     * @param userUuid UUID del trabajador.
-     * @see CompanyService#deleteWorker(UUID, UUID)
-     */
-    @DeleteMapping("/{companyUuid}/worker/{userUuid}")
-    @SecurityRequirement(name = "bearerAuth")
-    @PreAuthorize("@companySecurity.hasAnyRole(#companyUuid, "
-            + "T(com.gastonnicora.trips.enums.RoleCompany).OWNER, "
-            + "T(com.gastonnicora.trips.enums.RoleCompany).ADMIN, "
-            + "T(com.gastonnicora.trips.enums.RoleCompany).HR_MANAGER)")
-    @Operation(summary = "Eliminar trabajador de empresa", description = "Elimina un trabajador de una empresa por su UUID")
-    public void deleteWorker(@PathVariable("companyUuid") UUID companyUuid,
-            @PathVariable("userUuid") UUID userUuid) {
-        companyService.deleteWorker(userUuid, companyUuid);
-    }
+    
 //TODO: Agregar endpoint para obtener todas las empresas
 
 }

@@ -33,13 +33,17 @@ public interface WorkerRepository extends JpaRepository<Worker, UUID> {
             UUID userUuid,
             UUID companyUuid);
 
+    Optional<Worker> findByUserUuidAndCompanyUuidAndActiveTrue(
+            UUID userUuid,
+            UUID companyUuid);
+
     /**
      * Busca todos los trabajadores asociados a una empresa.
      *
      * @param companyUuid UUID de la empresa
      * @return Lista de trabajadores asociados a la empresa
      */
-    List<Worker> findAllByCompanyUuid(UUID companyUuid);
+    List<Worker> findAllByCompanyUuidAndActiveTrue(UUID companyUuid);
 
     /**
      * Busca todos los trabajadores asociados a un usuario.
@@ -48,6 +52,8 @@ public interface WorkerRepository extends JpaRepository<Worker, UUID> {
      * @return Lista de trabajadores asociados al usuario
      */
     List<Worker> findAllByUserUuid(UUID userUuid);
+
+    List<Worker> findAllByUserUuidAndActiveTrue(UUID userUuid);
 
     /**
      * Busca todos los trabajadores asociados a un usuario con un rol
@@ -58,4 +64,5 @@ public interface WorkerRepository extends JpaRepository<Worker, UUID> {
      * @return Lista de trabajadores asociados al usuario con el rol específico
      */
     List<Worker> findAllByUserUuidAndRolesContains(UUID userUuid, RoleCompany role);
+    List<Worker> findAllByUserUuidAndRolesContainsAndActiveTrue(UUID userUuid, RoleCompany role); // TODO 🚀:  testear
 }

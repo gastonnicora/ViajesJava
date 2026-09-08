@@ -22,7 +22,7 @@ import com.gastonnicora.trips.repositories.WorkerRepository;
 @ActiveProfiles("test")
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-public class FindAllByCompanyUuidTest {
+public class FindAllByCompanyUuidAndActiveTrueTest {
 
     @Autowired
     private WorkerRepository workerRepository;
@@ -55,7 +55,7 @@ public class FindAllByCompanyUuidTest {
                 company,
                 Set.of(RoleCompany.ADMIN)));
 
-        List<Worker> found = workerRepository.findAllByCompanyUuid(company.getUuid());
+        List<Worker> found = workerRepository.findAllByCompanyUuidAndActiveTrue(company.getUuid());
         assertFalse(found.isEmpty());
         assertTrue(found.stream().anyMatch(worker -> worker.getUser().getUuid().equals(user.getUuid())));
     }
@@ -71,7 +71,7 @@ public class FindAllByCompanyUuidTest {
                 "1234567890");
         company = companyRepository.save(company);
 
-        List<Worker> found = workerRepository.findAllByCompanyUuid(company.getUuid());
+        List<Worker> found = workerRepository.findAllByCompanyUuidAndActiveTrue(company.getUuid());
         assertTrue(found.isEmpty());
     }
 }

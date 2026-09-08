@@ -7,21 +7,15 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 
 import com.gastonnicora.trips.dtos.entities.CompanyDTO;
-import com.gastonnicora.trips.dtos.entities.WorkerDTO;
 import com.gastonnicora.trips.dtos.request.company.CompanyCreate;
 import com.gastonnicora.trips.dtos.response.ListResponse;
 import com.gastonnicora.trips.dtos.response.company.AddressResponse;
-import com.gastonnicora.trips.dtos.response.worker.WorkersByCompany;
 import com.gastonnicora.trips.entities.Company;
 import com.gastonnicora.trips.entities.User;
-import com.gastonnicora.trips.enums.RoleCompany;
 import com.gastonnicora.trips.exceptions.BadRequestException;
-import com.gastonnicora.trips.exceptions.ConflictException;
 import com.gastonnicora.trips.exceptions.NotFoundException;
 import com.gastonnicora.trips.mappers.CompanyMapper;
 import com.gastonnicora.trips.repositories.CompanyRepository;
-import com.gastonnicora.trips.utils.SecurityUtils;
-import static com.gastonnicora.trips.utils.SecurityUtils.getCurrentUserUuid;
 
 import jakarta.transaction.Transactional;
 // TODO 🚀: refactorizar para que solo contenga lo de company
@@ -41,11 +35,9 @@ import jakarta.transaction.Transactional;
 @Service
 public class CompanyService {
 
-    private final UserService userService;
     private final CompanyRepository companyRepository;
     private final CompanyMapper companyMapper;
     private final GeocodingService geocodingService;
-    private final WorkerService workerService;
 
     /**
      * Constructor que inicializa los servicios necesarios para la gestión de
@@ -60,13 +52,11 @@ public class CompanyService {
      * coordenadas.
      * @param workerService Servicio de gestión de trabajadores.
      */
-    public CompanyService(UserService userService, CompanyRepository companyRepository, CompanyMapper companyMapper,
-            GeocodingService geocodingService, WorkerService workerService) {
-        this.userService = userService;
+    public CompanyService(CompanyRepository companyRepository, CompanyMapper companyMapper,
+            GeocodingService geocodingService) {
         this.companyRepository = companyRepository;
         this.companyMapper = companyMapper;
         this.geocodingService = geocodingService;
-        this.workerService = workerService;
     }
 
     /**
@@ -98,7 +88,6 @@ public class CompanyService {
      * @see CompanyRepository#save(Company)
      */
     public CompanyDTO createCompany(CompanyCreate companyCreate) {
-        User currentUser = userService.getUser(getCurrentUserUuid());
         AddressResponse addressR = geocodingService.obtenerDireccion(companyCreate.getLatitude(),
                 companyCreate.getLongitude());
         if (addressR.displayName() == null) {
@@ -110,7 +99,6 @@ public class CompanyService {
                 companyCreate.getLongitude(),
                 companyCreate.getEmail(), companyCreate.getPhone());
         company = companyRepository.save(company);
-        workerService.createWorker(currentUser, company, Set.of(RoleCompany.OWNER));
         return companyMapper.toDTO(company);
     }
 
@@ -145,37 +133,8 @@ public class CompanyService {
                 .orElseThrow(() -> new NotFoundException("Empresa no encontrada"));
     }
 
-    /**
-     * Obtiene todas las empresas del usuario.
-     *
-     * @param uuid UUID del usuario.
-     * @return Lista de empresas del usuario.
-     * @see CompanyRepository#findAllByOwner_Uuid(UUID)
-     */
-    public ListResponse<CompanyDTO> getCompaniesByUser(UUID uuid) {
-        return getCompaniesByOwner(uuid);
-    }
-
-    /**
-     * Obtiene todas las empresas del usuario actual.
-     * <p>
-     * Este método realiza lo siguiente:
-     * </p>
-     * <ul>
-     * <li>Obtiene el UUID del usuario actual mediante
-     * {@link SecurityUtils}.</li>
-     * <li>Llama al método {@link #getCompaniesByOwner(UUID)} para obtener las
-     * empresas del usuario.</li>
-     * </ul>
-     *
-     * @return Lista de empresas del usuario actual.
-     *
-     * @see ListResponse
-     * @see SecurityUtils#getCurrentUserUuid()
-     * @see #getCompaniesByOwner(UUID)
-     */
-    public ListResponse<CompanyDTO> getCompaniesByCurrentUser() {
-        return getCompaniesByOwner(getCurrentUserUuid());
+    public ListResponse<CompanyDTO> toListResponse(List<Company> companies) {
+        return new ListResponse<>(companyMapper.toDTOList(companies));
     }
 
     /**
@@ -253,139 +212,6 @@ public class CompanyService {
         Company company = this.getCompanyEntity(uuid);
         company.setActive(false);
         companyRepository.save(company);
-    }
-
-    /**
-     * Obtiene todas las empresas del usuario por su UUID.
-     * <p>
-     * Este método realiza lo siguiente:
-     * </p>
-     * <ul>
-     * <li>Le pide a {@link WorkerService} todas las empresas en la que el
-     * usuario es dueño.</li>
-     * <li>Convierte las empresas en una lista de DTOs con sus datos utilizando
-     * {@link CompanyMapper}.</li>
-     * </ul>
-     *
-     * @return Lista de empresas del usuario.
-     * @see CompanyRepository#findAllByOwner_Uuid(UUID)
-     * @see CompanyMapper#toDTOList(List)
-     * @see ListResponse
-     * @see WorkerService#getWorkersByOwner(UUID)
-     */
-    private ListResponse<CompanyDTO> getCompaniesByOwner(UUID uuid) {
-        List<Company> companies = workerService.getWorkersByOwner(uuid).stream()
-                .map(worker -> worker.getCompany())
-                .toList();
-        return new ListResponse<>(companyMapper.toDTOList(companies));
-    }
-
-    /**
-     * Obtiene todos los trabajadores de una empresa.
-     *
-     * @param companyUuid UUID de la empresa.
-     * @return {@link WorkersByCompany} con los datos de la empresa y todos sus
-     * trabajadores.
-     * @see WorkerService#getWorkersByCompany(UUID)
-     * @see CompanyService#getCompanyEntity(UUID)
-     */
-    public WorkersByCompany getWorkersByCompany(UUID companyUuid) {
-        this.getCompany(companyUuid);
-        return workerService.getWorkersByCompany(companyUuid);
-    }
-
-    /**
-     * Obtiene la relación entre un usuario y una empresa.
-     *
-     * @param userUuid UUID del usuario.
-     * @return {@link WorkerDTO} con los datos del usuario y la empresa.
-     * @see WorkerService#getWorkerByUserAndCompany(UUID, UUID)
-     * @see CompanyService#getCompanyEntity(UUID)
-     */
-    public WorkerDTO getWorker(UUID userUuid, UUID companyUuid) {
-        this.getCompany(companyUuid);
-        userService.getUser(userUuid);
-        return workerService.getWorkerByUserAndCompany(userUuid, companyUuid);
-    }
-
-    /**
-     * Crea un nuevo trabajador en una empresa.
-     *
-     * @param userUuid UUID del usuario que se quiere agregar como trabajador.
-     * @param companyUuid UUID de la empresa a la que se quiere agregar el
-     * trabajador.
-     * @param roles Set de {@link RoleCompany} que se le asignarán al
-     * trabajador.
-     * @return {@link WorkerDTO} Datos del trabajador creado.
-     * @throws BadRequestException Si no se asigna ningún rol, o si se intenta
-     * asignar el rol de OWNER.
-     * @throws ConflictException Si el usuario ya es trabajador de la empresa.
-     * @see WorkerService#createWorker(User, Company, Set)
-     * @see CompanyService#getCompanyEntity(UUID)
-     */
-    public WorkerDTO createWorker(UUID userUuid, UUID companyUuid, Set<RoleCompany> roles) {
-        Company company = this.getCompanyEntity(companyUuid);
-        User user = userService.getUser(userUuid);
-
-        if (workerService.getWorkersByCompany(companyUuid).getWorkers().stream()
-                .anyMatch(worker -> worker.getUser().getUuid().equals(userUuid))) {
-            throw new ConflictException("El usuario ya es trabajador de la empresa");
-        }
-
-        if (roles == null || roles.isEmpty()) {
-            throw new BadRequestException("Se debe asignar al menos un rol al trabajador");
-        }
-
-        if (roles.contains(RoleCompany.OWNER)) {
-            throw new BadRequestException("No se puede asignar el rol de OWNER a un trabajador");
-        }
-
-        return workerService.createWorker(user, company, roles);
-    }
-
-    /**
-     * Elimina un trabajador de una empresa.
-     *
-     * @param userUuid UUID del usuario que se quiere eliminar como trabajador.
-     * @param companyUuid UUID de la empresa de la que se quiere eliminar el
-     * trabajador.
-     * @throws NotFoundException Si el usuario no es trabajador de la empresa.
-     * @see WorkerService#deleteWorker(UUID, UUID)
-     * @see CompanyService#getCompanyEntity(UUID)
-     * @see UserService#getUser(UUID)
-     */
-    public void deleteWorker(UUID userUuid, UUID companyUuid) {
-        this.getCompanyEntity(companyUuid);
-        userService.getUser(userUuid);
-        workerService.deleteWorker(userUuid, companyUuid);
-    }
-
-    /**
-     * Actualiza los roles de un trabajador en una empresa.
-     *
-     * @param userUuid UUID del usuario que se quiere actualizar como
-     * trabajador.
-     * @param companyUuid UUID de la empresa en la que se quiere actualizar el
-     * trabajador.
-     * @param roles Set de {@link RoleCompany} que se le asignarán al
-     * trabajador.
-     * @return {@link WorkerDTO} Datos del trabajador actualizado.
-     * @throws BadRequestException Si no se asigna ningún rol, o si se intenta
-     * asignar el rol de OWNER.
-     * @see WorkerService#updateWorker(UUID, UUID, Set)
-     * @see CompanyService#getCompanyEntity(UUID)
-     */
-    public WorkerDTO updateWorker(UUID userUuid, UUID companyUuid, Set<RoleCompany> roles) {
-        this.getCompanyEntity(companyUuid);
-        userService.getUser(userUuid);
-        if (roles == null || roles.isEmpty()) {
-            throw new BadRequestException("Se debe asignar al menos un rol al trabajador");
-        }
-        if (roles.contains(RoleCompany.OWNER)) {
-            throw new BadRequestException("No se puede asignar el rol de OWNER a un trabajador");
-        }
-
-        return workerService.updateWorker(userUuid, companyUuid, roles);
     }
 
 }
