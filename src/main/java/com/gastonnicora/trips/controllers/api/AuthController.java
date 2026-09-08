@@ -1,6 +1,8 @@
 package com.gastonnicora.trips.controllers.api;
 
 import java.util.Optional;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -89,6 +91,12 @@ public class AuthController {
      * refresh token.
      * @throws UnauthorizedException Si las credenciales son inválidas.
      */
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Autenticación exitosa"),
+        @ApiResponse(responseCode = "401", description = "Credenciales inválidas"),
+        @ApiResponse(responseCode = "404", description = "Usuario no encontrado")
+    })
+
     @PostMapping("/login")
     @Operation(summary = "Inicio de sesión", description = "Inicia sesión con email y contraseña y recibe un token")
     public LoginResponse login(@Valid @RequestBody LoginRequest login, HttpServletRequest request,
@@ -131,7 +139,19 @@ public class AuthController {
      * opcionalmente el refresh token
      * @throws UnauthorizedException Si el refresh token es inválido o expirado
      */
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Token renovado correctamente"),
+        @ApiResponse(responseCode = "401", description = "Refresh token inválido o expirado"),
+        @ApiResponse(responseCode = "404", description = "Usuario no encontrado")
+    })
     @PostMapping("/refresh")
+    @Operation(
+            summary = "Renovar token de acceso",
+            description = "Genera un nuevo token de acceso y un nuevo refresh token "
+            + "utilizando un refresh token válido. El refresh token puede "
+            + "recibirse mediante cookie para clientes web o mediante el cuerpo "
+            + "de la solicitud para clientes móviles."
+    )
     public RefreshResponse refresh(@CookieValue(value = "refreshToken", required = false) String cookieToken,
             @RequestBody(required = false) RefreshRequest body,
             HttpServletRequest request,
@@ -183,6 +203,10 @@ public class AuthController {
      * @return {@link ResponseEntity} con estado 200 si la operación fue exitosa
      * @throws UnauthorizedException Si el refresh token es inválido o expirado
      */
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Sesión cerrada correctamente"),
+        @ApiResponse(responseCode = "401", description = "Refresh token inválido o expirado")
+    })
     @PostMapping("/logout")
     @SecurityRequirement(name = "bearerAuth")
     @Operation(summary = "Cerrar sesión", description = "Cierra la sesión actual.")

@@ -14,8 +14,13 @@ import lombok.Setter;
 import lombok.ToString;
 
 /**
- * Data Transfer Object (DTO) que representa la información de la relación
- * trabajador empresa.
+ * Data Transfer Object(DTO) que representa la relación entre un usuario y una empresa.
+ *
+ * <p>
+ * Incluye el usuario asociado, la empresa, los roles asignados
+ * y el estado de la relación.
+ * </p>
+ * 
  * <p>
  * Se utiliza para exponer los datos de trabajador en respuestas de la API, sin
  * incluir información sensible como la contraseña.
@@ -55,8 +60,8 @@ import lombok.ToString;
  *   "uuid": "550e8400-e29b-41d4-a716-446655440000",
  *   "name": "Viajes LP",
  *   "address": "Calle Falsa 123,La Plata,Bs As, Argentina",
- *   "latitude": 500,
- *   "longitude": 5,
+ *   "latitude": -34.9214,
+ *   "longitude": -57.9545
  *   "email": "company@mail.com",
  *   "phone": "+5491122334455",
  *   "createdAt": "2026-01-01T00:00:00",

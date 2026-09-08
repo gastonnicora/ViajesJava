@@ -16,17 +16,41 @@ import com.gastonnicora.trips.repositories.VehicleRepository;
 
 import jakarta.transaction.Transactional;
 
+/**
+ * Servicio encargado de gestionar los vehículos asociados a empresas.
+ *
+ * <p>
+ * Permite crear, consultar y desactivar vehículos.
+ * </p>
+ *
+ * @author Gastón
+ * @version 1.0
+ * @since 2026-09-07
+ */
 @Service
 public class VehicleService {
 
     private final VehicleRepository vehicleRepository;
     private final VehicleMapper vehicleMapper;
 
+    /**
+     * Crea una instancia del servicio de vehículos.
+     *
+     * @param vehicleRepository repositorio de vehículos
+     * @param vehicleMapper mapper utilizado para convertir vehículos a DTOs
+     */
     public VehicleService(VehicleRepository vehicleRepository, VehicleMapper vehicleMapper) {
         this.vehicleRepository = vehicleRepository;
         this.vehicleMapper = vehicleMapper;
     }
 
+    /**
+     * Busca un vehículo activo mediante su UUID.
+     *
+     * @param vehicleUuid UUID del vehículo
+     * @return entidad del vehículo encontrado
+     * @throws NotFoundException si el vehículo no existe o está inactivo
+     */
     public Vehicle findByUuid(UUID vehicleUuid) {
         Vehicle vehicle = vehicleRepository.findByUuidAndActiveTrue(vehicleUuid).orElseThrow(() -> new NotFoundException("Vehículo no encontrado"));
         return vehicle;
@@ -37,7 +61,7 @@ public class VehicleService {
      *
      * @param company Empresa a la que se asociará el vehículo.
      * @param vehicleCreate DTO que contiene los datos del vehículo a crear.
-     * @return DTO del vehículos creado.
+     * @return DTO del vehículo creado.
      * @throws ConflictException si ya existe un vehículo con la misma patente
      * para la empresa.
      */
@@ -59,7 +83,7 @@ public class VehicleService {
      * @throws NotFoundException si no existe un vehículo con el UUID
      * proporcionado.
      */
-    @Transactional 
+    @Transactional
     public void deleteVehicle(UUID companyUuid, UUID vehicleUuid) {
         Vehicle existingVehicle = findByUuid(vehicleUuid);
         if (!companyUuid.equals(existingVehicle.getCompany().getUuid())) {

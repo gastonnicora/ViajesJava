@@ -64,8 +64,8 @@ public class VehicleController {
             + "T(com.gastonnicora.trips.enums.RoleCompany).OWNER, "
             + "T(com.gastonnicora.trips.enums.RoleCompany).ADMIN)")
     @Operation(summary = "Obtener vehículo", description = "Obtiene los detalles de un vehículo por su uuid")
-    public VehicleDTO getVehicle(@PathVariable("companyUuid") UUID companyUuid, @PathVariable("vehicleUuid") UUID uuid) {
-        return vehicleService.getVehicle(uuid);
+    public VehicleDTO getVehicle(@PathVariable("companyUuid") UUID companyUuid, @PathVariable("vehicleUuid") UUID vehicleUuid) {
+        return vehicleService.getVehicle(vehicleUuid);
     } 
 
     /**

@@ -87,7 +87,10 @@ public class UserController {
     @GetMapping
     @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN')")
-    @Operation(summary = "Obtener usuarios", description = "Obtiene una lista de usuarios filtrados por un parámetro opcional")
+    @Operation(
+            summary = "Obtener usuarios",
+            description = "Obtiene todos los usuarios registrados en el sistema."
+    )
     public ListResponse<UserDTO> getUsers() {
         return userService.getUsers();
     }
@@ -116,22 +119,15 @@ public class UserController {
     }
 
     /**
-     * Obtiene un usuario por su UUID.
+     * Obtiene un usuario mediante su UUID.
+     *
      * <p>
-     * <strong>Requiere autenticación y autorización</strong>
-     * </p>
-     * <p>
-     * <strong>Importante:</strong> Este endpoint solo es accesible para
-     * usuarios con roles "ADMIN".
-     * </p>
-     * <p>
-     * Este endpoint utiliza el servicio {@link UserService} para obtener los
-     * datos del usuario con el UUID especificado.
+     * Este endpoint requiere autenticación y está disponible para usuarios con
+     * los roles {@code ADMIN} o {@code SUPER_ADMIN}.
      * </p>
      *
-     * @param uuid ({@link UUID}) del usuario a obtener.
-     * @return {@link UserDTO} con los datos del usuario con el UUID
-     * especificado.
+     * @param uuid UUID del usuario a obtener
+     * @return datos del usuario solicitado
      * @see UserService#getUserByUuid(UUID)
      */
     @GetMapping("/{uuid}")
@@ -164,7 +160,7 @@ public class UserController {
      * @see UserService#createUser(UserCreate)
      */
     @PostMapping
-    @Operation(summary = "Crear Usuario", description = "Crea un nuevo usuario")
+    @Operation(summary = "Crear usuario", description = "Crea un nuevo usuario")
     public UserDTO createUser(@Valid @RequestBody UserCreate userCreateRequest) {
         return userService.createUser(userCreateRequest);
     }
@@ -196,7 +192,10 @@ public class UserController {
      */
     @PutMapping
     @SecurityRequirement(name = "bearerAuth")
-    @Operation(summary = "Modificar mi usuario", description = "Modifica mi usuario")
+    @Operation(
+            summary = "Actualizar perfil",
+            description = "Actualiza los datos del usuario autenticado."
+    )
     public UserDTO updateUserProfile(@Valid @RequestBody UserPut userPutRequest) {
         return userService.updateCurrentUser(userPutRequest);
     }
@@ -228,40 +227,36 @@ public class UserController {
      */
     @PutMapping("/me/password")
     @SecurityRequirement(name = "bearerAuth")
-    @Operation(summary = "Modificar mi contraseña", description = "Modifica mi contraseña")
+    @Operation(
+            summary = "Cambiar contraseña",
+            description = "Cambia la contraseña del usuario autenticado y revoca "
+            + "sus sesiones activas."
+    )
     public UserDTO changePassword(@Valid @RequestBody UserChangePassword userChangePasswordRequest) {
         return userService.updatePassword(userChangePasswordRequest);
     }
 
     /**
-     * Modifica los roles de un usuario.
+     * Modifica los roles globales de un usuario.
+     *
      * <p>
-     * <strong>Requiere autenticación y autorización</strong>
-     * </p>
-     * <p>
-     * <strong>Importante:</strong> Este endpoint solo es accesible para
-     * usuarios con roles "ADMIN" o "SUPER_ADMIN".
-     * </p>
-     * <p>
-     * Este endpoint modifica los roles de un usuario con los datos
-     * proporcionados. Se realiza la validación de los datos antes de modificar
-     * los roles.
-     * </p>
-     * <p>
-     * Este endpoint hace uso del servicio {@link UserService} para modificar el
-     * rol del usuario.
+     * Este endpoint requiere autenticación y está disponible para usuarios con
+     * los roles {@code ADMIN}, {@code SUPER_ADMIN} o {@code HR_MANAGER}.
      * </p>
      *
-     * @param uuid ({@link UUID}) del usuario a modificar.
-     * @param userChangeRoleRequest ({@link UserChangeRole}) con los datos
-     * válidos para el cambio de roles.
-     * @return {@link UserDTO} con los datos del usuario.
+     * @param uuid UUID del usuario cuyos roles se modificarán
+     * @param userChangeRoleRequest nuevos roles del usuario
+     * @return usuario actualizado
      * @see UserService#setRole(UUID, UserChangeRole)
      */
     @PutMapping("/{uuid}/role")
     @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN','HR_MANAGER')")
     @SecurityRequirement(name = "bearerAuth")
-    @Operation(summary = "Modificar roles de un usuario", description = "Modifica un usuario por su uuid")
+    @Operation(
+            summary = "Modificar roles de usuario",
+            description = "Modifica los roles globales de un usuario. "
+            + "Requiere rol ADMIN, SUPER_ADMIN o HR_MANAGER."
+    )
     public UserDTO changeUserRole(@PathVariable UUID uuid, @Valid @RequestBody UserChangeRole userChangeRoleRequest) {
         return userService.setRole(uuid, userChangeRoleRequest);
     }
@@ -288,7 +283,5 @@ public class UserController {
     public void deleteCurrentUserAccount() {
         userService.deleteCurrentUser();
     }
-
-    
 
 }

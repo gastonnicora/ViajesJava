@@ -18,7 +18,6 @@ import com.gastonnicora.trips.mappers.CompanyMapper;
 import com.gastonnicora.trips.repositories.CompanyRepository;
 
 import jakarta.transaction.Transactional;
-// TODO 🚀: refactorizar para que solo contenga lo de company
 
 /**
  * Servicio de gestión de empresas.
@@ -40,17 +39,13 @@ public class CompanyService {
     private final GeocodingService geocodingService;
 
     /**
-     * Constructor que inicializa los servicios necesarios para la gestión de
-     * empresas.
+     * Crea el servicio encargado de gestionar empresas.
      *
-     * @param userService Servicio de gestión de usuarios.
-     * @param companyRepository Repositorio de empresas utilizado para acceder a
-     * la base de datos.
-     * @param companyMapper Mapper para convertir entidades {@link Company} a
-     * DTOs {@link CompanyDTO}.
-     * @param geocodingService Servicio para obtener direcciones a partir de
-     * coordenadas.
-     * @param workerService Servicio de gestión de trabajadores.
+     * @param companyRepository repositorio utilizado para persistir y consultar
+     * empresas
+     * @param companyMapper mapper utilizado para convertir empresas a DTOs
+     * @param geocodingService servicio utilizado para obtener direcciones a
+     * partir de coordenadas geográficas
      */
     public CompanyService(CompanyRepository companyRepository, CompanyMapper companyMapper,
             GeocodingService geocodingService) {
@@ -60,32 +55,20 @@ public class CompanyService {
     }
 
     /**
-     * Crea una nueva empresa.
-     * <p>
-     * Este método realiza lo siguiente:
-     * </p>
-     * <ul>
-     * <li>Obtiene el usuario actual mediante {@link UserService}.</li>
-     * <li>Obtiene la dirección a partir de las coordenadas proporcionadas
-     * mediante {@link GeocodingService}.</li>
-     * <li>Crea una nueva instancia de {@link Company} con los datos
-     * proporcionados
-     * </li>
-     * <li>Crea un nuevo trabajador con el rol de dueño.</li>
-     * <li>Guarda la nueva empresa en la base de datos</li>
-     * <li>Convierte la nueva empresa en {@link CompanyDTO} utilizando
-     * {@link CompanyMapper}.</li>
-     * </ul>
+     * Crea una nueva empresa a partir de los datos proporcionados.
      *
-     * @param companyCreate {@link CompanyCreate} con los datos de la nueva
-     * empresa.
-     * @return {@link CompanyDTO} Datos de la nueva empresa creada.
-     * @throws BadRequestException Si la dirección no es válida.
-     * @see UserService#getUser(java.util.UUID)
+     * <p>
+     * Antes de persistir la empresa, obtiene su dirección utilizando las
+     * coordenadas geográficas proporcionadas mediante el servicio de
+     * geocodificación.
+     * </p>
+     *
+     * @param companyCreate datos necesarios para crear la empresa
+     * @return DTO correspondiente a la empresa creada
+     * @throws BadRequestException si no se puede obtener una dirección válida
      * @see GeocodingService#obtenerDireccion(double, double)
-     * @see WorkerService#createWorker(User, Company, Set)
-     * @see CompanyMapper#toDTO(Company)
      * @see CompanyRepository#save(Company)
+     * @see CompanyMapper#toDTO(Company)
      */
     public CompanyDTO createCompany(CompanyCreate companyCreate) {
         AddressResponse addressR = geocodingService.obtenerDireccion(companyCreate.getLatitude(),
@@ -103,71 +86,60 @@ public class CompanyService {
     }
 
     /**
-     * Obtiene los detalles de una empresa por su UUID.
-     * <p>
-     * Este método realiza lo siguiente:
-     * </p>
-     * <ul>
-     * <li>Busca la empresa en la base de datos mediante
-     * {@link CompanyRepository}.</li>
-     * <li>Si no se encuentra, lanza una excepción {@link BadRequestException}
-     * con mensaje descriptivo.</li>
-     * <li>Convierte la empresa en un DTO con sus datos utilizando
-     * {@link CompanyMapper}.</li>
-     * </ul>
+     * Obtiene una empresa mediante su UUID.
      *
-     * @param uuid UUID de la empresa que se quiere obtener.
-     * @return {@link CompanyDTO} Datos de la empresa con el UUID especificado.
-     * @throws BadRequestException Si la empresa no existe.
+     * @param uuid UUID de la empresa
+     * @return DTO de la empresa encontrada
+     * @throws NotFoundException si no existe una empresa con el UUID indicado
      * @see CompanyRepository#findByUuid(UUID)
      * @see CompanyMapper#toDTO(Company)
-     * @see BadRequestException
      */
     public CompanyDTO getCompany(UUID uuid) {
         Company company = this.getCompanyEntity(uuid);
         return companyMapper.toDTO(company);
     }
 
+    /**
+     * Obtiene la entidad de una empresa mediante su UUID.
+     *
+     * <p>
+     * Este método se utiliza internamente por otros servicios que necesitan
+     * trabajar directamente con la entidad {@link Company}.
+     * </p>
+     *
+     * @param uuid UUID de la empresa
+     * @return entidad de la empresa encontrada
+     * @throws NotFoundException si no existe una empresa con el UUID indicado
+     */
     public Company getCompanyEntity(UUID uuid) {
         return companyRepository.findByUuid(uuid)
                 .orElseThrow(() -> new NotFoundException("Empresa no encontrada"));
     }
 
+    /**
+     * Convierte una lista de entidades de empresa en una respuesta
+     * paginada/simple de tipo {@link ListResponse}.
+     *
+     * @param companies empresas a convertir
+     * @return respuesta que contiene los DTOs de las empresas
+     */
     public ListResponse<CompanyDTO> toListResponse(List<Company> companies) {
         return new ListResponse<>(companyMapper.toDTOList(companies));
     }
 
     /**
-     * Actualiza los detalles de una empresa por su UUID.
-     * <p>
-     * Este método realiza lo siguiente:
-     * </p>
-     * <ul>
-     * <li>Busca la empresa en la base de datos mediante
-     * {@link CompanyRepository}.</li>
-     * <li>Si no se encuentra, lanza una excepción {@link NotFoundException} con
-     * mensaje descriptivo.</li>
-     * <li>Si el usuario no es el dueño de la empresa, lanza una excepción
-     * {@link BadRequestException} con mensaje descriptivo.</li>
-     * <li>Convierte las coordenadas en una dirección a partir de
-     * {@link GeocodingService}.</li>
-     * <li>Si la dirección no es válida, lanza una excepción
-     * {@link BadRequestException} con mensaje descriptivo.</li>
-     * <li>Actualiza los campos de la empresa con los datos proporcionados.</li>
-     * <li>Guarda la empresa actualizada en la base de datos.</li>
-     * <li>Convierte la empresa en {@link CompanyDTO} utilizando
-     * {@link CompanyMapper}.</li>
-     * </ul>
+     * Actualiza los datos de una empresa.
      *
-     * @param uuid UUID de la empresa que se quiere actualizar.
-     * @param companyCreate {@link CompanyCreate} con los nuevos datos de la
-     * empresa.
-     * @return {@link CompanyDTO} Datos de la empresa actualizada.
-     * @throws NotFoundException Si la empresa no existe.
-     * @throws BadRequestException Si el usuario no es el dueño de la empresa.
-     * @throws BadRequestException Si la dirección no es válida.
-     * @see CompanyMapper#toDTO(Company)
-     * @see CompanyRepository#findByUuid(UUID)
+     * <p>
+     * Obtiene nuevamente la dirección a partir de las coordenadas
+     * proporcionadas y persiste los cambios realizados sobre la empresa.
+     * </p>
+     *
+     * @param uuid UUID de la empresa a actualizar
+     * @param companyCreate nuevos datos de la empresa
+     * @return DTO de la empresa actualizada
+     * @throws NotFoundException si la empresa no existe
+     * @throws BadRequestException si no se puede obtener una dirección válida
      */
     @Transactional
     public CompanyDTO updateCompany(UUID uuid, CompanyCreate companyCreate) {
@@ -188,24 +160,15 @@ public class CompanyService {
     }
 
     /**
-     * Elimina una empresa por su UUID.
-     * <p>
-     * Este método realiza lo siguiente:
-     * </p>
-     * <ul>
-     * <li>Busca la empresa en la base de datos mediante su UUID</li>
-     * <li>Si la empresa no existe, lanza una excepción
-     * {@link NotFoundException} con mensaje descriptivo.</li>
-     * <li>Corrobora que la empresa sea propiedad del usuario actual</li>
-     * <li>Si no es el dueño lanza una excepción {@link BadRequestException} con
-     * mensaje descriptivo.</li>
-     * <li>Desactiva la empresa en la base de datos.</li>
-     * </ul>
+     * Desactiva una empresa mediante su UUID.
      *
-     * @param uuid UUID de la empresa que se quiere eliminar.
-     * @throws NotFoundException con mensaje descriptivo.
-     * @throws BadRequestException con mensaje descriptivo.
-     * @see CompanyRepository#findByUuid(UUID)
+     * <p>
+     * La empresa no se elimina físicamente de la base de datos; se marca como
+     * inactiva.
+     * </p>
+     *
+     * @param uuid UUID de la empresa a desactivar
+     * @throws NotFoundException si la empresa no existe
      */
     @Transactional
     public void deleteCompany(UUID uuid) {

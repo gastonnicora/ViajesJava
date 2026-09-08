@@ -11,10 +11,12 @@ import lombok.Setter;
 import lombok.ToString;
 
 /**
- * Data Transfer Object (DTO) que representa la información de una empresa.
+ * Data Transfer Object (DTO) que representa la información pública
+ * de una empresa.
+ *
  * <p>
- * Se utiliza para exponer los datos de empresa en respuestas de la API, sin
- * incluir información sensible como la contraseña del dueño.
+ * Se utiliza para exponer los datos de una empresa en las respuestas
+ * de la API sin incluir información sensible.
  * </p>
  *
  * <p>
@@ -42,8 +44,8 @@ import lombok.ToString;
  *   "uuid": "550e8400-e29b-41d4-a716-446655440000",
  *   "name": "Viajes LP",
  *   "address": "Calle Falsa 123,La Plata,Bs As, Argentina",
- *   "latitude": 500,
- *   "longitude": 500,
+ *   "latitude": -34.9214,
+ *   "longitude": -34.9214,
  *   "email": "company@mail.com",
  *   "phone": "+5491122334455",
  *   "createdAt": "2026-01-01T00:00:00",
@@ -73,10 +75,16 @@ public class CompanyDTO {
     @Schema(description = "Dirección de la empresa", example = "Calle Falsa 123,La Plata,Bs As, Argentina")
     private String address;
 
-    @Schema(description = "Latitud de la dirección de la empresa", example = "500")
+    @Schema(
+            description = "Latitud de la empresa",
+            example = "-34.9214"
+    )
     private double latitude;
 
-    @Schema(description = "Longitud de la dirección de la empresa", example = "500")
+    @Schema(
+            description = "Longitud de la empresa",
+            example = "-57.9545"
+    )
     private double longitude;
 
     @Schema(description = "Email de la empresa", example = "company@mail.com")

@@ -30,7 +30,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
 /**
- * Controlador para la gestión de vehículos.
+ * Controlador para la gestión de trabajadores y su relación con las empresas.
  *
  * @author Gastón
  * @version 1.0
@@ -45,6 +45,13 @@ public class WorkerController {
     private final CompanyService companyService;
     private final UserService userService;
 
+    /**
+     * Crea una instancia del controlador de trabajadores.
+     *
+     * @param workerService servicio encargado de la gestión de trabajadores
+     * @param companyService servicio encargado de la gestión de empresas
+     * @param userService servicio encargado de la gestión de usuarios
+     */
     public WorkerController(WorkerService workerService, CompanyService companyService, UserService userService) {
         this.workerService = workerService;
         this.companyService = companyService;
@@ -73,7 +80,6 @@ public class WorkerController {
         return workerService.getWorkersByCompany(uuid);
     }
 
-    // TODO 🚀: Falta relacion entre trabajador y empresa
     /**
      * Agrega un trabajador a una empresa.
      * <p>
@@ -172,7 +178,11 @@ public class WorkerController {
      */
     @GetMapping("/users/workers")
     @SecurityRequirement(name = "bearerAuth")
-    @Operation(summary = "Obtener trabajos del usuario actual", description = "Obtiene los trabajos asociados al usuario actual")
+    @Operation(
+            summary = "Obtener empresas del usuario actual",
+            description = "Obtiene las relaciones laborales del usuario autenticado "
+            + "con las empresas a las que pertenece."
+    )
     public WorkersByUser getWorkersByCurrentUser() {
         return workerService.getWorkersByUser(getCurrentUserUuid());
     }

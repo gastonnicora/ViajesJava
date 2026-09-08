@@ -61,10 +61,11 @@ public class CompanyController {
     private final UserService userService;
 
     /**
-     * Constructor del controlador CompanyController.
+     * Crea una instancia del controlador de empresas.
      *
-     * @param companyService Servicio de empresa que maneja la lógica de negocio
-     * relacionada con las empresas.
+     * @param companyService servicio encargado de la gestión de empresas
+     * @param workerService servicio encargado de la gestión de trabajadores
+     * @param userService servicio encargado de la gestión de usuarios
      */
     public CompanyController(CompanyService companyService, WorkerService workerService, UserService userService) {
         this.companyService = companyService;
@@ -73,31 +74,29 @@ public class CompanyController {
     }
 
     /**
-     * Crea una nueva empresa en el sistema.
-     * <p>
-     * Este endpoint crea una nueva empresa con los datos proporcionados. Se
-     * realiza la validación de los datos antes de crear la empresa, y se
-     * verifica que la dirección sea válida.
-     * </p>
-     * <p>
-     * En caso que los datos no sean válidos, se lanzará una excepción de tipo
-     * {@link ValidationException}. En caso que la dirección no exista se
-     * lanzará una excepción de tipo {@link BadRequestException}.
+     * Crea una nueva empresa y registra al usuario autenticado como
+     * propietario.
      *
-     * </p>
      * <p>
-     * Este endpoint hace uso del servicio {@link CompanyService} para crear la
-     * empresa en la base de datos.
+     * La dirección se obtiene a partir de las coordenadas proporcionadas y se
+     * valida antes de persistir la empresa.
      * </p>
      *
-     * @param company ({@link CompanyCreate}) con los datos válidos para la
-     * nueva empresa.
-     * @return {@link CompanyDTO} con los datos de la empresa recién creada.
+     * @param companyCreate datos de la empresa a crear
+     * @return datos de la empresa creada
+     * @throws ValidationException si los datos proporcionados no son válidos
+     * @throws BadRequestException si las coordenadas no permiten obtener una
+     * dirección válida
      * @see CompanyService#createCompany(CompanyCreate)
      */
     @PostMapping
     @SecurityRequirement(name = "bearerAuth")
-    public CompanyDTO postMethodName(@Valid @RequestBody CompanyCreate companyCreate) {
+    @Operation(
+            summary = "Crear empresa",
+            description = "Crea una nueva empresa para el usuario autenticado y "
+            + "lo registra como propietario de la empresa."
+    )
+    public CompanyDTO createCompany(@Valid @RequestBody CompanyCreate companyCreate) {
         User currentUser = userService.getUser(getCurrentUserUuid());
 
         CompanyDTO companyDTO = companyService.createCompany(companyCreate);
@@ -119,7 +118,10 @@ public class CompanyController {
      */
     @GetMapping("/{uuid}")
     @SecurityRequirement(name = "bearerAuth")
-    @Operation(summary = "Obtener empresa", description = "Obtiene los detalles de una empresa por su uuid")
+    @Operation(
+            summary = "Obtener empresa",
+            description = "Obtiene una empresa utilizando su UUID."
+    )
     public CompanyDTO getCompany(@PathVariable UUID uuid) {
         return companyService.getCompany(uuid);
     }
@@ -137,7 +139,11 @@ public class CompanyController {
     @GetMapping("/owner/{uuid}")
     @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN')")
-    @Operation(summary = "Obtener empresas del usuario", description = "Obtiene las empresas del usuario")
+    @Operation(
+            summary = "Obtener empresas de un usuario",
+            description = "Obtiene las empresas asociadas a un usuario mediante su UUID. "
+            + "Requiere rol ADMIN o SUPER_ADMIN."
+    )
     public ListResponse<CompanyDTO> getCompaniesByUser(@PathVariable UUID uuid) {
         userService.getUser(uuid);
         List<Company> companies = workerService.getCompaniesByOwner(uuid);
@@ -155,7 +161,10 @@ public class CompanyController {
      */
     @GetMapping("/me")
     @SecurityRequirement(name = "bearerAuth")
-    @Operation(summary = "Obtener empresas del usuario actual", description = "Obtiene las empresas del usuario actual")
+    @Operation(
+            summary = "Obtener mis empresas",
+            description = "Obtiene las empresas asociadas al usuario autenticado."
+    )
     public ListResponse<CompanyDTO> getCompaniesByCurrentUser() {
         UUID uuid = getCurrentUserUuid();
         userService.getUser(uuid);
@@ -208,10 +217,5 @@ public class CompanyController {
         companyService.deleteCompany(uuid);
     }
 
-    
-
-
-    
 //TODO: Agregar endpoint para obtener todas las empresas
-
 }
