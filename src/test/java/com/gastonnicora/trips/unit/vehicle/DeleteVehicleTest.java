@@ -30,22 +30,20 @@ public class DeleteVehicleTest {
     private VehicleRepository vehicleRepository;
 
     @Mock
-    private CompanyService companyService ;
+    private CompanyService companyService;
 
     @Test
     void shouldDeleteVehicleSuccessfully() {
         Company company = new Company();
         company.setUuid(java.util.UUID.randomUUID());
-        
-        when(companyService.getCompanyEntity(company.getUuid())).thenReturn(company);
-        
+
         Vehicle vehicle = new Vehicle();
         vehicle.setActive(true);
         vehicle.setCompany(company);
 
         when(vehicleRepository.findByUuidAndActiveTrue(vehicle.getUuid())).thenReturn(Optional.of(vehicle));
 
-        vehicleService.deleteVehicle(company.getUuid(),vehicle.getUuid());
+        vehicleService.deleteVehicle(company.getUuid(), vehicle.getUuid());
 
         verify(vehicleRepository).save(vehicle);
         assertFalse(vehicle.isActive());
@@ -55,16 +53,14 @@ public class DeleteVehicleTest {
     void shouldNotDeleteVehicleIfNotFound() {
         Company company = new Company();
         company.setUuid(java.util.UUID.randomUUID());
-        
-        when(companyService.getCompanyEntity(company.getUuid())).thenReturn(company);
-        
+
         Vehicle vehicle = new Vehicle();
         vehicle.setCompany(company);
-        
+
         when(vehicleRepository.findByUuidAndActiveTrue(vehicle.getUuid())).thenReturn(Optional.empty());
-        
-        assertThrows(NotFoundException.class, () -> vehicleService.deleteVehicle(company.getUuid(),vehicle.getUuid()));
-        
+
+        assertThrows(NotFoundException.class, () -> vehicleService.deleteVehicle(company.getUuid(), vehicle.getUuid()));
+
         verify(vehicleRepository).findByUuidAndActiveTrue(vehicle.getUuid());
         verify(vehicleRepository, never()).save(new Vehicle());
     }

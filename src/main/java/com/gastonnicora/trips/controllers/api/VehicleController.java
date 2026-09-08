@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.gastonnicora.trips.dtos.entities.VehicleDTO;
 import com.gastonnicora.trips.dtos.request.vehicle.VehicleCreate;
+import com.gastonnicora.trips.entities.Company;
 import com.gastonnicora.trips.services.CompanyService;
 import com.gastonnicora.trips.services.VehicleService;
 
@@ -34,6 +35,7 @@ import jakarta.validation.Valid;
 public class VehicleController {
 
     private final VehicleService vehicleService;
+    private final CompanyService companyService;
 
     /**
      *
@@ -41,8 +43,9 @@ public class VehicleController {
      *
      * @param VehicleService Servicio del Transporte
      */
-    public VehicleController(VehicleService vehicleService) {
+    public VehicleController(VehicleService vehicleService, CompanyService companyService) {
         this.vehicleService = vehicleService;
+        this.companyService = companyService;
     }
 
     /**
@@ -84,7 +87,8 @@ public class VehicleController {
             + "T(com.gastonnicora.trips.enums.RoleCompany).ADMIN)")
     @Operation(summary = "Agregar vehículo a empresa", description = "Agrega un vehículo a una empresa por su UUID")
     public VehicleDTO createVehicle(@PathVariable("companyUuid") UUID companyUuid, @RequestBody @Valid VehicleCreate vehicleCreate) {
-        return vehicleService.createVehicle(companyUuid, vehicleCreate);
+        Company company= companyService.getCompanyEntity(companyUuid);
+        return vehicleService.createVehicle(company, vehicleCreate);
     }
 
     /**

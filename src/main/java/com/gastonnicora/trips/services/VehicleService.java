@@ -1,6 +1,5 @@
 package com.gastonnicora.trips.services;
 
-import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
@@ -15,21 +14,20 @@ import com.gastonnicora.trips.exceptions.NotFoundException;
 import com.gastonnicora.trips.mappers.VehicleMapper;
 import com.gastonnicora.trips.repositories.VehicleRepository;
 
+import jakarta.transaction.Transactional;
+
 @Service
 public class VehicleService {
 
     private final VehicleRepository vehicleRepository;
     private final VehicleMapper vehicleMapper;
-    private final CompanyService companyService;
 
-    public VehicleService(VehicleRepository vehicleRepository, VehicleMapper vehicleMapper,CompanyService companyService) {
+    public VehicleService(VehicleRepository vehicleRepository, VehicleMapper vehicleMapper) {
         this.vehicleRepository = vehicleRepository;
         this.vehicleMapper = vehicleMapper;
-        this.companyService = companyService;
     }
 
     public Vehicle findByUuid(UUID vehicleUuid) {
-
         Vehicle vehicle = vehicleRepository.findByUuidAndActiveTrue(vehicleUuid).orElseThrow(() -> new NotFoundException("Vehículo no encontrado"));
         return vehicle;
     }
@@ -40,16 +38,17 @@ public class VehicleService {
      * @param company Empresa a la que se asociará el vehículo.
      * @param vehicleCreate DTO que contiene los datos del vehículo a crear.
      * @return DTO del vehículos creado.
-     * @throws ConflictException si ya existe un vehículo con la misma patente para la
-     * empresa.
+     * @throws ConflictException si ya existe un vehículo con la misma patente
+     * para la empresa.
      */
-    public VehicleDTO createVehicle(UUID companyuUuid, VehicleCreate vehicleCreate) {
-        Company company = companyService.getCompanyEntity(companyuUuid);
-        Optional<Vehicle> existingVehicle = vehicleRepository.findByCompanyUuidAndPlate(company.getUuid(), vehicleCreate.getPlate());
-        if (existingVehicle.isPresent()) {
-            throw new ConflictException("Ya existe un vehículo con la misma patente para esta empresa");
-        }
-        var vehicle = vehicleRepository.save(new Vehicle(company, vehicleCreate.getPlate(), vehicleCreate.getModel(), vehicleCreate.getCapacity()));
+    public VehicleDTO createVehicle(Company company, VehicleCreate vehicleCreate) {
+        if (vehicleRepository
+                .findByCompanyUuidAndPlateAndActiveTrue(company.getUuid(), vehicleCreate.getPlate())
+                .isPresent()) {
+            throw new ConflictException("Ya existe un vehículo activo con esa patente");
+        } // TODO 🚀:  modificar patentes para sacar espacios y letras en mayusculas
+
+        Vehicle vehicle = vehicleRepository.save(new Vehicle(company, vehicleCreate.getPlate(), vehicleCreate.getModel(), vehicleCreate.getCapacity()));
         return vehicleMapper.toDTO(vehicle);
     }
 
@@ -57,12 +56,13 @@ public class VehicleService {
      * Elimina un vehículo existente marcándolo como inactivo.
      *
      * @param vehicleUuid UUID del vehículo a eliminar.
-     * @throws NotFoundException si no existe un vehículo con el UUID proporcionado.
+     * @throws NotFoundException si no existe un vehículo con el UUID
+     * proporcionado.
      */
-    public void deleteVehicle(UUID companyUuid,UUID vehicleUuid) {
-        Company company = companyService.getCompanyEntity(companyUuid);
+    @Transactional 
+    public void deleteVehicle(UUID companyUuid, UUID vehicleUuid) {
         Vehicle existingVehicle = findByUuid(vehicleUuid);
-        if (company.getUuid() != existingVehicle.getCompany().getUuid()){
+        if (!companyUuid.equals(existingVehicle.getCompany().getUuid())) {
             throw new ForbiddenException("Acceso denegado");
         }
         existingVehicle.setActive(false);
@@ -74,7 +74,8 @@ public class VehicleService {
      *
      * @param vehicleUuid UUID del vehículo a obtener.
      * @return DTO del vehículo encontrado.
-     * @throws NotFoundException si no existe un vehículo con el UUID proporcionado.
+     * @throws NotFoundException si no existe un vehículo con el UUID
+     * proporcionado.
      */
     public VehicleDTO getVehicle(UUID vehicleUuid) {
         Vehicle vehicle = findByUuid(vehicleUuid);

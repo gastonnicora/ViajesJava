@@ -17,7 +17,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.junit.jupiter.MockitoSettings;
 
 import com.gastonnicora.trips.dtos.entities.VehicleDTO;
 import com.gastonnicora.trips.dtos.request.vehicle.VehicleCreate;
@@ -42,7 +41,7 @@ class CreateVehicleTest {
     private VehicleMapper vehicleMapper;
 
     @Mock
-    private CompanyService companyService ;
+    private CompanyService companyService;
 
     @Test
     void shouldCreateVehicleSuccessfully() {
@@ -59,8 +58,6 @@ class CreateVehicleTest {
                 "123456789"
         );
         company.setUuid(companyUuid);
-
-        when(companyService.getCompanyEntity(company.getUuid())).thenReturn(company);
 
         VehicleCreate vehicleCreate = new VehicleCreate(
                 "AA123BB",
@@ -79,7 +76,7 @@ class CreateVehicleTest {
         VehicleDTO expectedDTO = new VehicleDTO();
         expectedDTO.setUuid(vehicleUuid);
 
-        when(vehicleRepository.findByCompanyUuidAndPlate(
+        when(vehicleRepository.findByCompanyUuidAndPlateAndActiveTrue(
                 companyUuid,
                 vehicleCreate.getPlate()
         )).thenReturn(Optional.empty());
@@ -91,7 +88,7 @@ class CreateVehicleTest {
                 .thenReturn(expectedDTO);
 
         VehicleDTO result = vehicleService.createVehicle(
-                company.getUuid(),
+                company,
                 vehicleCreate
         );
 
@@ -99,7 +96,7 @@ class CreateVehicleTest {
         assertEquals(expectedDTO, result);
 
         verify(vehicleRepository)
-                .findByCompanyUuidAndPlate(
+                .findByCompanyUuidAndPlateAndActiveTrue(
                         companyUuid,
                         vehicleCreate.getPlate()
                 );
@@ -136,8 +133,7 @@ class CreateVehicleTest {
         );
         company.setUuid(companyUuid);
 
-        when(companyService.getCompanyEntity(company.getUuid())).thenReturn(company);
-        
+
         VehicleCreate vehicleCreate = new VehicleCreate(
                 "AA123BB",
                 "Mercedes Benz",
@@ -151,7 +147,7 @@ class CreateVehicleTest {
                 vehicleCreate.getCapacity()
         );
 
-        when(vehicleRepository.findByCompanyUuidAndPlate(
+        when(vehicleRepository.findByCompanyUuidAndPlateAndActiveTrue(
                 companyUuid,
                 vehicleCreate.getPlate()
         )).thenReturn(Optional.of(existingVehicle));
@@ -159,18 +155,18 @@ class CreateVehicleTest {
         ConflictException exception = assertThrows(
                 ConflictException.class,
                 () -> vehicleService.createVehicle(
-                        company.getUuid(),
+                        company,
                         vehicleCreate
                 )
         );
 
         assertEquals(
-                "Ya existe un vehículo con la misma patente para esta empresa",
+                "Ya existe un vehículo activo con esa patente",
                 exception.getMessage()
         );
 
         verify(vehicleRepository)
-                .findByCompanyUuidAndPlate(
+                .findByCompanyUuidAndPlateAndActiveTrue(
                         companyUuid,
                         vehicleCreate.getPlate()
                 );
