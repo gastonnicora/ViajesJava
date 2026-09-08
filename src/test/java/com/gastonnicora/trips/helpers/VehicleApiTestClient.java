@@ -59,7 +59,7 @@ public class VehicleApiTestClient {
                 .content(json));
     }
     public ResultActions deleteVehicle(UUID companyUuid, UUID vehicleUuid)
-            throws Exception {
+            throws Exception { 
 
         return mockMvc.perform(delete(
                 "/api/companies/" + companyUuid + "/vehicle/" + vehicleUuid)

@@ -72,6 +72,22 @@ public class WorkerService {
         return WorkerMapper.toDTO(workerRepository.save(new Worker(user, company, roles)));
     }
 
+    /**
+     * Crea un nuevo trabajador con el rol de dueño.
+     *
+     * @param user {@link User} del worker.
+     * @param company {@link Company} de la empresa.
+     * @param roles Set de {@link RoleCompany} del worker.
+     * @return {@link WorkerDTO} del worker creado.
+     */
+    public WorkerDTO createWorkerOwner(User user, Company company) {
+        if (!workerRepository.findAllByCompanyUuidAndActiveTrue(company.getUuid())
+            .isEmpty()) {
+                throw  new ConflictException("Ya existen trabajadores");
+        }
+        return WorkerMapper.toDTO(workerRepository.save(new Worker(user, company, Set.of(RoleCompany.OWNER))));
+    }
+
     private void verfyRole(Set<RoleCompany> roles) {
         if (roles == null || roles.isEmpty()) {
             throw new BadRequestException("Se debe asignar al menos un rol al trabajador");

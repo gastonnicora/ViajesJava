@@ -52,7 +52,7 @@ class DeleteWorkerTest {
                 Set.of(RoleCompany.DRIVER)
         );
 
-        when(workerRepository.findByUserUuidAndCompanyUuid(
+        when(workerRepository.findByUserUuidAndCompanyUuidAndActiveTrue(
                 userUuid,
                 companyUuid
         )).thenReturn(Optional.of(worker));
@@ -60,7 +60,7 @@ class DeleteWorkerTest {
         workerService.deleteWorker(userUuid, companyUuid);
 
         verify(workerRepository)
-                .findByUserUuidAndCompanyUuid(userUuid, companyUuid);
+                .findByUserUuidAndCompanyUuidAndActiveTrue(userUuid, companyUuid);
 
         ArgumentCaptor<Worker> captor
                 = ArgumentCaptor.forClass(Worker.class);
@@ -78,7 +78,7 @@ class DeleteWorkerTest {
         UUID userUuid = UUID.randomUUID();
         UUID companyUuid = UUID.randomUUID();
 
-        when(workerRepository.findByUserUuidAndCompanyUuid(
+        when(workerRepository.findByUserUuidAndCompanyUuidAndActiveTrue(
                 userUuid,
                 companyUuid
         )).thenReturn(Optional.empty());
@@ -91,7 +91,7 @@ class DeleteWorkerTest {
         assertEquals(404, exception.getStatus());
 
         verify(workerRepository)
-                .findByUserUuidAndCompanyUuid(userUuid, companyUuid);
+                .findByUserUuidAndCompanyUuidAndActiveTrue(userUuid, companyUuid);
 
         verify(workerRepository, never())
                 .save(any(Worker.class));

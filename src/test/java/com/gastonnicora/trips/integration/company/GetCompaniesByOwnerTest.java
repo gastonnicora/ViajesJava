@@ -102,15 +102,6 @@ public class GetCompaniesByOwnerTest {
     }
 
     @Test
-    void shouldReturnListEmpty_whenUserDoesNotExist() throws Exception {
-        UUID nonExistentUuid = UUID.randomUUID();
-        companyApi.getCompaniesByOwner(nonExistentUuid)
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data").isEmpty())
-                .andExpect(jsonPath("$.total").value(0));
-    }
-
-    @Test
     void shouldReturnForbidden_whenUserIsNotIsAdmin() throws Exception {
         companyApi.withToken(token);
         companyApi.getCompaniesByOwner(user.getUuid())

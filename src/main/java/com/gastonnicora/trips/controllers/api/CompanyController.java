@@ -103,7 +103,7 @@ public class CompanyController {
         CompanyDTO companyDTO = companyService.createCompany(companyCreate);
         Company company = companyService.getCompanyEntity(companyDTO.getUuid());
 
-        workerService.createWorker(currentUser, company, Set.of(RoleCompany.OWNER));
+        workerService.createWorkerOwner(currentUser, company);
         return companyDTO;
     }
 

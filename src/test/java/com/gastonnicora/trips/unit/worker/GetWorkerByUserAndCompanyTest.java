@@ -56,7 +56,7 @@ class GetWorkerByUserAndCompanyTest {
 
         WorkerDTO expectedWorkerDTO = new WorkerDTO();
 
-        when(workerRepository.findByUserUuidAndCompanyUuid(
+        when(workerRepository.findByUserUuidAndCompanyUuidAndActiveTrue(
                 userUuid,
                 companyUuid
         )).thenReturn(Optional.of(worker));
@@ -73,7 +73,7 @@ class GetWorkerByUserAndCompanyTest {
         assertEquals(expectedWorkerDTO, result);
 
         verify(workerRepository)
-                .findByUserUuidAndCompanyUuid(userUuid, companyUuid);
+                .findByUserUuidAndCompanyUuidAndActiveTrue(userUuid, companyUuid);
 
         verify(workerMapper)
                 .toDTO(worker);
@@ -84,7 +84,7 @@ class GetWorkerByUserAndCompanyTest {
         UUID userUuid = UUID.randomUUID();
         UUID companyUuid = UUID.randomUUID();
 
-        when(workerRepository.findByUserUuidAndCompanyUuid(
+        when(workerRepository.findByUserUuidAndCompanyUuidAndActiveTrue(
                 userUuid,
                 companyUuid
         )).thenReturn(Optional.empty());
@@ -100,7 +100,7 @@ class GetWorkerByUserAndCompanyTest {
         assertEquals(404, exception.getStatus());
 
         verify(workerRepository)
-                .findByUserUuidAndCompanyUuid(userUuid, companyUuid);
+                .findByUserUuidAndCompanyUuidAndActiveTrue(userUuid, companyUuid);
 
         verify(workerMapper, never())
                 .toDTO(any(Worker.class));

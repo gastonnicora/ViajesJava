@@ -136,7 +136,7 @@ public class WorkerController {
      * @return {@link WorkerDTO} con los datos del trabajador actualizado.
      * @see CompanyService#updateWorker(UUID, UUID, Set<RoleCompany>)
      */
-    @PutMapping("/{companyUuid}/worker/{userUuid}")
+    @PutMapping("/companies/{companyUuid}/worker/{userUuid}")
     @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("@companySecurity.hasAnyRole(#companyUuid, "
             + "T(com.gastonnicora.trips.enums.RoleCompany).OWNER, "

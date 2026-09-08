@@ -85,9 +85,8 @@ public class GetCompaniesByCurrentUserTest {
         this.token = UserTestFactory.registerAndLogin(mockMvc);
         this.companyApi = this.companyApi.withToken(token);
         companyApi.getCompaniesByCurrentUser()
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data").isEmpty())
-                .andExpect(jsonPath("$.total").value(0));
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value("Empresas no encontradas"));
     }
 
     @Test

@@ -53,7 +53,7 @@ class GetWorkersByUserTest {
 
         WorkersByUser expected = new WorkersByUser();
 
-        when(workerRepository.findAllByUserUuid(userUuid))
+        when(workerRepository.findAllByUserUuidAndActiveTrue(userUuid))
                 .thenReturn(workers);
 
         when(workerMapper.toWorkersByUserDTO(workers))
@@ -65,7 +65,7 @@ class GetWorkersByUserTest {
         assertEquals(expected, result);
 
         verify(workerRepository)
-                .findAllByUserUuid(userUuid);
+                .findAllByUserUuidAndActiveTrue(userUuid);
 
         verify(workerMapper)
                 .toWorkersByUserDTO(workers);
