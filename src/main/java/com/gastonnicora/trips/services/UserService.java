@@ -48,7 +48,6 @@ public class UserService {
 
     private final UserMapper userMapper;
 
-    private final WorkerService workerService;
 
     /**
      * Constructor que inicializa los servicios necesarios para la gestión de
@@ -66,12 +65,11 @@ public class UserService {
      * @param workerService Servicio para manejar los trabajadores.
      */
     public UserService(UserRepository userRepository,
-            PasswordEncoder passwordEncoder, RefreshTokenService refreshTokenService, UserMapper userMapper, WorkerService workerService) {
+            PasswordEncoder passwordEncoder, RefreshTokenService refreshTokenService, UserMapper userMapper) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.refreshTokenService = refreshTokenService;
         this.userMapper = userMapper;
-        this.workerService = workerService;
     }
 
     /**
@@ -372,33 +370,4 @@ public class UserService {
         throw new NotFoundException("El usuario solicitado no existe");
     }
 
-    /**
-     * Obtiene todos los trabajadores asociados a un usuario específico.
-     * <p>
-     * Este método utiliza {@link WorkerService} para obtener todos los
-     * trabajadores relacionados con el usuario identificado por su UUID.
-     * </p>
-     *
-     * @param uuid UUID del usuario cuyos trabajadores se desean obtener.
-     * @return {@link WorkersByUser} con los datos del usuario y todos sus
-     * trabajadores.
-     */
-    public WorkersByUser getWorkersByUser(UUID uuid) {
-        User user = getUser(uuid);
-        return workerService.getWorkersByUser(user.getUuid());
-    }
-
-    /**
-     * Obtiene todos los trabajos asociados al usuario actual.
-     * <p>
-     * Este método utiliza {@link WorkerService} para obtener todos los trabajos
-     * relacionados con el usuario actualmente autenticado.
-     * </p>
-     *
-     * @return {@link WorkersByUser} con los datos del usuario y todos sus
-     * trabajos.
-     */
-    public WorkersByUser getWorkersByCurrentUser() {
-        return this.getWorkersByUser(getCurrentUserUuid());
-    }
 }

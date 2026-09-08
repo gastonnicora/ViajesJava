@@ -1,4 +1,4 @@
-package com.gastonnicora.trips.integration.company.worker;
+package com.gastonnicora.trips.integration.worker;
 
 import java.util.Set;
 import java.util.UUID;
@@ -23,8 +23,10 @@ import com.gastonnicora.trips.dtos.response.auth.LoginResponse;
 import com.gastonnicora.trips.dtos.response.company.AddressResponse;
 import com.gastonnicora.trips.dtos.response.company.AddressResponse.Address;
 import com.gastonnicora.trips.enums.RoleCompany;
-import com.gastonnicora.trips.helpers.CompanyApiTestClient;
+import com.gastonnicora.trips.helpers.WorkerApiTestClient;
+import com.gastonnicora.trips.helpers.CompanyTestFactory;
 import com.gastonnicora.trips.helpers.UserTestFactory;
+import com.gastonnicora.trips.helpers.WorkerApiTestClient;
 import com.gastonnicora.trips.services.GeocodingService;
 
 import jakarta.transaction.Transactional;
@@ -49,7 +51,7 @@ class PostWorkerTest {
     private UserDTO worker;
     private CompanyDTO company;
 
-    private CompanyApiTestClient companyApi;
+    private WorkerApiTestClient workerApi;
 
     @BeforeEach
     void setup() throws Exception {
@@ -69,42 +71,19 @@ class PostWorkerTest {
                 owner.getEmail(),
                 "goodPassword");
 
-        companyApi = new CompanyApiTestClient(
+        workerApi = new WorkerApiTestClient(
                 mockMvc,
                 objectMapper)
                 .withToken(login.getToken());
 
-        when(geocodingService.obtenerDireccion(anyDouble(), anyDouble()))
-                .thenReturn(new AddressResponse(
-                        "calle falsa 123",
-                        new Address(
-                                "calle falsa",
-                                "123",
-                                "barrio",
-                                "ciudad",
-                                "departamento",
-                                "estado",
-                                "pais")));
 
-        MvcResult result = companyApi
-                .createCompany(
-                        "Test Company",
-                        "company_" + System.currentTimeMillis() + "@test.com",
-                        "123456789",
-                        -34.6037,
-                        -58.3816)
-                .andExpect(status().isOk())
-                .andReturn();
-
-        company = objectMapper.readValue(
-                result.getResponse().getContentAsString(),
-                CompanyDTO.class);
+        company = new CompanyTestFactory(mockMvc, objectMapper, login.getToken(), geocodingService).createCompany();
     }
 
     @Test
     void shouldCreateWorkerSuccessfully() throws Exception {
 
-        companyApi
+        workerApi
                 .createWorker(
                         company.getUuid(),
                         worker.getUuid(),
@@ -126,7 +105,7 @@ class PostWorkerTest {
     @Test
     void shouldCreateWorkerWithMultipleRoles() throws Exception {
 
-        companyApi
+        workerApi
                 .createWorker(
                         company.getUuid(),
                         worker.getUuid(),
@@ -141,14 +120,14 @@ class PostWorkerTest {
     @Test
     void shouldReturnConflictWhenUserIsAlreadyWorker() throws Exception {
 
-        companyApi
+        workerApi
                 .createWorker(
                         company.getUuid(),
                         worker.getUuid(),
                         Set.of(RoleCompany.DRIVER))
                 .andExpect(status().isOk());
 
-        companyApi
+        workerApi
                 .createWorker(
                         company.getUuid(),
                         worker.getUuid(),
@@ -159,7 +138,7 @@ class PostWorkerTest {
     @Test
     void shouldReturnBadRequestWhenOwnerRoleIsAssigned() throws Exception {
 
-        companyApi
+        workerApi
                 .createWorker(
                         company.getUuid(),
                         worker.getUuid(),
@@ -170,7 +149,7 @@ class PostWorkerTest {
     @Test
     void shouldReturnBadRequestWhenRolesAreEmpty() throws Exception {
 
-        companyApi
+        workerApi
                 .createWorker(
                         company.getUuid(),
                         worker.getUuid(),
@@ -181,7 +160,7 @@ class PostWorkerTest {
     @Test
     void shouldReturnNotFoundWhenUserDoesNotExist() throws Exception {
 
-        companyApi
+        workerApi
                 .createWorker(
                         company.getUuid(),
                         UUID.randomUUID(),
@@ -192,7 +171,7 @@ class PostWorkerTest {
     @Test
     void shouldReturnForbiddenWhenCompanyDoesNotExist() throws Exception {
 
-        companyApi
+        workerApi
                 .createWorker(
                         UUID.randomUUID(),
                         worker.getUuid(),
@@ -208,7 +187,7 @@ class PostWorkerTest {
                 "ownerCreate",
                 "goodPassword");
 
-        companyApi
+        workerApi
                 .createWorker(
                         company.getUuid(),
                         anotherUser.getUuid(),
@@ -219,7 +198,7 @@ class PostWorkerTest {
     @Test
     void shouldAllowAdminToCreateWorker() throws Exception {
 
-        companyApi
+        workerApi
                 .createWorker(
                         company.getUuid(),
                         worker.getUuid(),
@@ -231,7 +210,7 @@ class PostWorkerTest {
                 worker.getEmail(),
                 "goodPassword");
 
-        CompanyApiTestClient adminApi = new CompanyApiTestClient(
+        WorkerApiTestClient adminApi = new WorkerApiTestClient(
                 mockMvc,
                 objectMapper)
                 .withToken(adminLogin.getToken());
@@ -252,7 +231,7 @@ class PostWorkerTest {
     @Test
     void shouldAllowHrManagerToCreateWorker() throws Exception {
 
-        companyApi
+        workerApi
                 .createWorker(
                         company.getUuid(),
                         worker.getUuid(),
@@ -264,7 +243,7 @@ class PostWorkerTest {
                 worker.getEmail(),
                 "goodPassword");
 
-        CompanyApiTestClient hrApi = new CompanyApiTestClient(
+        WorkerApiTestClient hrApi = new WorkerApiTestClient(
                 mockMvc,
                 objectMapper)
                 .withToken(hrLogin.getToken());
@@ -285,7 +264,7 @@ class PostWorkerTest {
     @Test
     void shouldReturnForbiddenWhenSellerTriesToCreateWorker() throws Exception {
 
-        companyApi
+        workerApi
                 .createWorker(
                         company.getUuid(),
                         worker.getUuid(),
@@ -297,7 +276,7 @@ class PostWorkerTest {
                 worker.getEmail(),
                 "goodPassword");
 
-        CompanyApiTestClient sellerApi = new CompanyApiTestClient(
+        WorkerApiTestClient sellerApi = new WorkerApiTestClient(
                 mockMvc,
                 objectMapper)
                 .withToken(sellerLogin.getToken());
@@ -318,7 +297,7 @@ class PostWorkerTest {
     @Test
     void shouldReturnForbiddenWhenDriverTriesToCreateWorker() throws Exception {
 
-        companyApi
+        workerApi
                 .createWorker(
                         company.getUuid(),
                         worker.getUuid(),
@@ -330,7 +309,7 @@ class PostWorkerTest {
                 worker.getEmail(),
                 "goodPassword");
 
-        CompanyApiTestClient driverApi = new CompanyApiTestClient(
+        WorkerApiTestClient driverApi = new WorkerApiTestClient(
                 mockMvc,
                 objectMapper)
                 .withToken(driverLogin.getToken());
@@ -361,7 +340,7 @@ class PostWorkerTest {
                 anotherUser.getEmail(),
                 "goodPassword");
 
-        CompanyApiTestClient userApi = new CompanyApiTestClient(
+        WorkerApiTestClient userApi = new WorkerApiTestClient(
                 mockMvc,
                 objectMapper)
                 .withToken(userLogin.getToken());
@@ -382,7 +361,7 @@ class PostWorkerTest {
     @Test
     void shouldReturnUnauthorizedWhenTokenIsMissing() throws Exception {
 
-        CompanyApiTestClient apiWithoutToken = new CompanyApiTestClient(
+        WorkerApiTestClient apiWithoutToken = new WorkerApiTestClient(
                 mockMvc,
                 objectMapper);
 

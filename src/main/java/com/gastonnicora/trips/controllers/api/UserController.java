@@ -289,28 +289,6 @@ public class UserController {
         userService.deleteCurrentUser();
     }
 
-    /**
-     * Obtiene los trabajos asociados al usuario actual.
-     * <p>
-     * <strong>Requiere autenticación </strong>
-     * </p>
-     * <p>
-     * Este endpoint obtiene los trabajos asociados al usuario actual. Se
-     * realiza la validación de los datos antes de obtener los trabajos.
-     * </p>
-     * <p>
-     * Este endpoint hace uso del servicio {@link UserService} para obtener los
-     * trabajos del usuario actual.
-     * </p>
-     *
-     * @return {@link WorkersByUser} con los trabajos del usuario actual.
-     * @see UserService#getWorkersByCurrentUser()
-     */
-    @GetMapping("/workers")
-    @SecurityRequirement(name = "bearerAuth")
-    @Operation(summary = "Obtener trabajos del usuario actual", description = "Obtiene los trabajos asociados al usuario actual")
-    public WorkersByUser getWorkersByCurrentUser() {
-        return userService.getWorkersByCurrentUser();
-    }
+    
 
 }

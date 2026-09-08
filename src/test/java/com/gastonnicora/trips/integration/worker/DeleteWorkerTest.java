@@ -1,12 +1,10 @@
-package com.gastonnicora.trips.integration.company.worker;
+package com.gastonnicora.trips.integration.worker;
 
 import java.util.Set;
 import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import static org.mockito.ArgumentMatchers.anyDouble;
-import static org.mockito.Mockito.when;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
@@ -15,14 +13,12 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.gastonnicora.trips.dtos.entities.CompanyDTO;
 import com.gastonnicora.trips.dtos.entities.UserDTO;
 import com.gastonnicora.trips.dtos.response.auth.LoginResponse;
-import com.gastonnicora.trips.dtos.response.company.AddressResponse;
-import com.gastonnicora.trips.dtos.response.company.AddressResponse.Address;
 import com.gastonnicora.trips.enums.RoleCompany;
-import com.gastonnicora.trips.helpers.CompanyApiTestClient;
+import com.gastonnicora.trips.helpers.CompanyTestFactory;
 import com.gastonnicora.trips.helpers.UserTestFactory;
+import com.gastonnicora.trips.helpers.WorkerApiTestClient;
 import com.gastonnicora.trips.services.GeocodingService;
 
 import jakarta.transaction.Transactional;
@@ -40,10 +36,13 @@ class DeleteWorkerTest {
     @MockitoBean
     private GeocodingService geocodingService;
 
-    private CompanyApiTestClient companyApi;
+    private WorkerApiTestClient workerApi;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     private UserDTO owner;
-    private UserDTO worker;
+    private UserDTO worker, otherWorker;
 
     private UUID companyUuid;
 
@@ -60,66 +59,39 @@ class DeleteWorkerTest {
                 owner.getEmail(),
                 "goodPassword"
         );
-
-        companyApi = new CompanyApiTestClient(
-                mockMvc,
-                new ObjectMapper()
-        ).withToken(login.getToken());
-
-        when(geocodingService.obtenerDireccion(anyDouble(), anyDouble()))
-                .thenReturn(new AddressResponse(
-                        "calle falsa 123",
-                        new Address(
-                                "calle falsa",
-                                "123",
-                                "barrio",
-                                "ciudad",
-                                "departamento",
-                                "estado",
-                                "pais"
-                        )
-                ));
-
-        companyUuid = createCompany();
+        companyUuid = new CompanyTestFactory(mockMvc, objectMapper, login.getToken(), geocodingService).createCompany().getUuid();
 
         worker = UserTestFactory.registerUser(
                 mockMvc,
                 "worker",
                 "goodPassword"
         );
-    }
-
-    private UUID createCompany() throws Exception {
-        String response = companyApi
-                .createCompany(
-                        "Test Company",
-                        "company@test.com",
-                        "123456789",
-                        -34.6037,
-                        -58.3816
-                )
-                .andExpect(status().isOk())
-                .andReturn()
-                .getResponse()
-                .getContentAsString();
-
-        CompanyDTO company = new ObjectMapper()
-                .readValue(response, CompanyDTO.class);
-
-        return company.getUuid();
-    }
-
-    @Test
-    void shouldDeleteWorkerSuccessfully() throws Exception {
-        companyApi
+        workerApi = new WorkerApiTestClient(mockMvc, objectMapper).withToken(login.getToken());
+        workerApi
                 .createWorker(
                         companyUuid,
                         worker.getUuid(),
                         Set.of(RoleCompany.DRIVER)
                 )
                 .andExpect(status().isOk());
+        otherWorker = UserTestFactory.registerUser(
+                mockMvc,
+                "worker",
+                "goodPassword"
+        );
+        workerApi
+                .createWorker(
+                        companyUuid,
+                        otherWorker.getUuid(),
+                        Set.of(RoleCompany.DRIVER)
+                )
+                .andExpect(status().isOk());
+    }
 
-        companyApi
+    @Test
+    void shouldDeleteWorkerSuccessfully() throws Exception {
+
+        workerApi
                 .deleteWorker(
                         companyUuid,
                         worker.getUuid()
@@ -129,65 +101,45 @@ class DeleteWorkerTest {
 
     @Test
     void shouldReturnOkWhenAdminDeletesWorker() throws Exception {
-        companyApi
-                .createWorker(
-                        companyUuid,
-                        worker.getUuid(),
-                        Set.of(RoleCompany.ADMIN)
-                )
-                .andExpect(status().isOk());
-
+        workerApi.updateWorkerRoles(companyUuid, worker.getUuid(), Set.of(RoleCompany.ADMIN)).andExpect(status().isOk());
         LoginResponse adminLogin = UserTestFactory.login(
                 mockMvc,
                 worker.getEmail(),
                 "goodPassword"
         );
 
-        CompanyApiTestClient adminApi = new CompanyApiTestClient(
-                mockMvc,
-                new ObjectMapper()
-        ).withToken(adminLogin.getToken());
+        workerApi.withToken(adminLogin.getToken());
 
-        adminApi
+        workerApi
                 .deleteWorker(
                         companyUuid,
-                        worker.getUuid()
+                        otherWorker.getUuid()
                 )
                 .andExpect(status().isOk());
     }
 
     @Test
     void shouldReturnOkWhenHR_ManagerDeletesWorker() throws Exception {
-        companyApi
-                .createWorker(
-                        companyUuid,
-                        worker.getUuid(),
-                        Set.of(RoleCompany.HR_MANAGER)
-                )
-                .andExpect(status().isOk());
 
-        LoginResponse adminLogin = UserTestFactory.login(
+        workerApi.updateWorkerRoles(companyUuid, worker.getUuid(), Set.of(RoleCompany.HR_MANAGER)).andExpect(status().isOk());
+        LoginResponse HRLogin = UserTestFactory.login(
                 mockMvc,
                 worker.getEmail(),
                 "goodPassword"
         );
 
-        CompanyApiTestClient adminApi = new CompanyApiTestClient(
-                mockMvc,
-                new ObjectMapper()
-        ).withToken(adminLogin.getToken());
+        workerApi.withToken(HRLogin.getToken());
 
-        adminApi
-                .deleteWorker(
-                        companyUuid,
-                        worker.getUuid()
-                )
+        workerApi.deleteWorker(
+                companyUuid,
+                otherWorker.getUuid()
+        )
                 .andExpect(status().isOk());
     }
 
     @Test
     void shouldReturnNotFoundWhenWorkerDoesNotExist() throws Exception {
-        companyApi
+        workerApi
                 .deleteWorker(
                         companyUuid,
                         UUID.randomUUID()
@@ -197,7 +149,7 @@ class DeleteWorkerTest {
 
     @Test
     void shouldReturnForbiddenWhenCompanyDoesNotExist() throws Exception {
-        companyApi
+        workerApi
                 .deleteWorker(
                         UUID.randomUUID(),
                         worker.getUuid()
@@ -207,7 +159,7 @@ class DeleteWorkerTest {
 
     @Test
     void shouldReturnUnauthorizedWhenTokenIsMissing() throws Exception {
-        CompanyApiTestClient unauthorizedApi = new CompanyApiTestClient(
+        WorkerApiTestClient unauthorizedApi = new WorkerApiTestClient(
                 mockMvc,
                 new ObjectMapper()
         );
@@ -222,13 +174,6 @@ class DeleteWorkerTest {
 
     @Test
     void shouldReturnForbiddenWhenDriverTriesToDeleteWorker() throws Exception {
-        companyApi
-                .createWorker(
-                        companyUuid,
-                        worker.getUuid(),
-                        Set.of(RoleCompany.DRIVER)
-                )
-                .andExpect(status().isOk());
 
         LoginResponse driverLogin = UserTestFactory.login(
                 mockMvc,
@@ -236,12 +181,7 @@ class DeleteWorkerTest {
                 "goodPassword"
         );
 
-        CompanyApiTestClient driverApi = new CompanyApiTestClient(
-                mockMvc,
-                new ObjectMapper()
-        ).withToken(driverLogin.getToken());
-
-        driverApi
+        workerApi.withToken(driverLogin.getToken())
                 .deleteWorker(
                         companyUuid,
                         worker.getUuid()
@@ -257,13 +197,7 @@ class DeleteWorkerTest {
                 worker.getEmail(),
                 "goodPassword"
         );
-
-        CompanyApiTestClient userApi = new CompanyApiTestClient(
-                mockMvc,
-                new ObjectMapper()
-        ).withToken(userLogin.getToken());
-
-        userApi
+        workerApi.withToken(userLogin.getToken())
                 .deleteWorker(
                         companyUuid,
                         owner.getUuid()

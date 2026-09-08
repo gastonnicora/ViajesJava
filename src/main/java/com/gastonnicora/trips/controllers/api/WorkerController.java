@@ -1,5 +1,7 @@
 package com.gastonnicora.trips.controllers.api;
 
+import static com.gastonnicora.trips.utils.SecurityUtils.getCurrentUserUuid;
+
 import java.util.UUID;
 
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.gastonnicora.trips.dtos.entities.WorkerDTO;
 import com.gastonnicora.trips.dtos.request.company.WorkerCreate;
 import com.gastonnicora.trips.dtos.response.worker.WorkersByCompany;
+import com.gastonnicora.trips.dtos.response.worker.WorkersByUser;
 import com.gastonnicora.trips.entities.Company;
 import com.gastonnicora.trips.entities.User;
 import com.gastonnicora.trips.services.CompanyService;
@@ -71,7 +74,6 @@ public class WorkerController {
     }
 
     // TODO 🚀: Falta relacion entre trabajador y empresa
-
     /**
      * Agrega un trabajador a una empresa.
      * <p>
@@ -92,7 +94,7 @@ public class WorkerController {
             + "T(com.gastonnicora.trips.enums.RoleCompany).HR_MANAGER)")
     @Operation(summary = "Agregar worker a empresa", description = "Agrega un worker a una empresa por su UUID")
     public WorkerDTO createWorker(@PathVariable("uuid") UUID uuid, @RequestBody @Valid WorkerCreate workerCreate) {
-        Company company= companyService.getCompanyEntity(uuid);
+        Company company = companyService.getCompanyEntity(uuid);
         User user = userService.getUser(workerCreate.getUserUuid());
         return workerService.createWorker(user, company, workerCreate.getRoles());
     }
@@ -121,7 +123,6 @@ public class WorkerController {
         workerService.deleteWorker(userUuid, companyUuid);
     }
 
-    
     /**
      * Actualiza los roles de un trabajador en una empresa.
      * <p>
@@ -150,5 +151,29 @@ public class WorkerController {
         companyService.getCompanyEntity(companyUuid);
         userService.getUser(userUuid);
         return workerService.updateWorker(userUuid, companyUuid, workerCreate.getRoles());
+    }
+
+    /**
+     * Obtiene los trabajos asociados al usuario actual.
+     * <p>
+     * <strong>Requiere autenticación </strong>
+     * </p>
+     * <p>
+     * Este endpoint obtiene los trabajos asociados al usuario actual. Se
+     * realiza la validación de los datos antes de obtener los trabajos.
+     * </p>
+     * <p>
+     * Este endpoint hace uso del servicio {@link UserService} para obtener los
+     * trabajos del usuario actual.
+     * </p>
+     *
+     * @return {@link WorkersByUser} con los trabajos del usuario actual.
+     * @see UserService#getWorkersByCurrentUser()
+     */
+    @GetMapping("/users/workers")
+    @SecurityRequirement(name = "bearerAuth")
+    @Operation(summary = "Obtener trabajos del usuario actual", description = "Obtiene los trabajos asociados al usuario actual")
+    public WorkersByUser getWorkersByCurrentUser() {
+        return workerService.getWorkersByUser(getCurrentUserUuid());
     }
 }

@@ -105,22 +105,6 @@ public class UserApiTestClient {
                         }""".formatted(setToJson(role))));
     }
 
-    public ResultActions getWorkersByCurrentUser() throws Exception {
-        return mockMvc.perform(get("/api/users/workers")
-                .with(csrf())
-                .header("Authorization", "Bearer " + token)
-                .header("User-Agent", "JUnit-Test")
-                .contentType(MediaType.APPLICATION_JSON));
-    }
-
-    public ResultActions getWorkersByUser(String uuid) throws Exception {
-        return mockMvc.perform(get("/api/users/workers/" + uuid + "/workers")
-                .with(csrf())
-                .header("Authorization", "Bearer " + token)
-                .header("User-Agent", "JUnit-Test")
-                .contentType(MediaType.APPLICATION_JSON));
-    }
-
     private String setToJson(Set<Role> roles) {
         return roles.stream()
                 .map(role -> "\"" + role.name() + "\"")
