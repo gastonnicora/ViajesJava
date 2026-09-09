@@ -35,7 +35,7 @@ public class TokenCleanupService {
 
     private final RefreshTokenRepository repo;
 
-    TokenCleanupService(RefreshTokenRepository repo) {
+    public TokenCleanupService(RefreshTokenRepository repo) {
         this.repo = repo;
     }
 

@@ -42,7 +42,7 @@ public class RefreshTokenService {
 
     private final RefreshTokenRepository repo;
 
-    RefreshTokenService(RefreshTokenRepository repo) {
+    public RefreshTokenService(RefreshTokenRepository repo) {
         this.repo = repo;
     }
 
