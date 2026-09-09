@@ -8,24 +8,26 @@ import org.springframework.stereotype.Service;
 import com.gastonnicora.trips.repositories.RefreshTokenRepository;
 
 /**
- * Servicio programado para limpiar tokens expirados o inactivos de la base de
- * datos.
+ * Servicio encargado de limpiar periódicamente los refresh tokens expirados o
+ * inactivos de la base de datos.
+ *
  * <p>
- * Se utilizan tareas programadas (cron) para eliminar:
- * </p>
- * <ul>
- * <li>Tokens cuya fecha de expiración ya pasó.</li>
- * <li>Tokens que están desactivados (no activos).</li>
- * </ul>
- * <p>
- * Esto ayuda a mantener la base de datos limpia y evitar acumulación
- * innecesaria de tokens.
+ * Utiliza tareas programadas para eliminar tokens cuya fecha de expiración ya
+ * pasó y tokens que se encuentran desactivados.
  * </p>
  *
- * Cron de ejemplo utilizado: "0 0 * * * *" → se ejecuta al inicio de cada hora.
+ * <p>
+ * Estas tareas permiten mantener limpia la base de datos y evitar la
+ * acumulación innecesaria de tokens.
+ * </p>
  *
- * @author Gastón 
- * @version 1.0 
+ * <p>
+ * Las tareas programadas utilizan el cron {@code 0 0 * * * *}, por lo que se
+ * ejecutan al inicio de cada hora.
+ * </p>
+ *
+ * @author Gastón
+ * @version 1.0
  * @since 2026-05-04
  */
 @Service
@@ -40,8 +42,10 @@ public class TokenCleanupService {
     /**
      * Elimina todos los refresh tokens cuya fecha de expiración es anterior al
      * momento actual.
+     *
      * <p>
-     * Se ejecuta automáticamente cada hora según el cron definido.
+     * La tarea se ejecuta automáticamente al inicio de cada hora según el cron
+     * definido.
      * </p>
      */
     @Scheduled(cron = "0 0 * * * *")
@@ -50,9 +54,11 @@ public class TokenCleanupService {
     }
 
     /**
-     * Elimina todos los refresh tokens que están inactivos.
+     * Elimina todos los refresh tokens que se encuentran inactivos.
+     *
      * <p>
-     * Se ejecuta automáticamente cada hora según el cron definido.
+     * La tarea se ejecuta automáticamente al inicio de cada hora según el cron
+     * definido.
      * </p>
      */
     @Scheduled(cron = "0 0 * * * *")

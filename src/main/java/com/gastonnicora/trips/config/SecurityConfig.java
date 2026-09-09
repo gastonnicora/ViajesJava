@@ -20,20 +20,19 @@ import com.gastonnicora.trips.security.handlers.CustomAccessDeniedHandler;
 import com.gastonnicora.trips.security.handlers.CustomAuthenticationEntryPoint;
 
 /**
- * Configuración de seguridad de la aplicación.
+ * Configuración principal de seguridad de la aplicación.
+ *
  * <p>
- * Esta clase configura la seguridad de Spring Security para la plataforma,
- * incluyendo la autenticación JWT para la API y la autenticación de formularios
- * para la web. También define codificación de contraseñas y manejo de
- * excepciones personalizadas.
+ * Define las cadenas de filtros de seguridad utilizadas para proteger la API
+ * REST y la interfaz web. La API utiliza autenticación mediante JWT, mientras
+ * que la interfaz web utiliza autenticación basada en sesión y HTTP Basic.
  * </p>
  *
- * <ul>
- * <li>Define los filtros de seguridad para las rutas de la API.</li>
- * <li>Define los filtros de seguridad para la web.</li>
- * <li>Maneja accesos denegados (403) y no autenticados (401) con handlers
- * personalizados.</li>
- * </ul>
+ * <p>
+ * También configura el codificador de contraseñas, el administrador de
+ * autenticación y los handlers utilizados para gestionar errores de
+ * autenticación y autorización.
+ * </p>
  *
  * @author Gastón
  * @version 1.0
@@ -50,17 +49,16 @@ public class SecurityConfig {
     private final CustomAuthenticationEntryPoint authenticationEntryPoint;
 
     /**
-     * Constructor de la clase SecurityConfig.
+     * Crea una instancia de la configuración de seguridad.
      *
-     * @param userService ({@link UserDetailsServiceImpl}) Servicio de detalles
-     * de usuario.
-     * @param jwtFilter ({@link JwtAuthenticationFilter}) Filtro para autenticar
-     * peticiones JWT.
-     * @param accessDeniedHandler ({@link CustomAccessDeniedHandler}) Handler
-     * para accesos denegados (403).
-     * @param authenticationEntryPoint
-     * ({@link CustomAuthenticationEntryPoint})Handler para no autenticados
-     * (401).
+     * @param userService servicio utilizado por Spring Security para cargar los
+     * datos de los usuarios
+     * @param jwtFilter filtro encargado de procesar la autenticación mediante
+     * JWT
+     * @param accessDeniedHandler handler encargado de gestionar accesos
+     * denegados
+     * @param authenticationEntryPoint handler encargado de gestionar
+     * solicitudes no autenticadas
      */
     public SecurityConfig(UserDetailsServiceImpl userService,
             JwtAuthenticationFilter jwtFilter,
@@ -73,13 +71,14 @@ public class SecurityConfig {
     }
 
     /**
-     * Bean que proporciona un codificador de contraseñas usando BCrypt.
+     * Proporciona el codificador de contraseñas utilizado por la aplicación.
+     *
      * <p>
-     * Este codificador se utiliza para almacenar contraseñas seguras en la base
-     * de datos.
+     * Utiliza {@link BCryptPasswordEncoder} para aplicar un hash seguro a las
+     * contraseñas antes de almacenarlas.
      * </p>
      *
-     * @return PasswordEncoder instancia de BCryptPasswordEncoder
+     * @return instancia de {@link PasswordEncoder} basada en BCrypt
      */
     @Bean
     public PasswordEncoder codificaPass() {
@@ -87,18 +86,13 @@ public class SecurityConfig {
     }
 
     /**
-     * Bean que proporciona el AuthenticationManager.
-     * <p>
-     * Este bean permite la autenticación de usuarios a nivel global dentro de
-     * Spring Security.
-     * </p>
+     * Proporciona el administrador de autenticación de Spring Security.
      *
-     * @param config ({@link AuthenticationConfiguration}) Configuración de
-     * autenticación de Spring Security.
-     * @return {@link AuthenticationManager} instancia para manejar
-     * autenticación.
-     * @throws Exception si ocurre algún error al obtener el
-     * AuthenticationManager.
+     * @param config configuración utilizada por Spring Security para construir
+     * el administrador de autenticación
+     * @return instancia de {@link AuthenticationManager}
+     * @throws Exception si no es posible obtener el administrador de
+     * autenticación
      */
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
@@ -106,19 +100,30 @@ public class SecurityConfig {
     }
 
     /**
-     * Configura la seguridad para la API con autenticación JWT.
+     * Configura la cadena de filtros de seguridad para la API REST.
+     *
      * <p>
-     * - Desactiva CSRF. - Aplica seguridad solo a rutas que empiezan con
-     * /api/**. - Define excepciones personalizadas para 401 y 403. - Permite
-     * accesos anónimos a /api/auth/login, /api/users (POST) y
-     * /api/auth/refresh. - Restringe el resto de la API a roles USER y ADMIN. -
-     * Añade el filtro JWT antes del filtro de autenticación de Spring.
+     * Esta cadena se aplica exclusivamente a las rutas que comienzan con
+     * {@code /api/} y utiliza {@link JwtAuthenticationFilter} para procesar los
+     * tokens JWT.
      * </p>
      *
-     * @param http ({@link HttpSecurity}) de Spring Security.
-     * @return {@link SecurityFilterChain} cadena de filtros de seguridad
-     * configurada.
-     * @throws Exception si ocurre un error al configurar la seguridad.
+     * <p>
+     * Las rutas de autenticación y registro permitidas sin autenticación son
+     * {@code /api/auth/login}, {@code POST /api/users} y
+     * {@code /api/auth/refresh}. El resto de las solicitudes de la API requiere
+     * un usuario autenticado.
+     * </p>
+     *
+     * <p>
+     * La autorización específica de cada operación se complementa mediante
+     * seguridad a nivel de método.
+     * </p>
+     *
+     * @param http objeto utilizado para configurar la seguridad HTTP
+     * @return cadena de filtros de seguridad configurada para la API
+     * @throws Exception si ocurre un error durante la configuración de
+     * seguridad
      * @see JwtAuthenticationFilter
      */
     @Bean
@@ -142,22 +147,26 @@ public class SecurityConfig {
     }
 
     /**
-     * Configura la seguridad para la web (interfaz de usuario).
+     * Configura la cadena de filtros de seguridad para la interfaz web.
+     *
      * <p>
-     * - Desactiva CSRF. - Aplica seguridad a todas las rutas. - Define
-     * excepciones personalizadas para 401 y 403. - Permite accesos públicos a
-     * /auth/**, /v3/api-docs/**, /swagger-ui/** y /public/**. - Restringe el
-     * resto de la web a roles USER y ADMIN. - Configura login por formulario y
-     * HTTP Basic. - Configura logout invalidando la sesión y eliminando
-     * cookies.
+     * Permite el acceso público a las rutas de autenticación, documentación
+     * OpenAPI y recursos públicos. El resto de las rutas requiere un usuario
+     * con rol {@code ADMIN} o {@code USER}.
      * </p>
      *
-     * @param http ({@link HttpSecurity}) de Spring Security.
-     * @param authenticationManager ({@link AuthenticationManager}) para
-     * autenticar usuarios.
-     * @return {@link SecurityFilterChain} cadena de filtros de seguridad
-     * configurada.
-     * @throws Exception si ocurre un error al configurar la seguridad.
+     * <p>
+     * La autenticación web utiliza inicio de sesión mediante formulario y HTTP
+     * Basic. El cierre de sesión invalida la sesión HTTP y elimina la cookie
+     * {@code JSESSIONID}.
+     * </p>
+     *
+     * @param http objeto utilizado para configurar la seguridad HTTP
+     * @param authenticationManager administrador utilizado para autenticar
+     * usuarios
+     * @return cadena de filtros de seguridad configurada para la interfaz web
+     * @throws Exception si ocurre un error durante la configuración de
+     * seguridad
      */
     @Bean
     @Order(2)

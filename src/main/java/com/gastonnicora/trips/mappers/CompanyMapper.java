@@ -1,3 +1,4 @@
+
 package com.gastonnicora.trips.mappers;
 
 import java.util.List;
@@ -9,20 +10,27 @@ import com.gastonnicora.trips.dtos.entities.CompanyDTO;
 import com.gastonnicora.trips.entities.Company;
 
 /**
- * Mapper que convierte entidades {@link Company} a {@link CompanyDTO}.
+ * Componente encargado de convertir entidades {@link Company} en objetos
+ * {@link CompanyDTO}.
+ *
  * <p>
- * Se utiliza para exponer datos de la empresa de manera segura en la API, sin
- * incluir información sensible como la contraseña del dueño.
+ * Proporciona métodos para transformar una entidad individual o una lista de
+ * entidades en los DTOs correspondientes.
  * </p>
  */
 @Component
 public class CompanyMapper {
 
     /**
-     * Convierte un {@link Company} en {@link CompanyDTO}.
+     * Convierte una entidad {@link Company} en un {@link CompanyDTO}.
      *
-     * @param company Entidad de empresa
-     * @return DTO de empresa correspondiente
+     * <p>
+     * La conversión incluye los datos de identificación, información de contacto,
+     * ubicación, fechas de creación y actualización, y estado de la empresa.
+     * </p>
+     *
+     * @param company Entidad de empresa que se desea convertir.
+     * @return DTO de empresa correspondiente a la entidad proporcionada.
      */
     public CompanyDTO toDTO(Company company) {
         return new CompanyDTO(
@@ -39,11 +47,12 @@ public class CompanyMapper {
     }
 
     /**
-     * Convierte una lista de {@link Company} en una lista de
+     * Convierte una lista de entidades {@link Company} en una lista de
      * {@link CompanyDTO}.
      *
-     * @param companies Lista de entidades de empresas
-     * @return Lista de DTOs de empresas correspondientes
+     * @param companies Lista de entidades de empresas que se desea convertir.
+     * @return Lista de DTOs de empresas correspondientes a las entidades
+     *         proporcionadas.
      */
     public List<CompanyDTO> toDTOList(List<Company> companies) {
         return companies.stream()

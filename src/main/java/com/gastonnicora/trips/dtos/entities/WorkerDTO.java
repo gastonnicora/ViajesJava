@@ -14,119 +14,96 @@ import lombok.Setter;
 import lombok.ToString;
 
 /**
- * Data Transfer Object(DTO) que representa la relación entre un usuario y una empresa.
+ * DTO utilizado para representar la relación entre un usuario y una empresa en
+ * las respuestas de la API.
  *
  * <p>
- * Incluye el usuario asociado, la empresa, los roles asignados
- * y el estado de la relación.
- * </p>
- * 
- * <p>
- * Se utiliza para exponer los datos de trabajador en respuestas de la API, sin
- * incluir información sensible como la contraseña.
+ * Contiene la información del usuario asociado, la empresa, los roles asignados
+ * dentro de la empresa y el estado de la relación.
  * </p>
  *
  * <p>
- * Campos principales:
+ * La clase se utiliza como objeto de transferencia de datos y no representa
+ * directamente la entidad persistida en la base de datos.
  * </p>
- * <ul>
- * <li>{@code uuid}: Identificador único de la relación.</li>
- * <li>{@code user}: {@link UserDTO} del trabajador.</li>
- * <li>{@code company}: {@link CompanyDTO} de la empresa.</li>
- * <li>{@code roles}: Conjunto de roles asignados al trabajador.</li>
- * <li>{@code active}: Estado del trabajador (activo o no).</li>
- * <li>{@code createdAt}: Fecha de creación del trabajador.</li>
- * <li>{@code updatedAt}: Fecha de última actualización del trabajador.</li>
- * </ul>
  *
  * <p>
- * Ejemplo de JSON:
+ * No incluye información sensible del usuario, como su contraseña.
  * </p>
- *
- * <pre>
- *{
- * "uuid": "550e8400-e29b-41d4-a716-446655440000",
- * "user": {
- *   "uuid": "550e8400-e29b-41d4-a716-446655440000",
- *   "name": "Juan",
- *   "lastname": "Perez",
- *   "email": "juanperez@mail.com",
- *   "role": ["USER"],
- *   "enabled": true,
- *   "createdAt": "2026-01-01T00:00:00",
- *   "updatedAt": "2026-01-01T00:00:00"
- * },
- * "company": {
- *   "uuid": "550e8400-e29b-41d4-a716-446655440000",
- *   "name": "Viajes LP",
- *   "address": "Calle Falsa 123,La Plata,Bs As, Argentina",
- *   "latitude": -34.9214,
- *   "longitude": -57.9545
- *   "email": "company@mail.com",
- *   "phone": "+5491122334455",
- *   "createdAt": "2026-01-01T00:00:00",
- *   "updatedAt": "2026-01-01T00:00:00",
- *   "active": true
- * },
- * "roles": ["DRIVER"],
- * "active": true,
- * "createdAt": "2026-01-01T00:00:00",
- * "updatedAt": "2026-01-01T00:00:00"
- * }
- * </pre>
  *
  * @author Gastón
  * @version 1.0
  * @since 2026-06-03
- *
  */
 @Getter
 @Setter
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(description = "DTO de relación trabajador empresa")
+@Schema(description = "Información de la relación entre un usuario y una empresa")
 public class WorkerDTO {
 
     /**
-     * Identificador único de la relación.
+     * Identificador único de la relación entre el usuario y la empresa.
      */
-    @Schema(description = "UUID de la relación", example = "550e8400-e29b-41d4-a716-446655440000")
+    @Schema(
+            description = "Identificador único de la relación.",
+            example = "550e8400-e29b-41d4-a716-446655440000"
+    )
     private UUID uuid;
 
     /**
-     * {@link UserDTO} del trabajador.
+     * Información del usuario asociado a la empresa.
      */
-    @Schema(description = "DTO del usuario", implementation = UserDTO.class)
+    @Schema(
+            description = "Información del usuario asociado a la empresa.",
+            implementation = UserDTO.class
+    )
     private UserDTO user;
 
     /**
-     * {@link CompanyDTO} de la empresa.
+     * Información de la empresa a la que pertenece el usuario.
      */
-    @Schema(description = "DTO de la empresa", implementation = CompanyDTO.class)
+    @Schema(
+            description = "Información de la empresa a la que pertenece el usuario.",
+            implementation = CompanyDTO.class
+    )
     private CompanyDTO company;
 
     /**
-     * Conjunto de roles asignados al trabajador.
+     * Conjunto de roles asignados al usuario dentro de la empresa.
      */
-    @Schema(description = "Roles del trabajador", example = "[\"DRIVER\"]")
+    @Schema(
+            description = "Roles asignados al usuario dentro de la empresa.",
+            example = "[\"DRIVER\"]"
+    )
     private Set<RoleCompany> roles;
 
     /**
-     * Indica si el trabajador está activo.
+     * Indica si la relación entre el usuario y la empresa se encuentra activa.
      */
-    @Schema(description = "Estado del trabajador", example = "true")
+    @Schema(
+            description = "Indica si la relación laboral se encuentra activa.",
+            example = "true"
+    )
     private boolean active;
 
     /**
-     * Fecha de creación del trabajador.
+     * Fecha y hora en la que se creó la relación entre el usuario y la empresa.
      */
-    @Schema(description = "Fecha de creación del trabajador", example = "2026-01-01T00:00:00")
+    @Schema(
+            description = "Fecha y hora de creación de la relación.",
+            example = "2026-01-01T00:00:00"
+    )
     private LocalDateTime createdAt;
 
     /**
-     * Fecha de actualización del trabajador.
+     * Fecha y hora de la última actualización de la relación entre el usuario y
+     * la empresa.
      */
-    @Schema(description = "Fecha de actualización del trabajador", example = "2026-01-01T00:00:00")
+    @Schema(
+            description = "Fecha y hora de la última actualización de la relación.",
+            example = "2026-01-01T00:00:00"
+    )
     private LocalDateTime updatedAt;
 }

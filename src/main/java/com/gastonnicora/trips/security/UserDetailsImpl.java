@@ -11,19 +11,14 @@ import org.springframework.security.core.userdetails.UserDetails;
 import com.gastonnicora.trips.entities.User;
 
 /**
- * Implementación de {@link UserDetails} de Spring Security.
- * <p>
- * Permite que Spring Security gestione la autenticación y autorización a partir
- * de la entidad {@link User}.
- * </p>
+ * Implementación de {@link UserDetails} de Spring Security basada en la
+ * entidad {@link User}.
  *
- * Funcionalidades:
- * <ul>
- * <li>Devuelve las credenciales del usuario (email y password).</li>
- * <li>Proporciona los roles del usuario como {@link GrantedAuthority}.</li>
- * <li>Controla el estado de la cuenta (habilitado, no bloqueado, no
- * expirado).</li>
- * </ul>
+ * <p>
+ * Proporciona las credenciales, authorities y estado de la cuenta necesarios
+ * para que Spring Security gestione la autenticación y autorización del
+ * usuario.
+ * </p>
  *
  * @author Gastón
  * @version 1.0
@@ -34,30 +29,34 @@ public class UserDetailsImpl implements UserDetails {
     private final User user;
 
     /**
-     * Constructor que recibe la entidad {@link User}.
+     * Crea una instancia de los detalles de usuario a partir de una entidad
+     * {@link User}.
      *
-     * @param user Usuario de la aplicación
+     * @param user Usuario de la aplicación.
      */
     public UserDetailsImpl(User user) {
         this.user = user;
     }
 
     /**
-     * Obtiene el UUID del usuario.
+     * Obtiene el identificador único del usuario.
      *
-     * @return UUID del usuario
+     * @return UUID del usuario.
      */
     public UUID getUuid() {
         return user.getUuid();
     }
 
     /**
-     * Obtiene los roles del usuario como {@link GrantedAuthority}.
+     * Obtiene los roles del usuario convertidos en authorities de Spring
+     * Security.
+     *
      * <p>
-     * Cada rol se convierte en un authority con el prefijo "ROLE_".
+     * Cada rol se transforma en un {@link SimpleGrantedAuthority} utilizando
+     * el prefijo {@code ROLE_}.
      * </p>
      *
-     * @return Colección de authorities
+     * @return Colección de authorities asociadas al usuario.
      */
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -69,7 +68,7 @@ public class UserDetailsImpl implements UserDetails {
     /**
      * Obtiene la contraseña del usuario.
      *
-     * @return Contraseña cifrada
+     * @return Contraseña del usuario.
      */
     @Override
     public String getPassword() {
@@ -77,12 +76,14 @@ public class UserDetailsImpl implements UserDetails {
     }
 
     /**
-     * Obtiene el nombre de usuario para autenticación.
+     * Obtiene el nombre de usuario utilizado para la autenticación.
+     *
      * <p>
-     * En este caso, es el email del usuario.
+     * En esta implementación, el nombre de usuario corresponde al correo
+     * electrónico del usuario.
      * </p>
      *
-     * @return Email del usuario
+     * @return Correo electrónico del usuario.
      */
     @Override
     public String getUsername() {
@@ -92,7 +93,12 @@ public class UserDetailsImpl implements UserDetails {
     /**
      * Indica si la cuenta del usuario no ha expirado.
      *
-     * @return true siempre, ya que la expiración no se gestiona
+     * <p>
+     * Esta implementación devuelve siempre {@code true}, ya que la expiración
+     * de la cuenta no se gestiona.
+     * </p>
+     *
+     * @return {@code true} siempre.
      */
     @Override
     public boolean isAccountNonExpired() {
@@ -102,7 +108,12 @@ public class UserDetailsImpl implements UserDetails {
     /**
      * Indica si la cuenta del usuario no está bloqueada.
      *
-     * @return true siempre, ya que el bloqueo no se gestiona
+     * <p>
+     * Esta implementación devuelve siempre {@code true}, ya que el bloqueo de
+     * la cuenta no se gestiona.
+     * </p>
+     *
+     * @return {@code true} siempre.
      */
     @Override
     public boolean isAccountNonLocked() {
@@ -112,7 +123,12 @@ public class UserDetailsImpl implements UserDetails {
     /**
      * Indica si las credenciales del usuario no han expirado.
      *
-     * @return true siempre, ya que la expiración de credenciales no se gestiona
+     * <p>
+     * Esta implementación devuelve siempre {@code true}, ya que la expiración
+     * de las credenciales no se gestiona.
+     * </p>
+     *
+     * @return {@code true} siempre.
      */
     @Override
     public boolean isCredentialsNonExpired() {
@@ -120,9 +136,10 @@ public class UserDetailsImpl implements UserDetails {
     }
 
     /**
-     * Indica si el usuario está habilitado.
+     * Indica si el usuario se encuentra habilitado.
      *
-     * @return true si el usuario está habilitado, false en caso contrario
+     * @return {@code true} si el usuario está habilitado; {@code false} en caso
+     *         contrario.
      */
     @Override
     public boolean isEnabled() {

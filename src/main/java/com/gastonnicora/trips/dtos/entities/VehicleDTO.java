@@ -11,25 +11,18 @@ import lombok.Setter;
 import lombok.ToString;
 
 /**
- * Data Transfer Object (DTO) que representa la información de un vehículo.
+ * DTO utilizado para representar la información de un vehículo en las
+ * respuestas de la API.
+ *
  * <p>
- * Se utiliza para exponer los datos de vehículo en respuestas de la API, sin
- * incluir información sensible.
+ * Contiene los datos principales del vehículo y la información de la empresa a
+ * la que pertenece.
  * </p>
  *
  * <p>
- * Campos principales:
+ * No incluye información sensible ni datos internos de persistencia que no sean
+ * necesarios para los clientes de la API.
  * </p>
- * <ul>
- * <li>{@code uuid}: Identificador único del vehículo.</li>
- * <li>{@code company}: DTO de la empresa a la que pertenece el vehículo.</li>
- * <li>{@code plate}: Matrícula del vehículo.</li>
- * <li>{@code model}: Modelo del vehículo.</li>
- * <li>{@code capacity}: Capacidad del vehículo.</li>
- * <li>{@code createdAt}: Fecha de creación del vehículo.</li>
- * <li>{@code updatedAt}: Fecha de última actualización del vehículo.</li>
- * <li>{@code active}: Indica si el vehículo está activo.</li>
- * </ul>
  *
  * @author Gastón
  * @version 1.0
@@ -40,31 +33,78 @@ import lombok.ToString;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(description = "DTO de vehículo.")
+@Schema(description = "Información de un vehículo")
 public class VehicleDTO {
 
-    @Schema(description = "UUID del vehículo.", example = "550e8400-e29b-41d4-a716-446655440000")
+    /**
+     * Identificador único del vehículo.
+     */
+    @Schema(
+            description = "Identificador único del vehículo.",
+            example = "550e8400-e29b-41d4-a716-446655440000"
+    )
     private UUID uuid;
 
-    @Schema(description = "DTO de la empresa", implementation = CompanyDTO.class)
+    /**
+     * Empresa a la que pertenece el vehículo.
+     */
+    @Schema(
+            description = "Empresa a la que pertenece el vehículo.",
+            implementation = CompanyDTO.class
+    )
     private CompanyDTO company;
 
-    @Schema(description = "Matrícula del vehículo.", example = "ABC123")
+    /**
+     * Matrícula o patente del vehículo.
+     */
+    @Schema(
+            description = "Matrícula o patente del vehículo.",
+            example = "ABC123"
+    )
     private String plate;
 
-    @Schema(description = "Modelo del vehículo.", example = "Model X")
+    /**
+     * Modelo del vehículo.
+     */
+    @Schema(
+            description = "Modelo del vehículo.",
+            example = "Model X"
+    )
     private String model;
 
-    @Schema(description = "Capacidad del vehículo.", example = "50")
+    /**
+     * Cantidad máxima de pasajeros que puede transportar el vehículo.
+     */
+    @Schema(
+            description = "Capacidad máxima de pasajeros del vehículo.",
+            example = "50"
+    )
     private int capacity;
 
-    @Schema(description = "Fecha de creación del vehículo.", example = "2026-01-01T00:00:00")
+    /**
+     * Fecha y hora en la que se creó el vehículo.
+     */
+    @Schema(
+            description = "Fecha y hora de creación del vehículo.",
+            example = "2026-01-01T00:00:00"
+    )
     private LocalDateTime createdAt;
 
-    @Schema(description = "Fecha de actualización del vehículo.", example = "2026-01-01T00:00:00")
+    /**
+     * Fecha y hora de la última actualización del vehículo.
+     */
+    @Schema(
+            description = "Fecha y hora de la última actualización del vehículo.",
+            example = "2026-01-01T00:00:00"
+    )
     private LocalDateTime updatedAt;
 
-    @Schema(description = "Indica si el vehículo está activo.", example = "true")
+    /**
+     * Indica si el vehículo se encuentra activo.
+     */
+    @Schema(
+            description = "Indica si el vehículo se encuentra activo.",
+            example = "true"
+    )
     private boolean active;
-
 }

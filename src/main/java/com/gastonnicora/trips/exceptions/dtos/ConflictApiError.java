@@ -5,51 +5,49 @@ import org.springframework.http.HttpStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
- * Representa un error de recurso en conflicto (HTTP 409).
+ * Representa un error de conflicto correspondiente al código de estado HTTP
+ * {@code 409}.
+ *
  * <p>
- * Se utiliza cuando el estado actual del recurso entra en conflicto con la
- * operación solicitada, por ejemplo: intento de crear un usuario con un email
- * ya registrado.
+ * Se utiliza cuando el estado actual de un recurso entra en conflicto con la
+ * operación solicitada.
  * </p>
  *
  * <p>
- * Ejemplo de respuesta JSON:
+ * Hereda de {@link ApiError} y establece automáticamente el código de estado
+ * HTTP {@link HttpStatus#CONFLICT}.
  * </p>
- *
- * <pre>
- * {
- *   "status": 409,
- *   "message": "Conflicto de recursos",
- *   "timestamp": "2026-05-06T12:34:56",
- *   "errors": null
- * }
- * </pre>
  *
  * @author Gastón
  * @version 1.0
  * @since 2026-05-06
  */
-@Schema(description = "Conflicto de recursos", example = """
-        {
-          "status": 409,
-          "message": "Conflicto de recursos",
-          "timestamp": "2026-05-06T12:34:56",
-          "errors": null
-        }
-        """)
+@Schema(
+        description = "Error correspondiente a un conflicto con el estado actual de un recurso.",
+        example = """
+                {
+                  "status": 409,
+                  "message": "Conflicto de recursos",
+                  "timestamp": "2026-05-06T12:34:56",
+                  "errors": null
+                }
+                """
+)
 public class ConflictApiError extends ApiError {
 
     /**
-     * Constructor por defecto.
+     * Constructor para crear un error de conflicto con el mensaje
+     * predeterminado.
      */
     public ConflictApiError() {
         super(HttpStatus.CONFLICT.value(), "Conflicto de recursos");
     }
 
     /**
-     * Constructor con mensaje personalizado.
+     * Constructor para crear un error de conflicto con un mensaje
+     * personalizado.
      *
-     * @param message Mensaje descriptivo del error
+     * @param message Mensaje descriptivo del error.
      */
     public ConflictApiError(String message) {
         super(HttpStatus.CONFLICT.value(), message);

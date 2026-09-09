@@ -11,13 +11,19 @@ import jakarta.validation.ConstraintValidatorContext;
  */
 public class FieldsMatchValidator implements ConstraintValidator<FieldsMatch, Object> {
 
-    // Nombre del primer campo que se quiere comparar
+    /**
+     * Nombre del primer campo que se quiere comparar.
+     */
     private String field;
 
-    // Nombre del segundo campo que se quiere comparar
+    /**
+     * Nombre del segundo campo que se quiere comparar.
+     */
     private String fieldMatch;
 
-    // Mensaje de error a mostrar si la validación falla
+    /**
+     * Mensaje de error a mostrar si la validación falla.
+     */
     private String message;
 
     /**
@@ -34,11 +40,11 @@ public class FieldsMatchValidator implements ConstraintValidator<FieldsMatch, Ob
     /**
      * Valida que los dos campos especificados tengan valores iguales.
      *
-     * @param value el objeto que se va a validar
+     * @param value   el objeto que se va a validar
      * @param context contexto de validación para agregar mensajes de error
-     * personalizados
+     *                personalizados
      * @return {@code true} si los campos son iguales, {@code false} si no lo
-     * son o si ocurre algún error
+     *         son o si ocurre algún error
      */
     @Override
     public boolean isValid(Object value, ConstraintValidatorContext context) {

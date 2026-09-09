@@ -9,50 +9,72 @@ import lombok.NoArgsConstructor;
 /**
  * DTO básico de usuario.
  * <p>
- * Clase abstracta que contiene la información mínima de un usuario que se
- * comparte entre otros DTOs.
+ * Clase abstracta que contiene la información básica y común de un usuario.
  * </p>
- * <p>
- * Campos principales:
- * </p>
- * <ul>
- * <li>{@code name}: Nombre del usuario.</li>
- * <li>{@code lastname}: Apellido del usuario.</li>
- * <li>{@code email}: Correo electrónico del usuario.</li>
- * </ul>
  *
  * <p>
- * Se utiliza como clase base para DTOs de creación y actualización de usuarios.
+ * Se utiliza como clase base para los DTOs relacionados con la creación y
+ * actualización de usuarios, evitando duplicar la definición de los campos
+ * comunes.
+ * </p>
+ *
+ * <p>
+ * Los campos cuentan con validaciones mediante Jakarta Bean Validation para
+ * garantizar que los datos recibidos cumplan con los requisitos establecidos.
  * </p>
  *
  * @author Gastón
  * @version 1.0
  * @since 2026-05-04
  */
-@Schema(description = "DTO de usuario para Request")
+@Schema(description = "DTO básico de usuario utilizado como clase base para Requests")
 @NoArgsConstructor
 public abstract class UserBasic {
 
     /**
      * Nombre del usuario.
+     * <p>
+     * El campo es obligatorio y no puede superar los 255 caracteres.
+     * </p>
      */
-    @Schema(description = "Nombre del usuario", example = "Juan")
+    @Schema(
+            description = "Nombre del usuario",
+            example = "Juan"
+    )
     @NotBlank(message = "El nombre no puede quedar en blanco")
     @Size(max = 255, message = "El nombre no puede tener mas de 255 caracteres")
     private String name;
 
     /**
      * Apellido del usuario.
+     * <p>
+     * El campo es obligatorio y no puede superar los 255 caracteres.
+     * </p>
      */
-    @Schema(description = "Apellido del usuario", example = "Perez")
+    @Schema(
+            description = "Apellido del usuario",
+            example = "Perez"
+    )
     @NotBlank(message = "El apellido no puede quedar en blanco")
     @Size(max = 255, message = "El apellido no puede tener mas de 255 caracteres")
     private String lastname;
 
     /**
-     * Email del usuario.
+     * Dirección de correo electrónico del usuario.
+     * <p>
+     * El campo es obligatorio, debe tener un formato de correo electrónico
+     * válido y no puede superar los 255 caracteres.
+     * </p>
+     *
+     * <p>
+     * El valor se normaliza eliminando los espacios al inicio y al final y
+     * convirtiéndolo a minúsculas al establecerlo mediante {@code setEmail}.
+     * </p>
      */
-    @Schema(description = "Email del usuario", example = "juanperez@mail.com")
+    @Schema(
+            description = "Dirección de correo electrónico del usuario",
+            example = "juanperez@mail.com"
+    )
     @NotBlank(message = "El email no puede quedar en blanco")
     @Email(message = "El email no es valido")
     @Size(max = 255, message = "El email no puede tener mas de 255 caracteres")
@@ -71,26 +93,61 @@ public abstract class UserBasic {
         this.email = email != null ? email.trim().toLowerCase() : null;
     }
 
+    /**
+     * Obtiene el nombre del usuario.
+     *
+     * @return Nombre del usuario
+     */
     public String getName() {
         return name;
     }
 
+    /**
+     * Establece el nombre del usuario.
+     *
+     * @param name Nombre del usuario
+     */
     public void setName(String name) {
         this.name = name;
     }
 
+    /**
+     * Obtiene el apellido del usuario.
+     *
+     * @return Apellido del usuario
+     */
     public String getLastname() {
         return lastname;
     }
 
+    /**
+     * Establece el apellido del usuario.
+     *
+     * @param lastname Apellido del usuario
+     */
     public void setLastname(String lastname) {
         this.lastname = lastname;
     }
 
+    /**
+     * Obtiene el email del usuario.
+     *
+     * @return Email del usuario
+     */
     public String getEmail() {
         return email;
     }
 
+    /**
+     * Establece el email del usuario.
+     * <p>
+     * El valor recibido se normaliza eliminando los espacios al inicio y al
+     * final y convirtiéndolo a minúsculas. Si el valor es {@code null}, se
+     * mantiene como {@code null}.
+     * </p>
+     *
+     * @param email Email del usuario
+     */
     public void setEmail(String email) {
         this.email = email != null ? email.trim().toLowerCase() : null;
     }

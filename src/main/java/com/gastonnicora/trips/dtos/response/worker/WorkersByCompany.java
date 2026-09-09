@@ -10,58 +10,18 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * Data Transfer Object (DTO) que representa la información de una empresa y sus
- * trabajadores.
+ * DTO utilizado para representar una empresa y los trabajadores asociados a
+ * ella.
+ *
  * <p>
- * Se utiliza para exponer los datos de empresa y sus trabajadores en respuestas
- * de la API, sin incluir información sensible como la contraseña.
+ * Contiene la información de la empresa y la lista de trabajadores
+ * correspondientes a la misma.
  * </p>
  *
  * <p>
- * Campos principales:
+ * Se utiliza para exponer información de una empresa junto con sus trabajadores
+ * en respuestas de la API.
  * </p>
- * <ul>
- * <li>{@code company}: {@link CompanyDTO} de la empresa.</li>
- * <li>{@code workers}: Lista de {@link WorkerUser} de los trabajadores.</li>
- * </ul>
- *
- * <p>
- * Ejemplo de JSON:
- * </p>
- *
- * <pre>
- *  {
- *   "company": {
- *     "uuid": "550e8400-e29b-41d4-a716-446655440000",
- *     "name": "Viajes LP",
- *     "address": "Calle Falsa 123,La Plata,Bs As, Argentina",
- *     "latitude": 500,
- *     "longitude": 500,
- *     "email": "company@mail.com",
- *     "phone": "+5491122334455",
- *     "createdAt": "2026-01-01T00:00:00",
- *     "updatedAt": "2026-01-01T00:00:00",
- *     "active": true
- *   },
- *   "workers": [
- *     {
- *       "uuid": "550e8400-e29b-41d4-a716-446655440000",
- *       "user": {
- *         "uuid": "550e8400-e29b-41d4-a716-446655440000",
- *         "name": "Juan",
- *         "lastname": "Perez",
- *         "email": "juanperez@mail.com",
- *         "role": ["USER"],
- *         "enabled": true,
- *         "createdAt": "2026-01-01T00:00:00",
- *         "updatedAt": "2026-01-01T00:00:00"
- *       },
- *       "roles": ["DRIVER"],
- *       "active": true
- *     }
- *   ]
- * }
- * </pre>
  *
  * @author Gastón
  * @version 1.0
@@ -70,20 +30,24 @@ import lombok.Setter;
 @Getter
 @Setter
 @AllArgsConstructor
-@Schema(description = "DTO de empresa y sus trabajadores")
+@Schema(description = "DTO utilizado para representar una empresa y sus trabajadores asociados.")
 public class WorkersByCompany {
 
     /**
-     * {@link CompanyDTO} de la empresa.
+     * Empresa asociada a los trabajadores.
      */
-    @Schema(description = "DTO de la empresa")
+    @Schema(description = "Empresa asociada a los trabajadores.")
     private CompanyDTO company;
+
     /**
-     * Lista de {@link WorkerUser} de los trabajadores.
+     * Lista de trabajadores asociados a la empresa.
      */
-    @Schema(description = "Lista de trabajadores")
+    @Schema(description = "Lista de trabajadores asociados a la empresa.")
     private List<WorkerUser> workers;
 
+    /**
+     * Constructor por defecto que inicializa la lista de trabajadores vacía.
+     */
     public WorkersByCompany() {
         this.workers = List.of();
     }

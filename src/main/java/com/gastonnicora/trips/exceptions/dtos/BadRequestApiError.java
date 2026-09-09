@@ -5,51 +5,50 @@ import org.springframework.http.HttpStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
- * Representa un error de solicitud incorrecta (HTTP 400).
+ * Representa un error de solicitud incorrecta correspondiente al código de
+ * estado HTTP {@code 400}.
+ *
  * <p>
- * Se utiliza cuando la petición no puede ser procesada debido a un error del
- * cliente que no está relacionado con validaciones de campos. Hereda de
- * {@link ApiError} y establece automáticamente el código de estado a 400.
+ * Se utiliza cuando una solicitud no puede ser procesada debido a un error
+ * asociado a la petición del cliente que no corresponde a una validación
+ * específica de campos.
  * </p>
  *
  * <p>
- * Ejemplo de respuesta JSON:
+ * Hereda de {@link ApiError} y establece automáticamente el código de estado
+ * HTTP {@link HttpStatus#BAD_REQUEST}.
  * </p>
- *
- * <pre>
- * {
- *   "status": 400,
- *   "message": "Solicitud incorrecta",
- *   "timestamp": "2026-05-04T12:34:56",
- *   "errors": null
- * }
- * </pre>
  *
  * @author Gastón
  * @version 1.0
  * @since 2026-05-06
  */
-@Schema(description = "Solicitud incorrecta", example = """
-        {
-          "status": 400,
-          "message": "Solicitud incorrecta",
-          "timestamp": "2026-05-04T12:34:56",
-          "errors": null
-        }
-        """)
+@Schema(
+        description = "Error correspondiente a una solicitud incorrecta.",
+        example = """
+                {
+                  "status": 400,
+                  "message": "Solicitud incorrecta",
+                  "timestamp": "2026-05-04T12:34:56",
+                  "errors": null
+                }
+                """
+)
 public class BadRequestApiError extends ApiError {
 
     /**
-     * Constructor para errores de tipo bad request sin detalle de campos.
+     * Constructor para crear un error de solicitud incorrecta con el mensaje
+     * predeterminado.
      */
     public BadRequestApiError() {
         super(HttpStatus.BAD_REQUEST.value(), "Solicitud incorrecta");
     }
 
     /**
-     * Constructor con mensaje personalizado.
+     * Constructor para crear un error de solicitud incorrecta con un mensaje
+     * personalizado.
      *
-     * @param message Mensaje descriptivo del error
+     * @param message Mensaje descriptivo del error.
      */
     public BadRequestApiError(String message) {
         super(HttpStatus.BAD_REQUEST.value(), message);

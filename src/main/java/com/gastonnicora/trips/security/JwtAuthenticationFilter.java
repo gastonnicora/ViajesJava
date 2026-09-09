@@ -20,24 +20,21 @@ import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * Filtro de autenticación JWT para Spring Security.
+ *
  * <p>
- * Este filtro intercepta todas las solicitudes HTTP y realiza los siguientes
- * pasos:
+ * Intercepta las solicitudes HTTP que contienen una cabecera de autorización
+ * con un token Bearer y valida las condiciones necesarias para establecer la
+ * autenticación en el contexto de Spring Security.
  * </p>
- * <ul>
- * <li>Verifica que la cabecera "Authorization" contenga un token Bearer
- * válido.</li>
- * <li>Valida el token JWT usando {@link JwtService}.</li>
- * <li>Extrae el username y la versión del token del JWT.</li>
- * <li>Verifica que el RefreshToken asociado esté activo y que la versión
- * coincida.</li>
- * <li>Si todo es válido, establece la autenticación en el contexto de Spring
- * Security.</li>
- * <li>Si el token es inválido o no cumple las condiciones, la solicitud
- * continúa sin autenticación.</li>
- * </ul>
+ *
  * <p>
- * Utiliza {@link UserDetailsServiceImpl} para cargar los detalles del usuario.
+ * La validación incluye la comprobación del token JWT, su usuario asociado,
+ * el estado activo del token de refresco y la coincidencia de su versión.
+ * </p>
+ *
+ * <p>
+ * Utiliza {@link JwtService} para validar y extraer información del token y
+ * {@link UserDetailsServiceImpl} para cargar los detalles del usuario.
  * </p>
  */
 @Component
@@ -55,6 +52,24 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         this.refreshTokenRepository = refreshTokenRepository;
     }
 
+    /**
+     * Procesa una solicitud HTTP para validar el token JWT y establecer la
+     * autenticación del usuario cuando las condiciones de seguridad son válidas.
+     *
+     * <p>
+     * Si la solicitud no contiene una cabecera {@code Authorization} con el
+     * esquema {@code Bearer}, si el token no es válido, si el token asociado no
+     * está activo o si su versión no coincide, la solicitud continúa hacia el
+     * siguiente filtro sin establecer autenticación.
+     * </p>
+     *
+     * @param request Solicitud HTTP que se está procesando.
+     * @param response Respuesta HTTP asociada a la solicitud.
+     * @param filterChain Cadena de filtros que continúa el procesamiento de la solicitud.
+     * @throws ServletException Si ocurre un error durante el procesamiento del filtro.
+     * @throws IOException Si ocurre un error de entrada o salida durante el procesamiento
+     *         de la solicitud.
+     */
     @Override
     protected void doFilterInternal(HttpServletRequest request,
             HttpServletResponse response,

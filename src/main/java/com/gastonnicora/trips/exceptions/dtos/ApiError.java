@@ -11,37 +11,17 @@ import lombok.Setter;
 import lombok.ToString;
 
 /**
- * Representa un error genérico en la API.
- * <p>
- * Se utiliza para encapsular información sobre errores ocurridos en las
- * operaciones, incluyendo estado HTTP, mensaje, timestamp y detalles de
- * validación.
- * </p>
- * <p>
- * Campos principales:
- * </p>
- * <ul>
- * <li>{@code status}: Código HTTP del error.</li>
- * <li>{@code message}: Mensaje descriptivo del error.</li>
- * <li>{@code timestamp}: Fecha y hora en que se generó el error.</li>
- * <li>{@code errors}: Map de errores detallados (por ejemplo, validaciones de
- * campos).</li>
- * </ul>
+ * Clase base que representa un error de la API.
  *
  * <p>
- * Ejemplo de respuesta JSON:
+ * Contiene información sobre el estado HTTP, el mensaje descriptivo, la fecha y
+ * hora en la que se generó el error y, cuando corresponde, los detalles
+ * asociados a errores específicos de campos.
  * </p>
  *
- * <pre>
- * {
- *   "status": 400,
- *   "message": "Error en la validación",
- *   "timestamp": "2026-05-04T12:34:56",
- *   "errors": {
- *     "email": ["El email no puede quedar en blanco"]
- *   }
- * }
- * </pre>
+ * <p>
+ * Se utiliza como estructura común para las respuestas de error de la API.
+ * </p>
  *
  * @author Gastón
  * @version 1.0
@@ -51,30 +31,57 @@ import lombok.ToString;
 @Setter
 @ToString
 @AllArgsConstructor
-@Schema(description = "Error genérico de la API")
+@Schema(description = "Clase base utilizada para representar un error de la API.")
 public abstract class ApiError {
 
-    @Schema(description = "Código HTTP de la respuesta")
+    /**
+     * Código de estado HTTP asociado al error.
+     */
+    @Schema(
+            description = "Código de estado HTTP asociado al error.",
+            example = "400"
+    )
     private int status;
 
-    @Schema(description = "Mensaje descriptivo del error")
+    /**
+     * Mensaje descriptivo asociado al error.
+     */
+    @Schema(
+            description = "Mensaje descriptivo asociado al error.",
+            example = "Error en la validación."
+    )
     private String message;
 
-    @Schema(description = "Fecha y hora en que se generó el error")
+    /**
+     * Fecha y hora en la que se generó el error.
+     */
+    @Schema(
+            description = "Fecha y hora en la que se generó el error.",
+            example = "2026-05-04T12:34:56"
+    )
     private LocalDateTime timestamp;
 
-    @Schema(description = "Listado de errores detallados por campo")
+    /**
+     * Mapa que contiene los errores detallados asociados a campos específicos.
+     *
+     * <p>
+     * Cada clave identifica un campo y su valor contiene la lista de mensajes
+     * correspondientes a los errores detectados.
+     * </p>
+     */
+    @Schema(description = "Mapa de errores detallados asociados a campos específicos.")
     private Map<String, List<String>> errors;
 
     /**
-     * Constructor simplificado para errores sin detalle de campos.
+     * Constructor simplificado para crear un error sin detalles específicos de
+     * campos.
+     *
      * <p>
-     * Inicializa el {@code timestamp} automáticamente con la fecha y hora
-     * actual.
+     * Inicializa automáticamente {@code timestamp} con la fecha y hora actual.
      * </p>
      *
-     * @param status Código HTTP del error
-     * @param message Mensaje descriptivo del error
+     * @param status Código de estado HTTP asociado al error.
+     * @param message Mensaje descriptivo asociado al error.
      */
     public ApiError(int status, String message) {
         this.status = status;

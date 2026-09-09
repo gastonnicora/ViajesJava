@@ -10,25 +10,17 @@ import com.gastonnicora.trips.repositories.UserRepository;
 
 /**
  * Implementación de {@link UserDetailsService} de Spring Security.
+ *
  * <p>
- * Se encarga de cargar la información del usuario desde la base de datos para
- * la autenticación.
- * </p>
- * <p>
- * Utiliza {@link UserRepository} para buscar usuarios activos por email.
- * Retorna un {@link UserDetailsImpl} para que Spring Security gestione la
- * autenticación y autorización.
+ * Se encarga de cargar la información de un usuario desde la base de datos
+ * para su autenticación.
  * </p>
  *
- * Flujo principal:
- * <ol>
- * <li>Recibe un username (email) a autenticar.</li>
- * <li>Busca el usuario en la base de datos con
- * {@link UserRepository#findByEmailAndEnabledTrue(String)}.</li>
- * <li>Si no encuentra el usuario, lanza {@link UsernameNotFoundException}.</li>
- * <li>Si lo encuentra, retorna un {@link UserDetailsImpl} que envuelve al
- * usuario.</li>
- * </ol>
+ * <p>
+ * Utiliza {@link UserRepository} para buscar usuarios habilitados por correo
+ * electrónico y retorna un {@link UserDetailsImpl} que permite a Spring
+ * Security gestionar la autenticación y autorización.
+ * </p>
  *
  * @author Gastón
  * @version 1.0
@@ -44,12 +36,18 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     }
 
     /**
-     * Carga un usuario por su username (email) para autenticación.
+     * Carga un usuario por su nombre de usuario para el proceso de autenticación.
      *
-     * @param username Email del usuario a autenticar
-     * @return {@link UserDetails} con la información del usuario
-     * @throws UsernameNotFoundException Si el usuario no existe o no está
-     * habilitado
+     * <p>
+     * En esta implementación, el nombre de usuario corresponde al correo
+     * electrónico del usuario. La búsqueda se realiza únicamente entre los
+     * usuarios habilitados.
+     * </p>
+     *
+     * @param username Correo electrónico del usuario que se desea autenticar.
+     * @return {@link UserDetails} con la información del usuario encontrado.
+     * @throws UsernameNotFoundException Si no existe un usuario habilitado con el
+     *                                   correo electrónico indicado.
      */
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {

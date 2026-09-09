@@ -10,10 +10,12 @@ import com.gastonnicora.trips.entities.Worker;
 import com.gastonnicora.trips.enums.RoleCompany;
 
 /**
- * Repositorio para gestionar la entidad {@link Worker}.
+ * Repositorio encargado de gestionar la persistencia de entidades
+ * {@link Worker}.
+ *
  * <p>
- * Proporciona métodos para consultar trabajadores por UUID entre otras opciones
- * Utiliza Spring Data JPA para el acceso a la base de datos.
+ * Proporciona operaciones para consultar trabajadores por usuario, empresa,
+ * rol y estado de actividad.
  * </p>
  *
  * @author Gastón
@@ -22,47 +24,76 @@ import com.gastonnicora.trips.enums.RoleCompany;
  */
 public interface WorkerRepository extends JpaRepository<Worker, UUID> {
 
-    /**
-     * Busca un trabajador por su UUID y la empresa asociada.
-     *
-     * @param userUuid UUID del usuario
-     * @param companyUuid UUID de la empresa
-     * @return {@link Optional} con el trabajador si existe
-     */
-    Optional<Worker> findByUserUuidAndCompanyUuid(
-            UUID userUuid,
-            UUID companyUuid);
+        /**
+         * Busca un trabajador por el identificador del usuario y de la empresa
+         * asociada.
+         *
+         * @param userUuid    Identificador único del usuario.
+         * @param companyUuid Identificador único de la empresa.
+         * @return {@link Optional} que contiene el trabajador encontrado, o vacío si no
+         *         existe.
+         */
+        Optional<Worker> findByUserUuidAndCompanyUuid(
+                        UUID userUuid,
+                        UUID companyUuid);
 
-    Optional<Worker> findByUserUuidAndCompanyUuidAndActiveTrue(
-            UUID userUuid,
-            UUID companyUuid);
+        /**
+         * Busca un trabajador por el identificador del usuario y de la empresa
+         * asociada únicamente si se encuentra activo.
+         *
+         * @param userUuid    Identificador único del usuario.
+         * @param companyUuid Identificador único de la empresa.
+         * @return {@link Optional} que contiene el trabajador activo encontrado, o
+         *         vacío si no existe.
+         */
+        Optional<Worker> findByUserUuidAndCompanyUuidAndActiveTrue(
+                        UUID userUuid,
+                        UUID companyUuid);
 
-    /**
-     * Busca todos los trabajadores asociados a una empresa.
-     *
-     * @param companyUuid UUID de la empresa
-     * @return Lista de trabajadores asociados a la empresa
-     */
-    List<Worker> findAllByCompanyUuidAndActiveTrue(UUID companyUuid);
+        /**
+         * Busca todos los trabajadores activos asociados a una empresa.
+         *
+         * @param companyUuid Identificador único de la empresa.
+         * @return Lista de trabajadores activos asociados a la empresa.
+         */
+        List<Worker> findAllByCompanyUuidAndActiveTrue(UUID companyUuid);
 
-    /**
-     * Busca todos los trabajadores asociados a un usuario.
-     *
-     * @param userUuid UUID del usuario
-     * @return Lista de trabajadores asociados al usuario
-     */
-    List<Worker> findAllByUserUuid(UUID userUuid);
+        /**
+         * Busca todos los trabajadores asociados a un usuario.
+         *
+         * @param userUuid Identificador único del usuario.
+         * @return Lista de trabajadores asociados al usuario.
+         */
+        List<Worker> findAllByUserUuid(UUID userUuid);
 
-    List<Worker> findAllByUserUuidAndActiveTrue(UUID userUuid);
+        /**
+         * Busca todos los trabajadores activos asociados a un usuario.
+         *
+         * @param userUuid Identificador único del usuario.
+         * @return Lista de trabajadores activos asociados al usuario.
+         */
+        List<Worker> findAllByUserUuidAndActiveTrue(UUID userUuid);
 
-    /**
-     * Busca todos los trabajadores asociados a un usuario con un rol
-     * específico.
-     *
-     * @param userUuid UUID del usuario
-     * @param role Rol del trabajador
-     * @return Lista de trabajadores asociados al usuario con el rol específico
-     */
-    List<Worker> findAllByUserUuidAndRolesContains(UUID userUuid, RoleCompany role);
-    List<Worker> findAllByUserUuidAndRolesContainsAndActiveTrue(UUID userUuid, RoleCompany role); // TODO 🚀:  testear
+        /**
+         * Busca todos los trabajadores asociados a un usuario que contengan un rol
+         * específico.
+         *
+         * @param userUuid Identificador único del usuario.
+         * @param role     Rol del trabajador que se desea buscar.
+         * @return Lista de trabajadores asociados al usuario que contienen el rol
+         *         indicado.
+         */
+        List<Worker> findAllByUserUuidAndRolesContains(UUID userUuid, RoleCompany role);
+
+        /**
+         * Busca todos los trabajadores activos asociados a un usuario que contengan
+         * un rol específico.
+         *
+         * @param userUuid Identificador único del usuario.
+         * @param role     Rol del trabajador que se desea buscar.
+         * @return Lista de trabajadores activos asociados al usuario que contienen el
+         *         rol indicado.
+         */
+        List<Worker> findAllByUserUuidAndRolesContainsAndActiveTrue(UUID userUuid, RoleCompany role); // TODO 🚀:
+                                                                                                      // testear
 }

@@ -8,10 +8,12 @@ import com.gastonnicora.trips.dtos.entities.VehicleDTO;
 import com.gastonnicora.trips.entities.Vehicle;
 
 /**
- * Mapper que convierte entidades {@link Vehicle} a {@link VehicleDTO}.
+ * Componente encargado de convertir entidades {@link Vehicle} en objetos
+ * {@link VehicleDTO}.
+ *
  * <p>
- * Se utiliza para exponer datos de vehículo de manera segura en la API, sin
- * incluir información sensible.
+ * Proporciona métodos para transformar una entidad individual o una lista de
+ * entidades en los DTOs correspondientes.
  * </p>
  */
 @Component
@@ -24,10 +26,16 @@ public class VehicleMapper {
     }
 
     /**
-     * Convierte un {@link Vehicle} en {@link VehicleDTO}.
+     * Convierte una entidad {@link Vehicle} en un {@link VehicleDTO}.
      *
-     * @param vehicle Entidad de vehículo
-     * @return DTO de vehículo correspondiente
+     * <p>
+     * La conversión incluye los datos de identificación, empresa asociada,
+     * información del vehículo, capacidad, fechas de creación y actualización,
+     * y estado.
+     * </p>
+     *
+     * @param vehicle Entidad de vehículo que se desea convertir.
+     * @return DTO de vehículo correspondiente a la entidad proporcionada.
      */
     public VehicleDTO toDTO(Vehicle vehicle) {
 
@@ -43,10 +51,12 @@ public class VehicleMapper {
     }
 
     /**
-     * Convierte una lista de {@link Vehicle} en una lista de {@link VehicleDTO}.
+     * Convierte una lista de entidades {@link Vehicle} en una lista de
+     * {@link VehicleDTO}.
      *
-     * @param vehicles Lista de entidades de vehículo
-     * @return Lista de DTOs de vehículo correspondientes
+     * @param vehicles Lista de entidades de vehículos que se desea convertir.
+     * @return Lista de DTOs de vehículos correspondientes a las entidades
+     *         proporcionadas.
      */
     public List<VehicleDTO> toDTOList(List<Vehicle> vehicles) {
         return vehicles.stream()

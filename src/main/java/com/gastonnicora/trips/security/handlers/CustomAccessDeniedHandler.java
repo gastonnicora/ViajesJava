@@ -14,30 +14,38 @@ import tools.jackson.databind.ObjectMapper;
 
 /**
  * Manejador personalizado para accesos denegados en Spring Security.
+ *
  * <p>
- * Cuando un usuario autenticado intenta acceder a un recurso para el que no
- * tiene permisos, este handler devuelve un JSON con un mensaje de error y
- * código HTTP 403 (Forbidden).
+ * Gestiona los casos en los que un usuario autenticado intenta acceder a un
+ * recurso para el que no dispone de los permisos necesarios.
  * </p>
+ *
  * <p>
- * Utiliza {@link ForbiddenApiError} para formatear la respuesta JSON.
+ * Genera una respuesta HTTP con estado {@code 403 Forbidden} y un cuerpo en
+ * formato JSON utilizando {@link ForbiddenApiError}.
  * </p>
  */
 @Component
 public class CustomAccessDeniedHandler implements AccessDeniedHandler {
 
     /**
-     * Mapper de Jackson para convertir objetos a JSON
+     * Mapper utilizado para convertir el objeto de error en formato JSON.
      */
     private final ObjectMapper mapper = new ObjectMapper();
 
     /**
-     * Maneja la excepción de acceso denegado.
+     * Maneja una excepción de acceso denegado generada por Spring Security.
      *
-     * @param request Solicitud HTTP
-     * @param response Respuesta HTTP
-     * @param accessDeniedException Excepción lanzada por Spring Security
-     * @throws IOException si ocurre un error al escribir la respuesta JSON
+     * <p>
+     * Configura la respuesta HTTP con estado {@code 403 Forbidden} y contenido
+     * JSON, y escribe en la respuesta el error representado mediante
+     * {@link ForbiddenApiError}.
+     * </p>
+     *
+     * @param request Solicitud HTTP asociada al acceso denegado.
+     * @param response Respuesta HTTP en la que se informa el error.
+     * @param accessDeniedException Excepción de acceso denegado generada por Spring Security.
+     * @throws IOException Si ocurre un error al escribir la respuesta JSON.
      */
     @Override
     public void handle(HttpServletRequest request,

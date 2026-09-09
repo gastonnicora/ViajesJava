@@ -9,21 +9,61 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import com.gastonnicora.trips.entities.Vehicle;
 
 /**
- * Repositorio para gestionar la entidad {@link Vehicle}.
+ * Repositorio encargado de gestionar la persistencia de entidades
+ * {@link Vehicle}.
+ *
  * <p>
- * Proporciona métodos para consultar vehículos por UUID y otras opciones.
- * Utiliza Spring Data JPA para el acceso a la base de datos.
+ * Proporciona operaciones para consultar vehículos por identificador único,
+ * empresa, patente y estado de actividad.
  * </p>
  */
 public interface VehicleRepository extends JpaRepository<Vehicle, UUID> {
 
+    /**
+     * Busca un vehículo por su identificador único.
+     *
+     * @param uuid Identificador único del vehículo.
+     * @return {@link Optional} que contiene el vehículo encontrado, o vacío si no
+     *         existe.
+     */
     Optional<Vehicle> findByUuid(UUID uuid);
 
-    Optional<Vehicle> findByUuidAndActiveTrue(UUID uuid); // TODO 🚀:  falta test
+    /**
+     * Busca un vehículo por su identificador único únicamente si se encuentra
+     * activo.
+     *
+     * @param uuid Identificador único del vehículo.
+     * @return {@link Optional} que contiene el vehículo activo encontrado, o vacío
+     *         si no existe.
+     */
+    Optional<Vehicle> findByUuidAndActiveTrue(UUID uuid); // TODO 🚀: falta test
 
+    /**
+     * Busca todos los vehículos asociados a una empresa.
+     *
+     * @param companyUuid Identificador único de la empresa.
+     * @return Lista de vehículos asociados a la empresa indicada.
+     */
     List<Vehicle> findAllByCompanyUuid(UUID companyUuid);
 
+    /**
+     * Busca un vehículo por el identificador de su empresa y su patente.
+     *
+     * @param companyUuid Identificador único de la empresa.
+     * @param plate       Patente del vehículo.
+     * @return {@link Optional} que contiene el vehículo encontrado, o vacío si no
+     *         existe.
+     */
     Optional<Vehicle> findByCompanyUuidAndPlate(UUID companyUuid, String plate);
-    
-    Optional<Vehicle> findByCompanyUuidAndPlateAndActiveTrue(UUID companyUuid, String plate); // TODO 🚀:  testear
+
+    /**
+     * Busca un vehículo por el identificador de su empresa y su patente
+     * únicamente si se encuentra activo.
+     *
+     * @param companyUuid Identificador único de la empresa.
+     * @param plate       Patente del vehículo.
+     * @return {@link Optional} que contiene el vehículo activo encontrado, o vacío
+     *         si no existe.
+     */
+    Optional<Vehicle> findByCompanyUuidAndPlateAndActiveTrue(UUID companyUuid, String plate); // TODO 🚀: testear
 }

@@ -5,58 +5,85 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
- * DTO de respuesta para la dirección generada a partir de coordenadas.
+ * DTO utilizado para representar una dirección obtenida a partir de coordenadas
+ * geográficas.
  *
  * <p>
- * Este DTO representa la respuesta que se obtiene al consultar la dirección
- * generada a partir de coordenadas geográficas. Contiene la dirección exacta y
- * la dirección desglosada en sus componentes.
+ * Contiene la dirección completa y sus diferentes componentes, permitiendo
+ * exponer de forma estructurada la información obtenida mediante un servicio de
+ * geocodificación.
  * </p>
  *
  * @author Gastón
  * @version 1.0
  * @since 2026-05-21
  */
-@Schema(name = "Address", description = "Dirección generada a partir de coordenadas")
+@Schema(
+        name = "Address",
+        description = "Dirección generada a partir de coordenadas geográficas"
+)
 public record AddressResponse(
-        @Schema(description = "Dirección exacta", example = "Calle 123 #456")
+        @Schema(
+                description = "Dirección completa generada a partir de las coordenadas.",
+                example = "Calle 123 #456"
+        )
         @JsonProperty("display_name")
         String displayName,
-        @Schema(description = "Dirección desglosada")
+        @Schema(
+                description = "Dirección desglosada en sus diferentes componentes.",
+                implementation = Address.class
+        )
         Address address) {
 
     /**
-     * Dirección desglosada.
+     * DTO que representa los componentes individuales de una dirección.
      *
-     * @param road Calle
-     * @param number Número de calle
-     * @param suburb Barrio
-     * @param city Ciudad
-     * @param department Departamento
-     * @param state Estado
-     * @param country País
+     * <p>
+     * Contiene la calle, número, barrio, ciudad, departamento, estado y país
+     * correspondientes a una ubicación geográfica.
+     * </p>
      *
      * @author Gastón
      * @version 1.0
      * @since 2026-05-21
      */
-    @Schema(description = "Dirección desglosada")
+    @Schema(description = "Componentes individuales de una dirección")
     public record Address(
-            @Schema(description = "Dirección exacta", example = "Calle 123 #456")
+            @Schema(
+                    description = "Nombre de la calle.",
+                    example = "Calle 123"
+            )
             String road,
-            @Schema(description = "Número de calle", example = "123")
+            @Schema(
+                    description = "Número de la calle.",
+                    example = "123"
+            )
             String number,
-            @Schema(description = "Barrio", example = "Centro")
+            @Schema(
+                    description = "Barrio o zona de la dirección.",
+                    example = "Centro"
+            )
             String suburb,
-            @Schema(description = "Ciudad", example = "Bogotá")
+            @Schema(
+                    description = "Ciudad correspondiente a la dirección.",
+                    example = "Bogotá"
+            )
             String city,
-            @Schema(description = "Departamento", example = "Cundinamarca")
+            @Schema(
+                    description = "Departamento correspondiente a la dirección.",
+                    example = "Cundinamarca"
+            )
             String department,
-            @Schema(description = "Estado", example = "Cundinamarca")
+            @Schema(
+                    description = "Estado o provincia correspondiente a la dirección.",
+                    example = "Cundinamarca"
+            )
             String state,
-            @Schema(description = "País", example = "Colombia")
+            @Schema(
+                    description = "País correspondiente a la dirección.",
+                    example = "Colombia"
+            )
             String country) {
 
     }
-
 }

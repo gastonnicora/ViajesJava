@@ -13,10 +13,12 @@ import com.gastonnicora.trips.utils.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 
 /**
- * Clase de seguridad para empresas.
+ * Componente de seguridad encargado de verificar los permisos del usuario
+ * actual dentro de una empresa.
+ *
  * <p>
- * Se utiliza para verificar si el usuario actual tiene permisos para realizar
- * ciertas acciones en una empresa.
+ * Permite comprobar si el usuario actual posee un rol específico o alguno de
+ * los roles indicados en una empresa determinada.
  * </p>
  *
  * @author Gastón
@@ -30,11 +32,12 @@ public class CompanySecurity {
     private final WorkerRepository workerRepository;
 
     /**
-     * Verifica si el usuario actual tiene un rol específico en una empresa.
+     * Verifica si el usuario actual posee un rol específico en una empresa.
      *
-     * @param companyUuid UUID de la empresa
-     * @param role Rol a verificar
-     * @return true si el usuario tiene el rol, false en caso contrario
+     * @param companyUuid Identificador único de la empresa.
+     * @param role        Rol que se desea verificar.
+     * @return {@code true} si el usuario posee el rol indicado en la empresa;
+     *         {@code false} en caso contrario.
      */
     public boolean hasRole(
             UUID companyUuid,
@@ -53,12 +56,13 @@ public class CompanySecurity {
     }
 
     /**
-     * Verifica si el usuario actual tiene al menos un rol específico en una
-     * empresa.
+     * Verifica si el usuario actual posee al menos uno de los roles indicados
+     * en una empresa.
      *
-     * @param companyUuid UUID de la empresa
-     * @param roles Roles a verificar
-     * @return true si el usuario tiene al menos un rol, false en caso contrario
+     * @param companyUuid Identificador único de la empresa.
+     * @param roles       Roles que se desean verificar.
+     * @return {@code true} si el usuario posee al menos uno de los roles
+     *         indicados en la empresa; {@code false} en caso contrario.
      */
     public boolean hasAnyRole(
             UUID companyUuid,
@@ -81,10 +85,11 @@ public class CompanySecurity {
     }
 
     /**
-     * Verifica si el usuario actual es vendedor en una empresa.
+     * Verifica si el usuario actual posee el rol de vendedor en una empresa.
      *
-     * @param companyUuid UUID de la empresa
-     * @return true si el usuario es vendedor, false en caso contrario
+     * @param companyUuid Identificador único de la empresa.
+     * @return {@code true} si el usuario posee el rol de vendedor en la empresa;
+     *         {@code false} en caso contrario.
      */
     public boolean isSeller(UUID companyUuid) {
         return hasRole(companyUuid, RoleCompany.SELLER);
@@ -92,33 +97,34 @@ public class CompanySecurity {
     }
 
     /**
-     * Verifica si el usuario actual es conductor en una empresa.
+     * Verifica si el usuario actual posee el rol de conductor en una empresa.
      *
-     * @param companyUuid UUID de la empresa
-     * @return true si el usuario es conductor, false en caso contrario
+     * @param companyUuid Identificador único de la empresa.
+     * @return {@code true} si el usuario posee el rol de conductor en la empresa;
+     *         {@code false} en caso contrario.
      */
     public boolean isDriver(UUID companyUuid) {
         return hasRole(companyUuid, RoleCompany.DRIVER);
     }
 
     /**
-     * Verifica si el usuario actual es administrador de empresa en una empresa.
+     * Verifica si el usuario actual posee el rol de administrador de empresa.
      *
-     * @param companyUuid UUID de la empresa
-     * @return true si el usuario es administrador de empresa, false en caso
-     * contrario
+     * @param companyUuid Identificador único de la empresa.
+     * @return {@code true} si el usuario posee el rol de administrador en la
+     *         empresa; {@code false} en caso contrario.
      */
     public boolean isAdmin(UUID companyUuid) {
         return hasRole(companyUuid, RoleCompany.ADMIN);
     }
 
     /**
-     * Verifica si el usuario actual es responsable de recursos humanos en una
-     * empresa.
+     * Verifica si el usuario actual posee el rol de responsable de recursos
+     * humanos en una empresa.
      *
-     * @param companyUuid UUID de la empresa
-     * @return true si el usuario es responsable de recursos humanos, false en
-     * caso contrario
+     * @param companyUuid Identificador único de la empresa.
+     * @return {@code true} si el usuario posee el rol de responsable de recursos
+     *         humanos en la empresa; {@code false} en caso contrario.
      */
     public boolean isHrManager(UUID companyUuid) {
         return hasRole(companyUuid, RoleCompany.HR_MANAGER);

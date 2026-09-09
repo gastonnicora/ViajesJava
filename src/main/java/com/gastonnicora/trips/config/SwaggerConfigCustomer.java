@@ -17,16 +17,35 @@ import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.tags.Tag;
 
 /**
- * Configuración de personalización de Swagger/OpenAPI.
+ * Configuración para personalizar la documentación de OpenAPI generada por
+ * SpringDoc.
+ *
  * <p>
- * Esta clase agrega información de roles requeridos a la documentación de la
- * API generada por SpringDoc para métodos protegidos con la anotación
- * {@link PreAuthorize}.
+ * Agrega a las operaciones protegidas mediante {@link PreAuthorize} información
+ * sobre los roles requeridos para acceder a ellas y permite ordenar
+ * alfabéticamente las etiquetas de la documentación.
  * </p>
  *
  * <p>
- * Cada operación protegida mostrará en su descripción los roles necesarios para
- * acceder, por ejemplo: "🔒 Requiere rol: ADMIN, USER".
+ * Las expresiones de autorización soportadas incluyen tanto las funciones
+ * estándar {@code hasRole} y {@code hasAnyRole} como las funciones
+ * personalizadas {@code @companySecurity.hasRole} y
+ * {@code @companySecurity.hasAnyRole}.
+ * </p>
+ *
+ * <p>
+ * También reconoce roles definidos mediante referencias SpEL a enumeraciones,
+ * por ejemplo:
+ * </p>
+ *
+ * <pre>
+ * T(com.gastonnicora.trips.enums.RoleCompany).OWNER
+ * T(com.gastonnicora.trips.enums.RoleCompany).ADMIN
+ * </pre>
+ *
+ * <p>
+ * Estos roles se muestran de forma simplificada en Swagger, evitando exponer la
+ * expresión SpEL completa.
  * </p>
  *
  * @author Gastón
@@ -37,16 +56,38 @@ import io.swagger.v3.oas.models.tags.Tag;
 public class SwaggerConfigCustomer {
 
     /**
-     * Bean que personaliza las operaciones de OpenAPI agregando la información
-     * de seguridad basada en {@link PreAuthorize}.
+     * Personaliza las operaciones de OpenAPI agregando información sobre los
+     * roles definidos mediante {@link PreAuthorize}.
+     *
      * <p>
-     * Recorre cada método expuesto en la API y, si tiene la anotación
-     * {@link PreAuthorize}, extrae los roles y los añade a la descripción de la
+     * Cuando el método asociado a una operación contiene la anotación
+     * {@link PreAuthorize}, se analiza su expresión de autorización y se
+     * extraen los roles requeridos para agregarlos a la descripción de la
      * operación.
      * </p>
      *
-     * @return {@link OperationCustomizer} para agregar información de roles a
-     * las operaciones
+     * <p>
+     * Por ejemplo, una expresión como:
+     * </p>
+     *
+     * <pre>
+     * @companySecurity.hasAnyRole(
+     *     #uuid,
+     *     T(com.gastonnicora.trips.enums.RoleCompany).OWNER,
+     *     T(com.gastonnicora.trips.enums.RoleCompany).ADMIN
+     * )
+     * </pre>
+     *
+     * <p>
+     * se mostrará en Swagger como:
+     * </p>
+     *
+     * <pre>
+     * 🔒 Requiere rol: OWNER, ADMIN
+     * </pre>
+     *
+     * @return {@link OperationCustomizer} encargado de personalizar las
+     * operaciones de OpenAPI
      */
     @Bean
     public OperationCustomizer customizePreAuthorize() {
@@ -59,12 +100,14 @@ public class SwaggerConfigCustomer {
 
                 String roles = extractRoles(expression);
 
-                String securityInfo = "🔒 Requiere rol: " + roles;
+                String securityInfo = "🔒 **Requiere rol:** " + roles;
 
                 String existingDescription = operation.getDescription();
 
                 operation.setDescription(
-                        (existingDescription == null ? "" : existingDescription + "\n\n")
+                        (existingDescription == null || existingDescription.isBlank()
+                        ? ""
+                        : existingDescription + "\n\n")
                         + securityInfo);
             }
 
@@ -73,8 +116,14 @@ public class SwaggerConfigCustomer {
     }
 
     /**
-     * Bean que ordena las etiquetas de Swagger/OpenAPI alfabéticamente.
+     * Ordena alfabéticamente las etiquetas de la documentación de OpenAPI.
      *
+     * <p>
+     * Si la definición de OpenAPI no contiene etiquetas, no se realiza ninguna
+     * modificación.
+     * </p>
+     *
+     * @return {@link OpenApiCustomizer} encargado de ordenar las etiquetas
      */
     @Bean
     public OpenApiCustomizer sortTagsAlphabetically() {
@@ -92,47 +141,104 @@ public class SwaggerConfigCustomer {
     }
 
     /**
-     * Extrae los roles de una expresión de {@link PreAuthorize}.
+     * Extrae los roles definidos en una expresión de {@link PreAuthorize}.
+     *
      * <p>
-     * Esta función reconoce expresiones de tipo:
-     * <ul>
-     * <li>hasRole('ROL')</li>
-     * <li>hasAnyRole('ROL1','ROL2')</li>
-     * </ul>
-     * y devuelve los roles como una cadena separada por comas. Si no se
-     * encuentra ningún rol, devuelve la expresión completa.
+     * Reconoce roles definidos mediante:
      * </p>
      *
-     * @param expression expresión de {@link PreAuthorize} a analizar
-     * @return {@link String} roles extraídos separados por coma
+     * <ul>
+     * <li>{@code hasRole('ADMIN')}</li>
+     * <li>{@code hasAnyRole('ADMIN', 'SUPER_ADMIN')}</li>
+     * <li>{@code @companySecurity.hasRole(#uuid, T(...).OWNER)}</li>
+     * <li>{@code @companySecurity.hasAnyRole(#uuid, T(...).OWNER, T(...).ADMIN)}</li>
+     * </ul>
+     *
+     * <p>
+     * Para las referencias SpEL a enumeraciones, únicamente se extrae el nombre
+     * de la constante. Por ejemplo:
+     * </p>
+     *
+     * <pre>
+     * T(com.gastonnicora.trips.enums.RoleCompany).OWNER
+     * </pre>
+     *
+     * <p>
+     * se transforma en:
+     * </p>
+     *
+     * <pre>
+     * OWNER
+     * </pre>
+     *
+     * <p>
+     * Si no se encuentra ningún rol reconocido, se devuelve la expresión
+     * original como mecanismo de fallback.
+     * </p>
+     *
+     * @param expression expresión de {@link PreAuthorize} que contiene las
+     * reglas de autorización
+     * @return roles extraídos de la expresión, separados por comas, o la
+     * expresión original si no se encuentra ningún rol
      */
     private String extractRoles(String expression) {
         List<String> roles = new ArrayList<>();
 
-        // hasRole('ADMIN')
-        Pattern singleRolePattern = Pattern.compile("hasRole\\('(.+?)'\\)");
-        Matcher singleMatcher = singleRolePattern.matcher(expression);
+        /*
+         * Detecta:
+         *
+         * hasRole('ADMIN')
+         * hasAnyRole('ADMIN', 'SUPER_ADMIN')
+         *
+         * También funciona con espacios:
+         *
+         * hasAnyRole( 'ADMIN', 'SUPER_ADMIN' )
+         */
+        Pattern stringRolePattern = Pattern.compile(
+                "(?:hasRole|hasAnyRole)\\s*\\(([^)]*)\\)");
 
-        while (singleMatcher.find()) {
-            roles.add(singleMatcher.group(1));
-        }
+        Matcher stringMatcher = stringRolePattern.matcher(expression);
 
-        // hasAnyRole('ADMIN','USER')
-        Pattern anyRolePattern = Pattern.compile("hasAnyRole\\((.*?)\\)");
-        Matcher anyMatcher = anyRolePattern.matcher(expression);
-
-        while (anyMatcher.find()) {
-            String inside = anyMatcher.group(1); // 'ADMIN','USER'
-
-            String[] parts = inside.split(",");
+        while (stringMatcher.find()) {
+            String[] parts = stringMatcher.group(1).split(",");
 
             for (String part : parts) {
                 String role = part.replaceAll("[\\'\\s]", "");
-                roles.add(role);
+
+                if (!role.isEmpty() && !role.startsWith("#")) {
+                    roles.add(role);
+                }
             }
         }
 
-        // fallback si no matchea nada
+        /*
+         * Detecta roles definidos mediante referencias SpEL a enums:
+         *
+         * T(com.gastonnicora.trips.enums.RoleCompany).OWNER
+         * T(com.gastonnicora.trips.enums.RoleCompany).ADMIN
+         */
+        Pattern enumRolePattern = Pattern.compile(
+                "T\\([^)]*\\)\\.(\\w+)");
+
+        Matcher enumMatcher = enumRolePattern.matcher(expression);
+
+        while (enumMatcher.find()) {
+            roles.add(enumMatcher.group(1));
+        }
+
+        /*
+         * Elimina roles duplicados manteniendo el orden original.
+         */
+        roles = roles.stream()
+                .distinct()
+                .toList();
+
+        /*
+         * Fallback:
+         *
+         * Si la expresión no contiene ningún rol reconocido, se mantiene la
+         * expresión original para no ocultar información de autorización.
+         */
         if (roles.isEmpty()) {
             return expression;
         }

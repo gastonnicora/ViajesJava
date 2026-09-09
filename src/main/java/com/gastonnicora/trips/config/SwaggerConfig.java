@@ -12,15 +12,17 @@ import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.License;
 
 /**
- * Configuración de Swagger/OpenAPI para la documentación de la API REST.
+ * Configuración de OpenAPI para la documentación de la API REST.
+ *
  * <p>
- * Esta clase define la información completa de la API, incluyendo título,
- * versión, descripción, contacto, licencia y el esquema de seguridad para JWT.
+ * Define la información general de la API, incluyendo su título, versión,
+ * descripción, información de contacto y licencia.
  * </p>
  *
  * <p>
- * El esquema de seguridad configurado permite la autenticación mediante tokens
- * Bearer JWT en los endpoints protegidos.
+ * También configura el esquema de seguridad utilizado por Swagger para
+ * autenticar solicitudes mediante tokens JWT enviados en el encabezado
+ * {@code Authorization} como Bearer Token.
  * </p>
  *
  * @author Gastón
@@ -32,14 +34,16 @@ import io.swagger.v3.oas.models.info.License;
 public class SwaggerConfig {
 
     /**
-     * Bean de OpenAPI que proporciona la información general de la API para
-     * Swagger UI.
+     * Crea y configura la definición de OpenAPI utilizada para documentar la
+     * API en Swagger UI.
+     *
      * <p>
-     * Incluye título, versión, descripción, contacto y licencia.
+     * La definición incluye el título, versión, descripción, información de
+     * contacto y licencia del proyecto.
      * </p>
      *
-     * @return {@link OpenAPI} objeto configurado con la información completa de
-     * la API.
+     * @return definición de {@link OpenAPI} con la información general de la
+     * API
      */
     @Bean
     public OpenAPI apiInfo() {

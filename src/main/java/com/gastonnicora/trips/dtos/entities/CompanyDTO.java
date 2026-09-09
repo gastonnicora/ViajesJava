@@ -11,48 +11,17 @@ import lombok.Setter;
 import lombok.ToString;
 
 /**
- * Data Transfer Object (DTO) que representa la información pública
- * de una empresa.
+ * DTO utilizado para representar una empresa en las respuestas de la API.
  *
  * <p>
- * Se utiliza para exponer los datos de una empresa en las respuestas
- * de la API sin incluir información sensible.
+ * Contiene únicamente la información necesaria para exponer los datos de una
+ * empresa a los clientes de la aplicación.
  * </p>
  *
  * <p>
- * Campos principales:
+ * La clase se utiliza como objeto de transferencia de datos y no representa
+ * directamente la entidad persistida en la base de datos.
  * </p>
- * <ul>
- * <li>{@code uuid}: Identificador único de la empresa.</li>
- * <li>{@code name}: Nombre de la empresa.</li>
- * <li>{@code address}: Dirección de la empresa.</li>
- * <li>{@code latitude}: Latitud de la dirección de la empresa.</li>
- * <li>{@code longitude}: Longitud de la dirección de la empresa.</li>
- * <li>{@code email}: Email de la empresa.</li>
- * <li>{@code phone}: Teléfono de la empresa.</li>
- * <li>{@code createdAt}: Fecha de creación de la empresa.</li>
- * <li>{@code updatedAt}: Fecha de última actualización de la empresa.</li>
- * <li>{@code active}: Estado de la empresa (activo o no).</li>
- * </ul>
- *
- * <p>
- * Ejemplo de JSON:
- * </p>
- *
- * <pre>
- * {
- *   "uuid": "550e8400-e29b-41d4-a716-446655440000",
- *   "name": "Viajes LP",
- *   "address": "Calle Falsa 123,La Plata,Bs As, Argentina",
- *   "latitude": -34.9214,
- *   "longitude": -34.9214,
- *   "email": "company@mail.com",
- *   "phone": "+5491122334455",
- *   "createdAt": "2026-01-01T00:00:00",
- *   "updatedAt": "2026-01-01T00:00:00",
- *   "active": true
- * }
- * </pre>
  *
  * @author Gastón
  * @version 1.0
@@ -63,43 +32,96 @@ import lombok.ToString;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(description = "DTO de empresa")
+@Schema(description = "Información de una empresa")
 public class CompanyDTO {
 
-    @Schema(description = "UUID de la empresa", example = "550e8400-e29b-41d4-a716-446655440000")
+    /**
+     * Identificador único de la empresa.
+     */
+    @Schema(
+            description = "Identificador único de la empresa.",
+            example = "550e8400-e29b-41d4-a716-446655440000"
+    )
     private UUID uuid;
 
-    @Schema(description = "Nombre de la empresa", example = "Viajes LP")
+    /**
+     * Nombre comercial de la empresa.
+     */
+    @Schema(
+            description = "Nombre de la empresa.",
+            example = "Viajes LP"
+    )
     private String name;
 
-    @Schema(description = "Dirección de la empresa", example = "Calle Falsa 123,La Plata,Bs As, Argentina")
+    /**
+     * Dirección física de la empresa.
+     */
+    @Schema(
+            description = "Dirección de la empresa.",
+            example = "Calle Falsa 123, La Plata, Buenos Aires, Argentina"
+    )
     private String address;
 
+    /**
+     * Latitud correspondiente a la ubicación de la empresa.
+     */
     @Schema(
-            description = "Latitud de la empresa",
+            description = "Latitud geográfica de la empresa.",
             example = "-34.9214"
     )
     private double latitude;
 
+    /**
+     * Longitud correspondiente a la ubicación de la empresa.
+     */
     @Schema(
-            description = "Longitud de la empresa",
+            description = "Longitud geográfica de la empresa.",
             example = "-57.9545"
     )
     private double longitude;
 
-    @Schema(description = "Email de la empresa", example = "company@mail.com")
+    /**
+     * Dirección de correo electrónico utilizada como contacto de la empresa.
+     */
+    @Schema(
+            description = "Correo electrónico de contacto de la empresa.",
+            example = "company@mail.com"
+    )
     private String email;
 
-    @Schema(description = "Teléfono de la empresa", example = "+5491122334455")
+    /**
+     * Número de teléfono utilizado como contacto de la empresa.
+     */
+    @Schema(
+            description = "Número de teléfono de contacto de la empresa.",
+            example = "+5491122334455"
+    )
     private String phone;
 
-    @Schema(description = "Fecha de creación de la empresa", example = "2026-01-01T00:00:00")
+    /**
+     * Fecha y hora en la que se creó la empresa.
+     */
+    @Schema(
+            description = "Fecha y hora de creación de la empresa.",
+            example = "2026-01-01T00:00:00"
+    )
     private LocalDateTime createdAt;
 
-    @Schema(description = "Fecha de actualización de la empresa", example = "2026-01-01T00:00:00")
+    /**
+     * Fecha y hora de la última actualización de la empresa.
+     */
+    @Schema(
+            description = "Fecha y hora de la última actualización de la empresa.",
+            example = "2026-01-01T00:00:00"
+    )
     private LocalDateTime updatedAt;
 
-    @Schema(description = "Estado de la empresa", example = "true")
+    /**
+     * Indica si la empresa se encuentra activa.
+     */
+    @Schema(
+            description = "Indica si la empresa se encuentra activa.",
+            example = "true"
+    )
     private boolean active;
-
 }

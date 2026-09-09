@@ -12,10 +12,12 @@ import com.gastonnicora.trips.dtos.response.worker.WorkersByUser;
 import com.gastonnicora.trips.entities.Worker;
 
 /**
- * Mapper que convierte entidades {@link Worker} a {@link WorkerDTO}.
+ * Componente encargado de convertir entidades {@link Worker} en los diferentes
+ * objetos DTO utilizados para representar la información de los trabajadores.
+ *
  * <p>
- * Se utiliza para exponer datos de trabajador de manera segura en la API, sin
- * incluir información sensible como la contraseña.
+ * Proporciona métodos para transformar un trabajador individual, una lista de
+ * trabajadores y agrupaciones de trabajadores asociadas a usuarios o empresas.
  * </p>
  */
 @Component
@@ -30,10 +32,15 @@ public class WorkerMapper {
     }
 
     /**
-     * Convierte un {@link Worker} en {@link WorkerDTO}.
+     * Convierte una entidad {@link Worker} en un {@link WorkerDTO}.
      *
-     * @param worker Entidad de trabajador
-     * @return DTO de trabajador correspondiente
+     * <p>
+     * La conversión incluye los datos de identificación, usuario, empresa, roles,
+     * estado y fechas de creación y actualización.
+     * </p>
+     *
+     * @param worker Entidad de trabajador que se desea convertir.
+     * @return DTO de trabajador correspondiente a la entidad proporcionada.
      */
     public WorkerDTO toDTO(Worker worker) {
         return new com.gastonnicora.trips.dtos.entities.WorkerDTO(
@@ -47,10 +54,11 @@ public class WorkerMapper {
     }
 
     /**
-     * Convierte una lista de {@link Worker} en una lista de {@link WorkerDTO}.
+     * Convierte una lista de entidades {@link Worker} en una lista de
+     * {@link WorkerDTO}.
      *
-     * @param workers Lista de entidades de trabajador
-     * @return Lista de DTOs de trabajador correspondientes
+     * @param workers Lista de entidades de trabajadores que se desea convertir.
+     * @return Lista de DTOs de trabajadores correspondientes a las entidades proporcionadas.
      */
     public List<WorkerDTO> toDTOList(List<Worker> workers) {
         return workers.stream()
@@ -59,10 +67,15 @@ public class WorkerMapper {
     }
 
     /**
-     * Convierte un {@link Worker} en {@link WorkerUser}.
+     * Convierte una entidad {@link Worker} en un {@link WorkerUser}.
      *
-     * @param worker Entidad de trabajador
-     * @return DTO de trabajador correspondiente
+     * <p>
+     * La conversión incluye los datos de identificación, usuario, roles y estado
+     * del trabajador.
+     * </p>
+     *
+     * @param worker Entidad de trabajador que se desea convertir.
+     * @return DTO de trabajador asociado a un usuario.
      */
     private WorkerUser toCompanyDTO(Worker worker) {
         return new WorkerUser(
@@ -73,10 +86,16 @@ public class WorkerMapper {
     }
 
     /**
-     * Convierte una lista de {@link Worker} en {@link WorkersByCompany}.
+     * Convierte una lista de entidades {@link Worker} en un
+     * {@link WorkersByCompany}.
      *
-     * @param worker Lista de entidades de trabajador
-     * @return DTO de trabajador correspondiente
+     * <p>
+     * El DTO resultante contiene la empresa asociada al primer trabajador de la
+     * lista y los trabajadores correspondientes a dicha empresa.
+     * </p>
+     *
+     * @param worker Lista de entidades de trabajadores.
+     * @return DTO que agrupa los trabajadores por empresa.
      */
     public WorkersByCompany toWorkersByCompanyDTO(List<Worker> worker) {
         return new WorkersByCompany(
@@ -87,10 +106,15 @@ public class WorkerMapper {
     }
 
     /**
-     * Convierte un {@link Worker} en {@link WorkerCompany}.
+     * Convierte una entidad {@link Worker} en un {@link WorkerCompany}.
      *
-     * @param worker Entidad de trabajador
-     * @return DTO de trabajador correspondiente
+     * <p>
+     * La conversión incluye los datos de identificación, empresa, roles y estado
+     * del trabajador.
+     * </p>
+     *
+     * @param worker Entidad de trabajador que se desea convertir.
+     * @return DTO de trabajador asociado a una empresa.
      */
     private WorkerCompany toUserDTO(Worker worker) {
         return new WorkerCompany(
@@ -101,10 +125,16 @@ public class WorkerMapper {
     }
 
     /**
-     * Convierte una lista de {@link Worker} en {@link WorkersByUser}.
+     * Convierte una lista de entidades {@link Worker} en un
+     * {@link WorkersByUser}.
      *
-     * @param worker Lista de entidades de trabajador
-     * @return DTO de trabajador correspondiente
+     * <p>
+     * El DTO resultante contiene el usuario asociado al primer trabajador de la
+     * lista y los trabajadores correspondientes a dicho usuario.
+     * </p>
+     *
+     * @param worker Lista de entidades de trabajadores.
+     * @return DTO que agrupa los trabajadores por usuario.
      */
     public WorkersByUser toWorkersByUserDTO(List<Worker> worker) {
         return new WorkersByUser(

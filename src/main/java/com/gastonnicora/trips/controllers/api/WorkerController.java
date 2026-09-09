@@ -30,7 +30,19 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
 /**
- * Controlador para la gestión de trabajadores y su relación con las empresas.
+ * Controlador REST encargado de gestionar los trabajadores y sus relaciones con
+ * las empresas.
+ *
+ * <p>
+ * Permite consultar los trabajadores de una empresa, incorporarlos o
+ * eliminarlos de una empresa y modificar sus roles dentro de ella. También
+ * permite consultar las relaciones laborales del usuario autenticado.
+ * </p>
+ *
+ * <p>
+ * Las operaciones sobre una empresa requieren que el usuario autenticado posea
+ * un rol con permisos suficientes dentro de dicha empresa.
+ * </p>
  *
  * @author Gastón
  * @version 1.0
@@ -52,22 +64,26 @@ public class WorkerController {
      * @param companyService servicio encargado de la gestión de empresas
      * @param userService servicio encargado de la gestión de usuarios
      */
-    public WorkerController(WorkerService workerService, CompanyService companyService, UserService userService) {
+    public WorkerController(
+            WorkerService workerService,
+            CompanyService companyService,
+            UserService userService) {
         this.workerService = workerService;
         this.companyService = companyService;
         this.userService = userService;
     }
 
     /**
-     * Obtiene los trabajadores de una empresa.
+     * Obtiene los trabajadores asociados a una empresa.
+     *
      * <p>
-     * Este endpoint devuelve los trabajadores asociados a una empresa
-     * identificada por su UUID.
+     * Requiere que el usuario autenticado tenga rol {@code OWNER},
+     * {@code ADMIN} o {@code HR_MANAGER} dentro de la empresa.
      * </p>
      *
-     * @param uuid UUID de la empresa.
-     * @return {@link WorkersByCompany} con los trabajadores de la empresa.
-     * @see CompanyService#getWorkersByCompany(UUID)
+     * @param uuid UUID de la empresa
+     * @return trabajadores asociados a la empresa
+     * @see WorkerService#getWorkersByCompany(UUID)
      */
     @GetMapping("/companies/{uuid}/workers")
     @SecurityRequirement(name = "bearerAuth")
@@ -75,22 +91,32 @@ public class WorkerController {
             + "T(com.gastonnicora.trips.enums.RoleCompany).OWNER, "
             + "T(com.gastonnicora.trips.enums.RoleCompany).ADMIN, "
             + "T(com.gastonnicora.trips.enums.RoleCompany).HR_MANAGER)")
-    @Operation(summary = "Obtener trabajadores de empresa", description = "Obtiene los trabajadores de una empresa por su uuid")
+    @Operation(
+            summary = "Obtener trabajadores",
+            description = "Obtiene los trabajadores asociados a una empresa."
+    )
     public WorkersByCompany getWorkersByCompany(@PathVariable("uuid") UUID uuid) {
         return workerService.getWorkersByCompany(uuid);
     }
 
     /**
-     * Agrega un trabajador a una empresa.
+     * Agrega un usuario como trabajador de una empresa.
+     *
      * <p>
-     * Este endpoint agrega un trabajador a una empresa por su UUID.
+     * El usuario se incorpora a la empresa con los roles indicados en la
+     * solicitud.
      * </p>
      *
-     * @param uuid UUID de la empresa a la que se quiere agregar el trabajador.
-     * @param workerCreate {@link WorkerCreate} con los datos del trabajador a
-     * agregar.
-     * @return {@link WorkerDTO} con los datos del trabajador agregado.
-     * @see CompanyService#createWorker(UUID, UUID, Set<RoleCompany>)
+     * <p>
+     * Requiere que el usuario autenticado tenga rol {@code OWNER},
+     * {@code ADMIN} o {@code HR_MANAGER} dentro de la empresa.
+     * </p>
+     *
+     * @param uuid UUID de la empresa
+     * @param workerCreate datos del usuario y roles con los que se registrará
+     * como trabajador
+     * @return datos del trabajador creado
+     * @see WorkerService#createWorker(User, Company, java.util.Set)
      */
     @PostMapping("/companies/{uuid}/worker")
     @SecurityRequirement(name = "bearerAuth")
@@ -98,22 +124,34 @@ public class WorkerController {
             + "T(com.gastonnicora.trips.enums.RoleCompany).OWNER, "
             + "T(com.gastonnicora.trips.enums.RoleCompany).ADMIN, "
             + "T(com.gastonnicora.trips.enums.RoleCompany).HR_MANAGER)")
-    @Operation(summary = "Agregar worker a empresa", description = "Agrega un worker a una empresa por su UUID")
-    public WorkerDTO createWorker(@PathVariable("uuid") UUID uuid, @RequestBody @Valid WorkerCreate workerCreate) {
+    @Operation(
+            summary = "Agregar trabajador",
+            description = "Agrega un usuario como trabajador de una empresa."
+    )
+    public WorkerDTO createWorker(
+            @PathVariable("uuid") UUID uuid,
+            @RequestBody @Valid WorkerCreate workerCreate) {
+
         Company company = companyService.getCompanyEntity(uuid);
         User user = userService.getUser(workerCreate.getUserUuid());
-        return workerService.createWorker(user, company, workerCreate.getRoles());
+
+        return workerService.createWorker(
+                user,
+                company,
+                workerCreate.getRoles());
     }
 
     /**
      * Elimina un trabajador de una empresa.
+     *
      * <p>
-     * Este endpoint elimina un trabajador de una empresa por su UUID.
+     * Requiere que el usuario autenticado tenga rol {@code OWNER},
+     * {@code ADMIN} o {@code HR_MANAGER} dentro de la empresa.
      * </p>
      *
-     * @param companyUuid UUID de la empresa.
-     * @param userUuid UUID del trabajador.
-     * @see CompanyService#deleteWorker(UUID, UUID)
+     * @param companyUuid UUID de la empresa
+     * @param userUuid UUID del usuario que se eliminará de la empresa
+     * @see WorkerService#deleteWorker(UUID, UUID)
      */
     @DeleteMapping("/companies/{companyUuid}/worker/{userUuid}")
     @SecurityRequirement(name = "bearerAuth")
@@ -121,27 +159,39 @@ public class WorkerController {
             + "T(com.gastonnicora.trips.enums.RoleCompany).OWNER, "
             + "T(com.gastonnicora.trips.enums.RoleCompany).ADMIN, "
             + "T(com.gastonnicora.trips.enums.RoleCompany).HR_MANAGER)")
-    @Operation(summary = "Eliminar trabajador de empresa", description = "Elimina un trabajador de una empresa por su UUID")
-    public void deleteWorker(@PathVariable("companyUuid") UUID companyUuid,
+    @Operation(
+            summary = "Eliminar trabajador",
+            description = "Elimina la relación laboral de un usuario con una empresa."
+    )
+    public void deleteWorker(
+            @PathVariable("companyUuid") UUID companyUuid,
             @PathVariable("userUuid") UUID userUuid) {
+
         companyService.getCompanyEntity(companyUuid);
         userService.getUser(userUuid);
+
         workerService.deleteWorker(userUuid, companyUuid);
     }
 
     /**
-     * Actualiza los roles de un trabajador en una empresa.
+     * Actualiza los roles de un trabajador dentro de una empresa.
+     *
      * <p>
-     * Este endpoint actualiza los roles de un trabajador en una empresa por su
-     * UUID.
+     * Los roles enviados reemplazan o actualizan los roles que el trabajador
+     * posee actualmente dentro de la empresa, según la lógica implementada por
+     * {@link WorkerService}.
      * </p>
      *
-     * @param companyUuid UUID de la empresa.
-     * @param userUuid UUID del trabajador.
-     * @param workerCreate {@link WorkerCreate} con los nuevos roles del
-     * trabajador.
-     * @return {@link WorkerDTO} con los datos del trabajador actualizado.
-     * @see CompanyService#updateWorker(UUID, UUID, Set<RoleCompany>)
+     * <p>
+     * Requiere que el usuario autenticado tenga rol {@code OWNER},
+     * {@code ADMIN} o {@code HR_MANAGER} dentro de la empresa.
+     * </p>
+     *
+     * @param companyUuid UUID de la empresa
+     * @param userUuid UUID del trabajador cuyos roles se modificarán
+     * @param workerCreate datos que contienen los nuevos roles del trabajador
+     * @return datos actualizados del trabajador
+     * @see WorkerService#updateWorker(UUID, UUID, java.util.Set)
      */
     @PutMapping("/companies/{companyUuid}/worker/{userUuid}")
     @SecurityRequirement(name = "bearerAuth")
@@ -149,39 +199,41 @@ public class WorkerController {
             + "T(com.gastonnicora.trips.enums.RoleCompany).OWNER, "
             + "T(com.gastonnicora.trips.enums.RoleCompany).ADMIN, "
             + "T(com.gastonnicora.trips.enums.RoleCompany).HR_MANAGER)")
-    @Operation(summary = "Actualizar roles de trabajador en empresa", description = "Actualiza los roles de un trabajador en una empresa por su UUID")
-    public WorkerDTO updateWorkerRoles(@PathVariable("companyUuid") UUID companyUuid,
+    @Operation(
+            summary = "Actualizar roles del trabajador",
+            description = "Actualiza los roles de un trabajador dentro de una empresa."
+    )
+    public WorkerDTO updateWorkerRoles(
+            @PathVariable("companyUuid") UUID companyUuid,
             @PathVariable("userUuid") UUID userUuid,
             @RequestBody @Valid WorkerCreate workerCreate) {
 
         companyService.getCompanyEntity(companyUuid);
         userService.getUser(userUuid);
-        return workerService.updateWorker(userUuid, companyUuid, workerCreate.getRoles());
+
+        return workerService.updateWorker(
+                userUuid,
+                companyUuid,
+                workerCreate.getRoles());
     }
 
     /**
-     * Obtiene los trabajos asociados al usuario actual.
+     * Obtiene las relaciones laborales del usuario autenticado.
+     *
      * <p>
-     * <strong>Requiere autenticación </strong>
-     * </p>
-     * <p>
-     * Este endpoint obtiene los trabajos asociados al usuario actual. Se
-     * realiza la validación de los datos antes de obtener los trabajos.
-     * </p>
-     * <p>
-     * Este endpoint hace uso del servicio {@link UserService} para obtener los
-     * trabajos del usuario actual.
+     * La respuesta contiene las empresas a las que pertenece el usuario y la
+     * información asociada a su relación laboral.
      * </p>
      *
-     * @return {@link WorkersByUser} con los trabajos del usuario actual.
-     * @see UserService#getWorkersByCurrentUser()
+     * @return relaciones laborales del usuario autenticado
+     * @see WorkerService#getWorkersByUser(UUID)
      */
     @GetMapping("/users/workers")
     @SecurityRequirement(name = "bearerAuth")
     @Operation(
-            summary = "Obtener empresas del usuario actual",
-            description = "Obtiene las relaciones laborales del usuario autenticado "
-            + "con las empresas a las que pertenece."
+            summary = "Obtener mis relaciones laborales",
+            description = "Obtiene las empresas a las que pertenece el usuario "
+            + "autenticado y sus roles dentro de cada una."
     )
     public WorkersByUser getWorkersByCurrentUser() {
         return workerService.getWorkersByUser(getCurrentUserUuid());

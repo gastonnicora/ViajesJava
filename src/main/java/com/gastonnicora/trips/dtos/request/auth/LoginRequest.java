@@ -7,61 +7,94 @@ import jakarta.validation.constraints.Size;
 import lombok.NoArgsConstructor;
 
 /**
- * DTO para el inicio de sesión del usuario.
+ * DTO utilizado para solicitar la autenticación de un usuario.
+ *
  * <p>
- * Contiene los datos necesarios para autenticarse en el sistema: email y
- * contraseña. Se valida que el email tenga formato correcto y que los campos no
- * estén en blanco.
+ * Contiene las credenciales necesarias para iniciar sesión en la aplicación:
+ * dirección de correo electrónico y contraseña.
+ * </p>
+ *
+ * <p>
+ * El correo electrónico se normaliza automáticamente al establecer su valor,
+ * convirtiéndolo a minúsculas y eliminando los espacios al inicio y al final.
+ * </p>
+ *
+ * <p>
+ * Los campos son validados mediante Jakarta Bean Validation antes de procesar
+ * la solicitud.
  * </p>
  *
  * @author Gastón
  * @version 1.0
  * @since 2026-05-04
  */
-@Schema(description = "DTO de inicio de sesión")
+@Schema(description = "Credenciales necesarias para iniciar sesión")
 @NoArgsConstructor
 public class LoginRequest {
 
     /**
-     * Email del usuario que se utilizará para iniciar sesión.
+     * Dirección de correo electrónico utilizada como identificador del usuario.
+     *
      * <p>
-     * Se valida que no esté en blanco, que tenga formato de correo válido y que
-     * no supere los 255 caracteres.
+     * Debe tener un formato de correo electrónico válido, no puede estar vacía
+     * y no puede superar los 255 caracteres.
+     * </p>
+     *
+     * <p>
+     * El valor se normaliza automáticamente a minúsculas y se eliminan los
+     * espacios al inicio y al final.
      * </p>
      */
     @NotBlank(message = "Debe introducir un email")
     @Email(message = "Debe introducir un email valido")
     @Size(max = 255, message = "El email no puede ser de mas de 255 caracteres")
-    @Schema(description = "Su email", example = "juanperez@mail.com")
+    @Schema(
+            description = "Dirección de correo electrónico del usuario.",
+            example = "juanperez@mail.com",
+            maxLength = 255
+    )
     private String email;
 
     /**
-     * Contraseña del usuario para iniciar sesión.
+     * Contraseña utilizada para autenticar al usuario.
+     *
      * <p>
-     * Se valida que no esté en blanco y que no supere los 255 caracteres.
+     * No puede estar vacía y no puede superar los 255 caracteres.
+     * </p>
+     *
+     * <p>
+     * La contraseña no se incluye en las respuestas de la API.
      * </p>
      */
     @NotBlank(message = "Debe introducir una contraseña")
     @Size(max = 255, message = "La contraseña debe tener entre 0 y 255 caracteres")
-    @Schema(description = "Contraseña", example = "12345678")
+    @Schema(
+            description = "Contraseña del usuario.",
+            example = "********",
+            format = "password",
+            maxLength = 255
+    )
     private String password;
 
     /**
-     * Obtiene el email del usuario.
+     * Obtiene el correo electrónico normalizado del usuario.
      *
-     * @return email en minúsculas y sin espacios al inicio o final
+     * @return dirección de correo electrónico en minúsculas y sin espacios
+     *         al inicio o final
      */
     public String getEmail() {
         return email;
     }
 
     /**
-     * Establece el email del usuario.
+     * Establece el correo electrónico del usuario.
+     *
      * <p>
-     * Se convierte a minúsculas y se elimina espacios al inicio y final.
+     * El valor se normaliza convirtiéndolo a minúsculas y eliminando los
+     * espacios al inicio y al final.
      * </p>
      *
-     * @param email email del usuario
+     * @param email dirección de correo electrónico del usuario
      */
     public void setEmail(String email) {
         this.email = email.trim().toLowerCase();
@@ -70,7 +103,7 @@ public class LoginRequest {
     /**
      * Obtiene la contraseña del usuario.
      *
-     * @return contraseña
+     * @return contraseña proporcionada para la autenticación
      */
     public String getPassword() {
         return password;
@@ -79,17 +112,21 @@ public class LoginRequest {
     /**
      * Establece la contraseña del usuario.
      *
-     * @param password contraseña
+     * @param password contraseña utilizada para la autenticación
      */
     public void setPassword(String password) {
         this.password = password;
     }
 
     /**
-     * Constructor completo de LoginRequest.
+     * Crea una solicitud de inicio de sesión con las credenciales indicadas.
      *
-     * @param email email del usuario (se normaliza a minúsculas y se quitan
-     * espacios)
+     * <p>
+     * El correo electrónico se normaliza a minúsculas y se eliminan los
+     * espacios al inicio y al final.
+     * </p>
+     *
+     * @param email dirección de correo electrónico del usuario
      * @param password contraseña del usuario
      */
     public LoginRequest(String email, String password) {

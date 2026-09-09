@@ -13,41 +13,16 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- * Data Transfer Object (DTO) que representa la información de la relación
- * usuario empresa sin mostrar la información del usuario
+ * DTO utilizado para representar la relación entre un trabajador y una empresa.
  *
  * <p>
- * Campos principales:
- * </p>
- * <ul>
- * <li>{@code uuid}: Identificador único de la relación.</li>
- * <li>{@code company}: {@link CompanyDTO} de la empresa.</li>
- * <li>{@code roles}: Conjunto de roles asignados al trabajador.</li>
- * <li>{@code active}: Estado del trabajador (activo o no).</li>
- * </ul>
- * <p>
- * Ejemplo de JSON:
+ * Contiene la información de la empresa asociada, los roles asignados al
+ * trabajador y el estado de la relación.
  * </p>
  *
- * <pre>
- *  {
- *   "uuid": "550e8400-e29b-41d4-a716-446655440000",
- *   "company": {
- *     "uuid": "550e8400-e29b-41d4-a716-446655440000",
- *     "name": "Viajes LP",
- *     "address": "Calle Falsa 123,La Plata,Bs As, Argentina",
- *     "latitude": 500,
- *     "longitude": 500,
- *     "email": "company@mail.com",
- *     "phone": "+5491122334455",
- *     "createdAt": "2026-01-01T00:00:00",
- *     "updatedAt": "2026-01-01T00:00:00",
- *     "active": true
- *   },
- *   "roles": ["DRIVER"],
- *   "active": true
- * }
- * </pre>
+ * <p>
+ * No incluye información correspondiente al usuario asociado a la relación.
+ * </p>
  *
  * @author Gastón
  * @version 1.0
@@ -57,30 +32,42 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(description = "DTO de relación trabajador empresa sin información de usuario")
+@Schema(description = "DTO utilizado para representar la relación entre un trabajador y una empresa.")
 public class WorkerCompany {
 
     /**
-     * Identificador único de la relación.
+     * Identificador único de la relación entre el trabajador y la empresa.
      */
-    @Schema(description = "UUID de la relación")
+    @Schema(
+            description = "Identificador único de la relación entre el trabajador y la empresa.",
+            example = "550e8400-e29b-41d4-a716-446655440000"
+    )
     private UUID uuid;
 
     /**
-     * {@link CompanyDTO} de la empresa.
+     * Empresa asociada a la relación del trabajador.
      */
-    @Schema(description = "DTO de la empresa")
+    @Schema(
+            description = "Empresa asociada al trabajador.",
+            implementation = CompanyDTO.class
+    )
     private CompanyDTO company;
 
     /**
-     * Conjunto de roles asignados al trabajador.
+     * Conjunto de roles asignados al trabajador dentro de la empresa.
      */
-    @Schema(description = "Roles dentro de la empresa")
+    @Schema(
+            description = "Roles asignados al trabajador dentro de la empresa.",
+            example = "[\"DRIVER\"]"
+    )
     private Set<RoleCompany> roles;
 
     /**
-     * Indica si el trabajador está activo.
+     * Indica si la relación del trabajador con la empresa se encuentra activa.
      */
-    @Schema(description = "Indica si el trabajador está activo")
+    @Schema(
+            description = "Indica si la relación del trabajador con la empresa se encuentra activa.",
+            example = "true"
+    )
     private boolean active;
 }

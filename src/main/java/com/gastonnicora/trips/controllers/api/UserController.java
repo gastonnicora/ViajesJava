@@ -18,9 +18,6 @@ import com.gastonnicora.trips.dtos.request.user.UserChangeRole;
 import com.gastonnicora.trips.dtos.request.user.UserCreate;
 import com.gastonnicora.trips.dtos.request.user.UserPut;
 import com.gastonnicora.trips.dtos.response.ListResponse;
-import com.gastonnicora.trips.dtos.response.worker.WorkersByUser;
-import com.gastonnicora.trips.exceptions.ConflictException;
-import com.gastonnicora.trips.exceptions.ValidationException;
 import com.gastonnicora.trips.services.UserService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -29,16 +26,16 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
 /**
- * Controlador para la gestión de usuarios.
+ * Controlador REST encargado de la gestión de usuarios.
+ *
  * <p>
- * Este controlador maneja todas las operaciones relacionadas con los usuarios,
- * como la creación, modificación, eliminación y obtención de usuarios a través
- * de los endpoints definidos en la URL "/api/users".
+ * Proporciona operaciones para consultar, crear, actualizar y eliminar
+ * usuarios, así como para gestionar sus credenciales y roles globales.
  * </p>
  *
  * <p>
- * Este controlador utiliza el servicio {@link UserService} para realizar las
- * operaciones de negocio relacionadas con la gestión de usuarios.
+ * La lógica de negocio relacionada con los usuarios se delega en
+ * {@link UserService}.
  * </p>
  *
  * @author Gastón
@@ -53,35 +50,22 @@ public class UserController {
     private final UserService userService;
 
     /**
-     * Constructor del controlador UserController.
+     * Crea una instancia del controlador de usuarios.
      *
-     * @param userService Servicio de usuario que maneja la lógica de negocio
-     * relacionada con los usuarios.
+     * @param userService servicio encargado de la gestión de usuarios
      */
     public UserController(UserService userService) {
         this.userService = userService;
     }
 
     /**
-     * Obtiene la lista de todos los usuarios.
+     * Obtiene todos los usuarios registrados en el sistema.
+     *
      * <p>
-     * <strong>Requiere autenticación y autorización</strong>
-     * </p>
-     * <p>
-     * <strong>Importante:</strong> Este endpoint solo es accesible para
-     * usuarios con roles "ADMIN" o "SUPER_ADMIN".
-     * </p>
-     * <p>
-     * Los usuarios serán devueltos como una lista de objetos {@link UserDTO}.
-     * </p>
-     * <p>
-     * Este endpoint hace uso del servicio {@link UserService} para obtener la
-     * lista de usuarios.
+     * Esta operación requiere los roles {@code ADMIN} o {@code SUPER_ADMIN}.
      * </p>
      *
-     * @return ListResponse ({@link ListResponse}) de objetos UserDTO
-     * ({@link UserDTO}) con todos los usuarios.
-     * @see UserDTO
+     * @return respuesta con la lista de usuarios registrados
      * @see UserService#getUsers()
      */
     @GetMapping
@@ -96,141 +80,103 @@ public class UserController {
     }
 
     /**
-     * Obtiene los datos del usuario actual.
-     * <p>
-     * <strong>Requiere autenticación y autorización</strong>
-     * </p>
-     * <p>
-     * Los datos del usuario serán devueltos como un objeto {@link UserDTO}.
-     * </p>
-     * <p>
-     * Este endpoint utiliza el servicio {@link UserService} para obtener los
-     * datos del usuario actual.
-     * </p>
+     * Obtiene los datos del usuario autenticado.
      *
-     * @return {@link UserDTO} con los datos del usuario actual.
+     * @return datos del usuario actual
      * @see UserService#getCurrentUser()
      */
     @GetMapping("/me")
     @SecurityRequirement(name = "bearerAuth")
-    @Operation(summary = "Usuario actual", description = "Devuelve los datos del usuario actual")
+    @Operation(
+            summary = "Obtener usuario actual",
+            description = "Devuelve los datos del usuario autenticado."
+    )
     public UserDTO currentUser() {
         return userService.getCurrentUser();
     }
 
     /**
-     * Obtiene un usuario mediante su UUID.
+     * Obtiene un usuario a partir de su UUID.
      *
      * <p>
-     * Este endpoint requiere autenticación y está disponible para usuarios con
-     * los roles {@code ADMIN} o {@code SUPER_ADMIN}.
+     * Esta operación requiere los roles {@code ADMIN} o {@code SUPER_ADMIN}.
      * </p>
      *
-     * @param uuid UUID del usuario a obtener
+     * @param uuid UUID del usuario que se desea consultar
      * @return datos del usuario solicitado
      * @see UserService#getUserByUuid(UUID)
      */
     @GetMapping("/{uuid}")
     @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN')")
     @SecurityRequirement(name = "bearerAuth")
-    @Operation(summary = "Obtener usuario", description = "Obtiene un usuario por su uuid")
+    @Operation(
+            summary = "Obtener usuario",
+            description = "Obtiene los datos de un usuario a partir de su UUID."
+    )
     public UserDTO getUserByUuid(@PathVariable UUID uuid) {
         return userService.getUserByUuid(uuid);
     }
 
     /**
      * Crea un nuevo usuario en el sistema.
+     *
      * <p>
-     * Este endpoint crea un nuevo usuario con los datos proporcionados. Se
-     * realiza la validación de los datos antes de crear al usuario, y se
-     * verifica que el correo electrónico no esté en uso.
-     * </p>
-     * <p>
-     * En caso que los datos no sean válidos, se lanzará una excepción de tipo
-     * {@link ValidationException}.
-     * </p>
-     * <p>
-     * Este endpoint hace uso del servicio {@link UserService} para crear al
-     * usuario en la base de datos.
+     * Los datos recibidos se validan antes de delegar la creación al servicio
+     * de usuarios.
      * </p>
      *
-     * @param userCreateRequest ({@link UserCreate}) con los datos válidos para
-     * el nuevo usuario.
-     * @return {@link UserDTO} con los datos del usuario recién creado.
+     * @param userCreateRequest datos necesarios para crear el usuario
+     * @return datos del usuario creado
      * @see UserService#createUser(UserCreate)
      */
     @PostMapping
-    @Operation(summary = "Crear usuario", description = "Crea un nuevo usuario")
+    @Operation(
+            summary = "Crear usuario",
+            description = "Crea un nuevo usuario a partir de los datos proporcionados."
+    )
     public UserDTO createUser(@Valid @RequestBody UserCreate userCreateRequest) {
         return userService.createUser(userCreateRequest);
     }
 
     /**
-     * Modifica los datos del usuario actual.
+     * Actualiza los datos del perfil del usuario autenticado.
+     *
      * <p>
-     * <strong>Requiere autenticación y autorización</strong>
-     * </p>
-     * <p>
-     * Este endpoint modifica los datos del usuario actual con los datos
-     * proporcionados. Se realiza la validación de los datos antes de crear al
-     * usuario, y se verifica que el correo electrónico no esté en uso.
-     * </p>
-     * <p>
-     * En caso que los datos no sean válidos, se lanzará una excepción de tipo
-     * {@link ValidationException}. En caso que el correo electrónico ya esté en
-     * uso se lanzará una excepción de tipo {@link ConflictException}.
-     * </p>
-     * <p>
-     * Este endpoint hace uso del servicio {@link UserService} para actualizar
-     * los datos del usuario.
+     * Los datos recibidos se validan antes de realizar la actualización.
      * </p>
      *
-     * @param userPutRequest ({@link UserPut}) con los datos válidos para el
-     * nuevo usuario.
-     * @return {@link UserDTO} con los datos actualizados del usuario.
+     * @param userPutRequest nuevos datos del perfil del usuario
+     * @return datos actualizados del usuario
      * @see UserService#updateCurrentUser(UserPut)
      */
     @PutMapping
     @SecurityRequirement(name = "bearerAuth")
     @Operation(
             summary = "Actualizar perfil",
-            description = "Actualiza los datos del usuario autenticado."
+            description = "Actualiza los datos del perfil del usuario autenticado."
     )
     public UserDTO updateUserProfile(@Valid @RequestBody UserPut userPutRequest) {
         return userService.updateCurrentUser(userPutRequest);
     }
 
     /**
-     * Modifica la contraseña del usuario actual.
+     * Cambia la contraseña del usuario autenticado.
+     *
      * <p>
-     * <strong>Requiere autenticación y autorización</strong>
-     * </p>
-     * <p>
-     * Este endpoint modifica la contraseña del usuario actual con los datos
-     * proporcionados. Se realiza la validación de los datos antes de modificar
-     * la contraseña. Si se cambia correctamente la contraseña, se cierran todas
-     * las sesiones.
-     * </p>
-     * <p>
-     * En caso que los datos no sean válidos, se lanzará una excepción de tipo
-     * {@link ValidationException}.
-     * </p>
-     * <p>
-     * Este endpoint hace uso del servicio {@link UserService} para realizar el
-     * cambio de contraseña.
+     * Al modificar correctamente la contraseña, se revocan las sesiones activas
+     * del usuario.
      * </p>
      *
-     * @param userChangePasswordRequest ({@link UserChangePassword}) con los
-     * datos válidos para el cambio de contraseña.
-     * @return {@link UserDTO} con los datos del usuario.
+     * @param userChangePasswordRequest datos necesarios para cambiar la
+     * contraseña
+     * @return datos del usuario actualizado
      * @see UserService#updatePassword(UserChangePassword)
      */
     @PutMapping("/me/password")
     @SecurityRequirement(name = "bearerAuth")
     @Operation(
             summary = "Cambiar contraseña",
-            description = "Cambia la contraseña del usuario autenticado y revoca "
-            + "sus sesiones activas."
+            description = "Cambia la contraseña del usuario autenticado y revoca sus sesiones activas."
     )
     public UserDTO changePassword(@Valid @RequestBody UserChangePassword userChangePasswordRequest) {
         return userService.updatePassword(userChangePasswordRequest);
@@ -240,13 +186,13 @@ public class UserController {
      * Modifica los roles globales de un usuario.
      *
      * <p>
-     * Este endpoint requiere autenticación y está disponible para usuarios con
-     * los roles {@code ADMIN}, {@code SUPER_ADMIN} o {@code HR_MANAGER}.
+     * Esta operación requiere los roles {@code ADMIN}, {@code SUPER_ADMIN} o
+     * {@code HR_MANAGER}.
      * </p>
      *
      * @param uuid UUID del usuario cuyos roles se modificarán
-     * @param userChangeRoleRequest nuevos roles del usuario
-     * @return usuario actualizado
+     * @param userChangeRoleRequest nuevos roles globales del usuario
+     * @return datos actualizados del usuario
      * @see UserService#setRole(UUID, UserChangeRole)
      */
     @PutMapping("/{uuid}/role")
@@ -254,32 +200,28 @@ public class UserController {
     @SecurityRequirement(name = "bearerAuth")
     @Operation(
             summary = "Modificar roles de usuario",
-            description = "Modifica los roles globales de un usuario. "
-            + "Requiere rol ADMIN, SUPER_ADMIN o HR_MANAGER."
+            description = "Modifica los roles globales de un usuario."
     )
     public UserDTO changeUserRole(@PathVariable UUID uuid, @Valid @RequestBody UserChangeRole userChangeRoleRequest) {
         return userService.setRole(uuid, userChangeRoleRequest);
     }
 
     /**
-     * Elimina el usuario actual.
+     * Elimina la cuenta del usuario autenticado.
+     *
      * <p>
-     * <strong>Requiere autenticación y autorización</strong>
-     * </p>
-     * <p>
-     * Este endpoint elimina el usuario actual. Si se elimina correctamente se
-     * cierran todas las sesiones.
-     * </p>
-     * <p>
-     * Este endpoint hace uso del servicio {@link UserService} para eliminar al
-     * usuario actual.
+     * Al eliminar correctamente la cuenta, se revocan las sesiones activas
+     * asociadas al usuario.
      * </p>
      *
      * @see UserService#deleteCurrentUser()
      */
     @DeleteMapping
     @SecurityRequirement(name = "bearerAuth")
-    @Operation(summary = "Eliminar mi usuario", description = "Elimina mi usuario")
+    @Operation(
+            summary = "Eliminar mi usuario",
+            description = "Elimina la cuenta del usuario autenticado."
+    )
     public void deleteCurrentUserAccount() {
         userService.deleteCurrentUser();
     }

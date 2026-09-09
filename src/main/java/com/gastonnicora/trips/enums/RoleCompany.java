@@ -1,11 +1,12 @@
 package com.gastonnicora.trips.enums;
 
 /**
- * Enumeración que define los roles posibles dentro de una empresa.
+ * Enumeración que define los roles disponibles dentro de una empresa.
+ *
  * <p>
- * Cada rol representa un conjunto de permisos y responsabilidades dentro del
- * sistema. Los roles pueden asignarse a los usuarios para controlar el acceso a
- * diferentes funcionalidades.
+ * Cada rol representa un conjunto de responsabilidades y permisos dentro de la
+ * empresa. Los roles pueden asignarse a los trabajadores para determinar el
+ * acceso a las distintas funcionalidades disponibles.
  * </p>
  *
  * @author Gastón
@@ -15,27 +16,47 @@ package com.gastonnicora.trips.enums;
 public enum RoleCompany {
 
     /**
-     * Dueño de la empresa que puede tiene todos los permisos sobre la misma.
+     * Rol correspondiente al propietario de la empresa, con todos los permisos
+     * sobre la misma.
      */
     OWNER,
+
     /**
-     * Vendedor que gestiona viajes (crear, modificar, eliminar), reservas (ver,
-     * cancelar) y genera reportes de ventas.
+     * Rol correspondiente al vendedor, encargado de gestionar viajes y
+     * reservas, además de generar reportes de ventas.
+     *
+     * <p>
+     * Puede crear, modificar y eliminar viajes, así como consultar y cancelar
+     * reservas.
+     * </p>
      */
     SELLER,
+
     /**
-     * Conductor que ve sus viajes asignados, actualiza el estado de los viajes
-     * (en curso, completado) y gestiona su perfil.
+     * Rol correspondiente al conductor, encargado de gestionar los viajes que
+     * tiene asignados y actualizar su estado.
+     *
+     * <p>
+     * Puede actualizar los viajes a los estados correspondientes a su
+     * ejecución, como en curso o completado, y gestionar su perfil.
+     * </p>
      */
     DRIVER,
+
     /**
-     * Administrador de empresa que gestiona usuarios, viajes y genera reportes
-     * de ventas y usuarios dentro de su empresa.
+     * Rol correspondiente al administrador de la empresa, encargado de
+     * gestionar usuarios, viajes y reportes dentro de su empresa.
+     *
+     * <p>
+     * Puede generar reportes relacionados con las ventas y los usuarios de la
+     * empresa.
+     * </p>
      */
     ADMIN,
+
     /**
-     * Responsable de recursos humanos que gestiona empleados y genera reportes
-     * de personal.
+     * Rol correspondiente al responsable de recursos humanos, encargado de la
+     * gestión de empleados y de los reportes de personal dentro de la empresa.
      */
     HR_MANAGER
 }

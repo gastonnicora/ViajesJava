@@ -13,32 +13,41 @@ import jakarta.servlet.http.HttpServletResponse;
 import tools.jackson.databind.ObjectMapper;
 
 /**
- * Entry point personalizado para manejar errores de autenticación en Spring
+ * Entry point personalizado para gestionar errores de autenticación en Spring
  * Security.
+ *
  * <p>
- * Cuando un usuario no autenticado intenta acceder a un recurso protegido, este
- * entry point devuelve un JSON con mensaje de error y código HTTP 401
- * (Unauthorized).
+ * Gestiona los casos en los que un usuario no autenticado intenta acceder a un
+ * recurso protegido.
  * </p>
+ *
  * <p>
- * Utiliza {@link UnauthorizedApiError} para estructurar la respuesta JSON.
+ * Genera una respuesta HTTP con estado {@code 401 Unauthorized} y un cuerpo en
+ * formato JSON utilizando {@link UnauthorizedApiError}.
  * </p>
  */
 @Component
 public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
     /**
-     * Mapper de Jackson para convertir objetos a JSON
+     * Mapper utilizado para convertir el objeto de error en formato JSON.
      */
     private final ObjectMapper mapper = new ObjectMapper();
 
     /**
-     * Maneja la excepción de autenticación no válida o ausente.
+     * Maneja una excepción de autenticación no válida o ausente generada por
+     * Spring Security.
      *
-     * @param request Solicitud HTTP
-     * @param response Respuesta HTTP
-     * @param authException Excepción lanzada por Spring Security
-     * @throws IOException si ocurre un error al escribir la respuesta JSON
+     * <p>
+     * Configura la respuesta HTTP con estado {@code 401 Unauthorized} y
+     * contenido JSON, y escribe en la respuesta el error representado mediante
+     * {@link UnauthorizedApiError}.
+     * </p>
+     *
+     * @param request       Solicitud HTTP asociada al intento de acceso.
+     * @param response      Respuesta HTTP en la que se informa el error.
+     * @param authException Excepción de autenticación generada por Spring Security.
+     * @throws IOException Si ocurre un error al escribir la respuesta JSON.
      */
     @Override
     public void commence(HttpServletRequest request,

@@ -36,15 +36,23 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
- * Maneja globalmente las excepciones lanzadas por los controladores de la API.
+ * Manejador global de excepciones de la API.
+ * <p>
+ * Centraliza el tratamiento de las excepciones producidas durante el
+ * procesamiento de las solicitudes y genera respuestas estandarizadas mediante
+ * los DTOs de error correspondientes.
+ * </p>
  *
- * Proporciona respuestas estandarizadas con DTOs de error, incluyendo: -
- * Errores de validación (400) - Errores de autenticación (401) - Acceso
- * prohibido (403) - Conflicto de recursos (409) - Recurso no encontrado (404) -
- * Solicitud incorrecta (400) - Excepciones personalizadas de la aplicación
+ * <p>
+ * Contempla errores de validación, autenticación, autorización, conflictos,
+ * recursos no encontrados, solicitudes incorrectas y errores internos del
+ * servidor.
+ * </p>
  *
- * Se documenta con Swagger/OpenAPI para que cada tipo de error tenga un ejemplo
- * en la documentación.
+ * <p>
+ * Las respuestas generadas se documentan mediante Swagger/OpenAPI para
+ * representar los diferentes tipos de error que puede devolver la API.
+ * </p>
  */
 @RestControllerAdvice
 @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Error de validación de campos (Bean Validation)", content = @Content(schema = @Schema(implementation = ValidationApiError.class)))
@@ -58,31 +66,27 @@ public class GlobalExceptionHandler {
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     /**
-     * Maneja excepciones internas del servidor y devuelve una respuesta
-     * estandarizada con código HTTP 500 (Internal Server Error).
-     *
+     * Maneja errores internos producidos durante el procesamiento de una
+     * solicitud y devuelve una respuesta estandarizada con código HTTP 500.
      * <p>
-     * Este handler captura tanto excepciones genéricas de tipo
-     * {@link RuntimeException} como excepciones personalizadas
-     * {@link InternalErrorException}.
+     * Captura excepciones de tipo {@link RuntimeException} y la excepción
+     * personalizada {@link InternalErrorException}.
      * </p>
      *
      * <p>
-     * En caso de recibir una {@link InternalErrorException}, se devuelve el
-     * mensaje específico de la excepción. Para cualquier otra excepción no
-     * controlada, se retorna un mensaje genérico para evitar exponer detalles
-     * internos de la aplicación.
+     * Cuando la excepción corresponde a {@link InternalErrorException}, se
+     * conserva su mensaje. Para el resto de las excepciones se devuelve un
+     * mensaje genérico, evitando exponer detalles internos de la aplicación.
      * </p>
      *
      * <p>
-     * Todas las excepciones son registradas en el sistema de logs mediante
-     * nivel ERROR junto con el stacktrace completo, permitiendo tareas de
-     * monitoreo y depuración.
+     * La excepción capturada se registra en el sistema de logs con nivel
+     * {@code ERROR}, incluyendo el stacktrace.
      * </p>
      *
-     * @param ex Excepción capturada durante el procesamiento de la solicitud
+     * @param ex Excepción capturada durante el procesamiento de la solicitud.
      * @return {@link InternalServerErrorApiError} con la información del error
-     * interno
+     * interno.
      */
     @ExceptionHandler({
         RuntimeException.class,
@@ -100,14 +104,16 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Maneja errores de validación lanzados por Spring cuando fallan las
-     * anotaciones de validación.
+     * Maneja los errores de validación producidos cuando los datos recibidos no
+     * cumplen las restricciones de validación configuradas.
+     * <p>
+     * Recopila los errores específicos de cada campo y los errores globales en
+     * un mapa, agrupando los mensajes asociados a cada elemento.
+     * </p>
      *
-     * Devuelve un objeto ValidationApiError con un mapa de campos y mensajes de
-     * error.
-     *
-     * @param ex Excepción de validación de Spring
+     * @param ex Excepción de validación generada por Spring.
      * @return {@link ValidationApiError} con los errores de validación
+     * agrupados por campo u objeto.
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -129,12 +135,14 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Maneja excepciones de credenciales inválidas.
+     * Maneja errores de autenticación producidos por credenciales inválidas.
+     * <p>
+     * Devuelve una respuesta estandarizada con código HTTP 401.
+     * </p>
      *
-     * Devuelve UnauthorizedApiError con HTTP 401.
-     *
-     * @param ex Excepción de credenciales inválidas
-     * @return {@link UnauthorizedApiError} con el mensaje de error
+     * @param ex Excepción producida por credenciales inválidas.
+     * @return {@link UnauthorizedApiError} con el mensaje correspondiente al
+     * error de autenticación.
      */
     @ExceptionHandler(BadCredentialsException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
@@ -143,12 +151,14 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Maneja excepciones de token JWT inválido o expirado.
+     * Maneja errores relacionados con tokens JWT inválidos o expirados.
+     * <p>
+     * Devuelve una respuesta estandarizada con código HTTP 401.
+     * </p>
      *
-     * Devuelve UnauthorizedApiError con HTTP 401.
-     *
-     * @param ex Excepción de token JWT
-     * @return {@link UnauthorizedApiError} con el mensaje de error
+     * @param ex Excepción producida durante la validación del token JWT.
+     * @return {@link UnauthorizedApiError} indicando que el token no es válido
+     * o ha expirado.
      */
     @ExceptionHandler(JwtException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
@@ -157,18 +167,16 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Maneja excepciones de solicitud incorrecta (HTTP 400).
+     * Maneja solicitudes incorrectas producidas por peticiones mal formadas o
+     * argumentos no válidos.
      * <p>
-     * Se ejecuta cuando el cliente envía una petición mal formada o inválida,
-     * como JSON inválido o argumentos no válidos.
+     * Contempla, entre otros casos, errores al interpretar el contenido de la
+     * solicitud y argumentos que no pueden procesarse correctamente.
      * </p>
      *
-     * Devuelve un {@link BadRequestApiError} con el mensaje de error y código
+     * @param ex Excepción producida durante el procesamiento de la solicitud.
+     * @return {@link BadRequestApiError} con los detalles del error y código
      * HTTP 400.
-     *
-     * @param ex excepción capturada (por ejemplo JSON mal formado o argumento
-     * inválido)
-     * @return {@link BadRequestApiError} con los detalles del error
      */
     @ExceptionHandler({
         HttpMessageNotReadableException.class,
@@ -180,13 +188,15 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Maneja la excepción personalizada de petición incorrecta.
+     * Maneja la excepción personalizada de solicitud incorrecta.
+     * <p>
+     * Devuelve una respuesta estandarizada con código HTTP 400 utilizando el
+     * mensaje proporcionado por la excepción.
+     * </p>
      *
-     * Devuelve un {@link BadRequestApiError} con los detalles proporcionados en
-     * la excepción y un código HTTP 400.
-     *
-     * @param ex ({@link BadRequestException}) personalizada de la aplicación
-     * @return {@link BadRequestApiError} con los detalles de la excepción
+     * @param ex {@link BadRequestException} producida durante el procesamiento
+     * de la solicitud.
+     * @return {@link BadRequestApiError} con los detalles de la excepción.
      */
     @ExceptionHandler(BadRequestException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -195,13 +205,15 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Maneja la excepción personalizada de objeto no encontrado.
+     * Maneja la excepción personalizada de recurso no encontrado.
+     * <p>
+     * Devuelve una respuesta estandarizada con código HTTP 404 utilizando el
+     * mensaje proporcionado por la excepción.
+     * </p>
      *
-     * Devuelve un {@link NotFoundApiError} con los detalles proporcionados en
-     * la excepción y un código HTTP 404.
-     *
-     * @param ex ({@link NotFoundException}) personalizada de la aplicación
-     * @return {@link NotFoundApiError} con los detalles de la excepción
+     * @param ex {@link NotFoundException} producida cuando no se encuentra el
+     * recurso solicitado.
+     * @return {@link NotFoundApiError} con los detalles de la excepción.
      */
     @ExceptionHandler(NotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
@@ -210,13 +222,17 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Maneja la excepción personalizada de acceso prohibido.
+     * Maneja las excepciones relacionadas con el acceso prohibido.
+     * <p>
+     * Contempla tanto la excepción personalizada {@link ForbiddenException}
+     * como los errores de autorización generados por Spring Security mediante
+     * {@link AuthorizationDeniedException}.
+     * </p>
      *
-     * Devuelve un {@link ForbiddenApiError} con los detalles proporcionados en
-     * la excepción y un código HTTP 403.
-     *
-     * @param ex ({@link ForbiddenException}) personalizada de la aplicación
-     * @return {@link ForbiddenApiError} con los detalles de la excepción
+     * @param ex Excepción producida cuando el acceso al recurso no está
+     * permitido.
+     * @return {@link ForbiddenApiError} con los detalles de la excepción y
+     * código HTTP 403.
      */
     @ExceptionHandler({ForbiddenException.class, AuthorizationDeniedException.class})
     @ResponseStatus(HttpStatus.FORBIDDEN)
@@ -225,13 +241,15 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Maneja la excepción personalizada de no autenticado.
+     * Maneja la excepción personalizada de usuario no autenticado.
+     * <p>
+     * Devuelve una respuesta estandarizada con código HTTP 401 utilizando el
+     * mensaje proporcionado por la excepción.
+     * </p>
      *
-     * Devuelve un {@link UnauthorizedApiError} con los detalles proporcionados
-     * en la excepción y un código HTTP 401.
-     *
-     * @param ex ({@link UnauthorizedException}) personalizada de la aplicación
-     * @return {@link UnauthorizedApiError} con los detalles de la excepción
+     * @param ex {@link UnauthorizedException} producida durante el proceso de
+     * autenticación.
+     * @return {@link UnauthorizedApiError} con los detalles de la excepción.
      */
     @ExceptionHandler(UnauthorizedException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
@@ -241,12 +259,15 @@ public class GlobalExceptionHandler {
 
     /**
      * Maneja la excepción personalizada de validación.
+     * <p>
+     * Devuelve una respuesta estandarizada con código HTTP 400 utilizando los
+     * errores proporcionados por la excepción.
+     * </p>
      *
-     * Devuelve un {@link ValidationApiError} con los detalles proporcionados en
-     * la excepción y un código HTTP 400.
-     *
-     * @param ex ({@link ValidationException}) personalizada de la aplicación
-     * @return {@link ValidationApiError} con los detalles de la excepción
+     * @param ex {@link ValidationException} que contiene los errores de
+     * validación.
+     * @return {@link ValidationApiError} con los errores de validación
+     * proporcionados por la excepción.
      */
     @ExceptionHandler(ValidationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -256,12 +277,14 @@ public class GlobalExceptionHandler {
 
     /**
      * Maneja la excepción personalizada de conflicto.
+     * <p>
+     * Devuelve una respuesta estandarizada con código HTTP 409 utilizando el
+     * mensaje proporcionado por la excepción.
+     * </p>
      *
-     * Devuelve un {@link ConflictApiError} con los detalles proporcionados en
-     * la excepción y un código HTTP 409.
-     *
-     * @param ex ({@link ConflictException}) personalizada de la aplicación
-     * @return {@link ConflictApiError} con los detalles de la excepción
+     * @param ex {@link ConflictException} producida cuando existe un conflicto
+     * con el estado actual del recurso.
+     * @return {@link ConflictApiError} con los detalles de la excepción.
      */
     @ExceptionHandler(ConflictException.class)
     @ResponseStatus(HttpStatus.CONFLICT)

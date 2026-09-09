@@ -3,24 +3,17 @@ package com.gastonnicora.trips.exceptions;
 import org.springframework.http.HttpStatus;
 
 /**
- * Excepción personalizada de la aplicación utilizada para representar recursos
- * no encontrados (HTTP 404 - Not Found).
- *
+ * Excepción personalizada de la aplicación para representar recursos no
+ * encontrados (HTTP 404 - Not Found).
  * <p>
- * Se utiliza cuando un cliente solicita un recurso que no existe o ha sido
- * eliminado, por ejemplo:
+ * Se utiliza cuando un cliente solicita un recurso que no existe o no se
+ * encuentra disponible.
  * </p>
- * <ul>
- * <li>Buscar un usuario por ID inexistente</li>
- * <li>Acceder a un recurso que ha sido borrado</li>
- * <li>Intentar obtener datos de una entidad que no se encuentra en la base de
- * datos</li>
- * </ul>
  *
  * <p>
- * Esta excepción se utiliza en conjunto con
- * {@link com.gastonnicora.trips.exceptions.handler.GlobalExceptionHandler} para
- * generar respuestas API estandarizadas.
+ * Se utiliza en conjunto con
+ * {@link com.gastonnicora.trips.exceptions.handler.GlobalExceptionHandler}
+ * para generar respuestas de error estandarizadas con código HTTP 404.
  * </p>
  *
  * @author Gastón
@@ -30,14 +23,14 @@ import org.springframework.http.HttpStatus;
 public class NotFoundException extends RuntimeException {
 
     /**
-     * Código HTTP asociado al error (404 - Not Found)
+     * Código HTTP asociado a la excepción (404 - Not Found).
      */
     private final int status = HttpStatus.NOT_FOUND.value();
 
     /**
      * Constructor que inicializa la excepción con un mensaje descriptivo.
      *
-     * @param message Mensaje de error
+     * @param message Mensaje descriptivo del error.
      */
     public NotFoundException(String message) {
         super(message);
@@ -46,7 +39,7 @@ public class NotFoundException extends RuntimeException {
     /**
      * Obtiene el código HTTP asociado a la excepción.
      *
-     * @return Código HTTP 404
+     * @return Código HTTP 404.
      */
     public int getStatus() {
         return status;

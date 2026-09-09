@@ -1,11 +1,13 @@
 package com.gastonnicora.trips.enums;
 
 /**
- * Enumeración que define los roles posibles dentro de la plataforma.
+ * Enumeración que define los roles disponibles para los usuarios de la
+ * plataforma.
+ *
  * <p>
- * Cada rol representa un conjunto de permisos y responsabilidades dentro del
- * sistema. Los roles pueden asignarse a los usuarios para controlar el acceso a
- * diferentes funcionalidades.
+ * Cada rol identifica un nivel de responsabilidad dentro del sistema y puede
+ * utilizarse para determinar el acceso del usuario a las distintas
+ * funcionalidades de la aplicación.
  * </p>
  *
  * @author Gastón
@@ -15,42 +17,42 @@ package com.gastonnicora.trips.enums;
 public enum Role {
 
     /**
-     * Usuario estándar de la plataforma.
+     * Rol correspondiente a un usuario estándar de la plataforma.
      */
     USER,
     /**
-     * Administrador general con permisos para gestionar recursos y usuarios
-     * básicos.
+     * Rol correspondiente a un administrador con permisos para gestionar
+     * recursos y usuarios básicos del sistema.
      */
     ADMIN,
     /**
-     * Super administrador con acceso completo a todas las funciones del
-     * sistema.
+     * Rol correspondiente al super administrador, con acceso completo a las
+     * funcionalidades del sistema.
      */
     SUPER_ADMIN,
     /**
-     * Administrador de plataforma con permisos para gestionar empresas,
-     * usuarios, viajes y generar reportes generales.
+     * Rol correspondiente al administrador de la plataforma, encargado de la
+     * gestión de empresas, usuarios, viajes y reportes generales.
      */
     PLATFORM_ADMIN,
     /**
-     * Agente de soporte que gestiona tickets de soporte y genera reportes
-     * relacionados.
+     * Rol correspondiente al agente de soporte, encargado de la gestión de
+     * tickets de soporte y de los reportes relacionados.
      */
     SUPPORT_AGENT,
     /**
-     * Analista que genera reportes de ventas, usuarios y viajes, y analiza
-     * datos para mejorar la plataforma.
+     * Rol correspondiente al analista, encargado de generar y analizar
+     * información relacionada con ventas, usuarios y viajes.
      */
     ANALYST,
     /**
-     * Responsable financiero que gestiona facturación y genera reportes
-     * financieros.
+     * Rol correspondiente al responsable financiero, encargado de la gestión de
+     * facturación y de los reportes financieros.
      */
     FINANCE_MANAGER,
     /**
-     * Responsable de recursos humanos que gestiona empleados y genera reportes
-     * de personal.
+     * Rol correspondiente al responsable de recursos humanos, encargado de la
+     * gestión de empleados y de los reportes de personal.
      */
     HR_MANAGER
 

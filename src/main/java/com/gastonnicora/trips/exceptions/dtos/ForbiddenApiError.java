@@ -5,51 +5,49 @@ import org.springframework.http.HttpStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
- * Representa un error de acceso prohibido (HTTP 403).
+ * Representa un error de acceso prohibido correspondiente al código de estado
+ * HTTP {@code 403}.
+ *
  * <p>
- * Se utiliza cuando un usuario intenta acceder a un recurso para el que no
- * tiene permisos. Hereda de {@link ApiError} y establece automáticamente el
- * código de estado a 403.
+ * Se utiliza cuando un usuario intenta acceder a un recurso para el cual no
+ * dispone de los permisos necesarios.
  * </p>
  *
  * <p>
- * Ejemplo de respuesta JSON:
+ * Hereda de {@link ApiError} y establece automáticamente el código de estado
+ * HTTP {@link HttpStatus#FORBIDDEN}.
  * </p>
- *
- * <pre>
- * {
- *   "status": 403,
- *   "message": "Acceso denegado",
- *   "timestamp": "2026-05-04T12:34:56",
- *   "errors": null
- * }
- * </pre>
  *
  * @author Gastón
  * @version 1.0
  * @since 2026-05-04
  */
-@Schema(description = "Error de acceso prohibido", example = """
-        {
-          "status": 403,
-          "message": "Acceso denegado",
-          "timestamp": "2026-05-04T12:34:56",
-          "errors": null
-        }
-        """)
+@Schema(
+        description = "Error correspondiente a un acceso prohibido.",
+        example = """
+                {
+                  "status": 403,
+                  "message": "Acceso denegado",
+                  "timestamp": "2026-05-04T12:34:56",
+                  "errors": null
+                }
+                """
+)
 public class ForbiddenApiError extends ApiError {
 
     /**
-     * Constructor por defecto.
+     * Constructor para crear un error de acceso prohibido con el mensaje
+     * predeterminado.
      */
     public ForbiddenApiError() {
         super(HttpStatus.FORBIDDEN.value(), "Acceso denegado");
     }
 
     /**
-     * Constructor con mensaje personalizado.
+     * Constructor para crear un error de acceso prohibido con un mensaje
+     * personalizado.
      *
-     * @param message Mensaje descriptivo del error
+     * @param message Mensaje descriptivo del error.
      */
     public ForbiddenApiError(String message) {
         super(HttpStatus.FORBIDDEN.value(), message);

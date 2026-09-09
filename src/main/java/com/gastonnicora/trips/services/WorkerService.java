@@ -22,15 +22,13 @@ import com.gastonnicora.trips.repositories.WorkerRepository;
 import jakarta.transaction.Transactional;
 
 /**
- * Servicio para gestionar la entidad {@link Worker}.
+ * Servicio encargado de gestionar las relaciones entre usuarios y empresas
+ * mediante la entidad {@link Worker}.
  *
  * <p>
- * Este servicio maneja todas las operaciones relacionadas con la gestión de
- * trabajadores, como la creación, actualización, eliminación y obtención de
- * información. Ademas permite el cambio y asignación de roles a los
- * trabajadores.
+ * Permite crear, consultar, actualizar y desactivar trabajadores, así como
+ * asignar y modificar sus roles dentro de una empresa.
  * </p>
- *
  *
  * @author Gastón
  * @version 1.0
@@ -43,12 +41,12 @@ public class WorkerService {
     private final WorkerMapper WorkerMapper;
 
     /**
-     * Constructor del servicio WorkerService.
+     * Crea una instancia del servicio de trabajadores.
      *
-     * @param workerRepository Repositorio de workers utilizado para acceder a
-     * la base de datos.
-     * @param WorkerMapper Mapper para convertir entidades {@link Worker} a
-     * {@link WorkerDTO}.
+     * @param workerRepository Repositorio de trabajadores utilizado para acceder
+     *                         a la base de datos.
+     * @param WorkerMapper     Mapper utilizado para convertir entidades
+     *                         {@link Worker} en {@link WorkerDTO}.
      */
     public WorkerService(WorkerRepository workerRepository, WorkerMapper WorkerMapper) {
         this.workerRepository = workerRepository;
@@ -56,38 +54,63 @@ public class WorkerService {
     }
 
     /**
-     * Crea un nuevo worker.
+     * Crea un nuevo trabajador asociado a un usuario y una empresa.
      *
-     * @param user {@link User} del worker.
-     * @param company {@link Company} de la empresa.
-     * @param roles Set de {@link RoleCompany} del worker.
-     * @return {@link WorkerDTO} del worker creado.
+     * <p>
+     * Antes de crear la relación, valida los roles proporcionados y verifica que
+     * no exista un trabajador activo asociado al mismo usuario y empresa.
+     * </p>
+     *
+     * @param user    {@link User} que se asociará como trabajador.
+     * @param company {@link Company} a la que se asociará el trabajador.
+     * @param roles   Conjunto de {@link RoleCompany} que tendrá el trabajador.
+     * @return {@link WorkerDTO} correspondiente al trabajador creado.
+     * @throws BadRequestException Si los roles son nulos, están vacíos o
+     *                             contienen el rol {@link RoleCompany#OWNER}.
+     * @throws ConflictException   Si ya existe un trabajador activo asociado al
+     *                             usuario y la empresa indicados.
      */
     public WorkerDTO createWorker(User user, Company company, Set<RoleCompany> roles) {
         this.verfyRole(roles);
         if (workerRepository.findByUserUuidAndCompanyUuidAndActiveTrue(user.getUuid(), company.getUuid())
-            .isPresent()) {
-                throw  new ConflictException("Ya existe el trabajador");
+                .isPresent()) {
+            throw new ConflictException("Ya existe el trabajador");
         }
         return WorkerMapper.toDTO(workerRepository.save(new Worker(user, company, roles)));
     }
 
     /**
-     * Crea un nuevo trabajador con el rol de dueño.
+     * Crea un nuevo trabajador con el rol {@link RoleCompany#OWNER}.
      *
-     * @param user {@link User} del worker.
-     * @param company {@link Company} de la empresa.
-     * @param roles Set de {@link RoleCompany} del worker.
-     * @return {@link WorkerDTO} del worker creado.
+     * <p>
+     * La creación solo se realiza si la empresa no posee trabajadores activos.
+     * </p>
+     *
+     * @param user    {@link User} que se asociará como propietario.
+     * @param company {@link Company} a la que se asociará el trabajador.
+     * @return {@link WorkerDTO} correspondiente al trabajador creado.
+     * @throws ConflictException Si la empresa ya posee trabajadores activos.
      */
     public WorkerDTO createWorkerOwner(User user, Company company) {
         if (!workerRepository.findAllByCompanyUuidAndActiveTrue(company.getUuid())
-            .isEmpty()) {
-                throw  new ConflictException("Ya existen trabajadores");
+                .isEmpty()) {
+            throw new ConflictException("Ya existen trabajadores");
         }
         return WorkerMapper.toDTO(workerRepository.save(new Worker(user, company, Set.of(RoleCompany.OWNER))));
     }
 
+    /**
+     * Valida el conjunto de roles asignado a un trabajador.
+     *
+     * <p>
+     * Verifica que se haya proporcionado al menos un rol y que no se intente
+     * asignar el rol {@link RoleCompany#OWNER} mediante este método.
+     * </p>
+     *
+     * @param roles Conjunto de {@link RoleCompany} que se desea validar.
+     * @throws BadRequestException Si los roles son nulos, están vacíos o
+     *                             contienen el rol {@link RoleCompany#OWNER}.
+     */
     private void verfyRole(Set<RoleCompany> roles) {
         if (roles == null || roles.isEmpty()) {
             throw new BadRequestException("Se debe asignar al menos un rol al trabajador");
@@ -99,11 +122,13 @@ public class WorkerService {
     }
 
     /**
-     * Obtiene un worker por su UUID.
+     * Obtiene un trabajador mediante el UUID del usuario y de la empresa.
      *
-     * @param user UUID del usuario.
-     * @param company UUID de la empresa.
-     * @return {@link WorkerDTO} del worker.
+     * @param user    UUID del usuario asociado al trabajador.
+     * @param company UUID de la empresa asociada al trabajador.
+     * @return {@link WorkerDTO} correspondiente al trabajador encontrado.
+     * @throws NotFoundException Si no existe una relación activa entre el
+     *                           usuario y la empresa indicados.
      */
     public WorkerDTO getWorkerByUserAndCompany(UUID user, UUID company) {
         Worker worker = this.getWorker(user, company);
@@ -111,11 +136,11 @@ public class WorkerService {
     }
 
     /**
-     * Obtiene todos los workers de una empresa.
+     * Obtiene todos los trabajadores activos de una empresa.
      *
-     * @param company UUID de la empresa.
-     * @return {@link WorkersByCompany} con los datos de la empresa y todos sus
-     * trabajadores.
+     * @param company UUID de la empresa cuyos trabajadores se desean obtener.
+     * @return {@link WorkersByCompany} con los datos de la empresa y sus
+     *         trabajadores activos.
      */
     public WorkersByCompany getWorkersByCompany(UUID company) {
         List<Worker> workers = workerRepository.findAllByCompanyUuidAndActiveTrue(company);
@@ -123,25 +148,32 @@ public class WorkerService {
     }
 
     /**
-     * Obtiene todos los workers de un usuario.
+     * Obtiene todos los trabajadores activos asociados a un usuario.
      *
-     * @param user UUID del usuario.
-     * @return {@link WorkersByUser} con los datos del usuario y todos sus
-     * trabajos.
+     * <p>
+     * Si el usuario no posee trabajadores activos, se lanza una excepción.
+     * </p>
+     *
+     * @param user UUID del usuario cuyos trabajadores se desean obtener.
+     * @return {@link WorkersByUser} con los datos del usuario y sus trabajadores
+     *         activos.
+     * @throws NotFoundException Si el usuario no posee trabajadores activos.
      */
     public WorkersByUser getWorkersByUser(UUID user) {
         List<Worker> workers = workerRepository.findAllByUserUuidAndActiveTrue(user);
-        if (workers == null || workers.isEmpty()) { //TODO: Falta testear este caso
+        if (workers == null || workers.isEmpty()) { // TODO: Falta testear este caso
             throw new NotFoundException("El usuario no tiene trabajos");
         }
         return WorkerMapper.toWorkersByUserDTO(workers);
     }
 
     /**
-     * Elimina una relación entre un usuario y una empresa.
+     * Desactiva la relación entre un usuario y una empresa.
      *
-     * @param user UUID del usuario.
-     * @param company UUID de la empresa.
+     * @param user    UUID del usuario asociado al trabajador.
+     * @param company UUID de la empresa asociada al trabajador.
+     * @throws NotFoundException Si no existe una relación activa entre el
+     *                           usuario y la empresa indicados.
      */
     @Transactional
     public void deleteWorker(UUID user, UUID company) {
@@ -151,11 +183,21 @@ public class WorkerService {
     }
 
     /**
-     * Actualiza los roles de un worker.
+     * Actualiza los roles de un trabajador.
      *
-     * @param user UUID del usuario.
-     * @param company UUID de la empresa.
-     * @param roles Set de {@link RoleCompany} del worker.
+     * <p>
+     * Antes de actualizar la relación, valida los roles proporcionados y verifica
+     * que el trabajador exista y se encuentre activo.
+     * </p>
+     *
+     * @param user    UUID del usuario asociado al trabajador.
+     * @param company UUID de la empresa asociada al trabajador.
+     * @param roles   Conjunto de {@link RoleCompany} que tendrá el trabajador.
+     * @return {@link WorkerDTO} correspondiente al trabajador actualizado.
+     * @throws BadRequestException Si los roles son nulos, están vacíos o
+     *                             contienen el rol {@link RoleCompany#OWNER}.
+     * @throws NotFoundException   Si no existe una relación activa entre el
+     *                             usuario y la empresa indicados.
      */
     @Transactional
     public WorkerDTO updateWorker(UUID user, UUID company, Set<RoleCompany> roles) {
@@ -167,11 +209,13 @@ public class WorkerService {
     }
 
     /**
-     * Obtiene un worker .
+     * Obtiene un trabajador activo mediante el UUID del usuario y de la empresa.
      *
-     * @param user UUID del usuario.
-     * @param company UUID de la empresa.
-     * @return {@link Worker} del worker.
+     * @param user    UUID del usuario asociado al trabajador.
+     * @param company UUID de la empresa asociada al trabajador.
+     * @return {@link Worker} correspondiente a la relación encontrada.
+     * @throws NotFoundException Si no existe una relación activa entre el
+     *                           usuario y la empresa indicados.
      */
     private Worker getWorker(UUID user, UUID company) {
         return workerRepository.findByUserUuidAndCompanyUuidAndActiveTrue(user, company)
@@ -179,13 +223,21 @@ public class WorkerService {
     }
 
     /**
-     * Obtiene todos los workers de un usuario con el rol owner.
+     * Obtiene las empresas en las que un usuario posee el rol
+     * {@link RoleCompany#OWNER}.
      *
-     * @param owner UUID del usuario.
-     * @return Lista de {@link Worker} del worker.
+     * <p>
+     * Busca las relaciones activas del usuario que contienen el rol de
+     * propietario y devuelve las empresas asociadas.
+     * </p>
+     *
+     * @param owner UUID del usuario propietario.
+     * @return Lista de {@link Company} asociadas al usuario como propietario.
+     * @throws NotFoundException Si el usuario no posee empresas como propietario.
      */
     public List<Company> getCompaniesByOwner(UUID owner) {
-        List<Worker> workers = workerRepository.findAllByUserUuidAndRolesContainsAndActiveTrue(owner, RoleCompany.OWNER);
+        List<Worker> workers = workerRepository.findAllByUserUuidAndRolesContainsAndActiveTrue(owner,
+                RoleCompany.OWNER);
         if (workers.isEmpty()) {
             throw new NotFoundException("Empresas no encontradas");
         }

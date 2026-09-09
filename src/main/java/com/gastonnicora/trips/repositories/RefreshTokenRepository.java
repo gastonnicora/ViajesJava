@@ -12,10 +12,13 @@ import org.springframework.transaction.annotation.Transactional;
 import com.gastonnicora.trips.entities.RefreshToken;
 
 /**
- * Repositorio para gestionar {@link RefreshToken}.
+ * Repositorio encargado de gestionar la persistencia de entidades
+ * {@link RefreshToken}.
+ *
  * <p>
- * Proporciona métodos para consultar, eliminar y verificar tokens de refresco.
- * Utiliza Spring Data JPA para el acceso a la base de datos.
+ * Proporciona operaciones para consultar y eliminar tokens de refresco,
+ * incluyendo búsquedas por usuario, UUID, valor del token, fecha de expiración
+ * y estado de activación.
  * </p>
  */
 public interface RefreshTokenRepository extends JpaRepository<RefreshToken, UUID> {
@@ -23,39 +26,41 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshToken, UUID
     /**
      * Busca un token de refresco por su valor.
      *
-     * @param refreshToken Token de refresco
-     * @return {@link Optional} con el token si existe
+     * @param refreshToken Valor del token de refresco.
+     * @return {@link Optional} que contiene el token encontrado, o vacío si no
+     *         existe.
      */
     Optional<RefreshToken> findByRefreshToken(String refreshToken);
 
     /**
-     * Obtiene todos los tokens activos de un usuario.
+     * Obtiene todos los tokens activos asociados a un usuario.
      *
-     * @param userUuid UUID del usuario
-     * @return Lista de tokens activos
+     * @param userUuid Identificador único del usuario.
+     * @return Lista de tokens de refresco activos asociados al usuario.
      */
     List<RefreshToken> findAllByUser_UuidAndActiveTrue(UUID userUuid);
 
     /**
-     * Elimina todos los tokens de un usuario.
+     * Elimina todos los tokens asociados a un usuario.
      *
-     * @param userUuid UUID del usuario
+     * @param userUuid Identificador único del usuario.
      */
     @Modifying
     @Transactional
     void deleteAllByUser_Uuid(UUID userUuid);
 
     /**
-     * Elimina todos los tokens que hayan expirado antes de la fecha indicada.
+     * Elimina todos los tokens cuya fecha de expiración sea anterior a la fecha
+     * indicada.
      *
-     * @param now Fecha de referencia
+     * @param now Fecha de referencia para determinar los tokens expirados.
      */
     @Modifying
     @Transactional
     void deleteAllByExpiryDateBefore(Instant now);
 
     /**
-     * Elimina todos los tokens que están desactivados.
+     * Elimina todos los tokens que se encuentran desactivados.
      */
     @Modifying
     @Transactional
@@ -64,33 +69,36 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshToken, UUID
     /**
      * Elimina un token de refresco por su valor.
      *
-     * @param refreshToken Token de refresco
+     * @param refreshToken Valor del token de refresco que se desea eliminar.
      */
     @Modifying
     @Transactional
     void deleteByRefreshToken(String refreshToken);
 
     /**
-     * Busca un token por su UUID.
+     * Busca un token por su identificador único.
      *
-     * @param uuid UUID del token
-     * @return {@link Optional} con el token si existe
+     * @param uuid Identificador único del token.
+     * @return {@link Optional} que contiene el token encontrado, o vacío si no
+     *         existe.
      */
     Optional<RefreshToken> findByUuid(UUID uuid);
 
     /**
-     * Busca un token de acceso por su valor.
+     * Busca un token por su valor.
      *
-     * @param token Token JWT
-     * @return {@link Optional} con el token si existe
+     * @param token Valor del token.
+     * @return {@link Optional} que contiene el token encontrado, o vacío si no
+     *         existe.
      */
     Optional<RefreshToken> findByToken(String token);
 
     /**
      * Verifica si existe un token de refresco con el valor indicado.
      *
-     * @param refreshToken Token de refresco
-     * @return true si existe, false en caso contrario
+     * @param refreshToken Valor del token de refresco.
+     * @return {@code true} si existe un token con el valor indicado; {@code false}
+     *         en caso contrario.
      */
     boolean existsByRefreshToken(String refreshToken);
 

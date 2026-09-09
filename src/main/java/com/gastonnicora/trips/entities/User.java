@@ -27,28 +27,25 @@ import lombok.Setter;
 import lombok.ToString;
 
 /**
- * Representa un usuario en el sistema.
+ * Entidad que representa un usuario en el sistema.
+ *
  * <p>
- * Contiene información personal, roles, estado y fechas de
- * creación/actualización. Por defecto, se asigna el rol {@link Role#USER}.
+ * Contiene la información personal del usuario, sus credenciales, los roles
+ * asignados, su estado y las fechas de creación y última actualización.
  * </p>
+ *
  * <p>
- * Campos principales:
+ * Cuando se crea un usuario mediante los constructores disponibles, se asigna
+ * automáticamente el rol {@link Role#USER}.
  * </p>
- * <ul>
- * <li>{@code uuid}: Identificador único del usuario.</li>
- * <li>{@code name}: Nombre del usuario.</li>
- * <li>{@code lastname}: Apellido del usuario.</li>
- * <li>{@code email}: Correo electrónico del usuario.</li>
- * <li>{@code password}: Contraseña cifrada del usuario.</li>
- * <li>{@code role}: Conjunto de roles asignados al usuario.</li>
- * <li>{@code enabled}: Indica si el usuario está habilitado.</li>
- * <li>{@code createdAt}: Fecha y hora de creación.</li>
- * <li>{@code updatedAt}: Fecha y hora de última actualización.</li>
- * <li>{@code version}: Versión del usuario.</li>
- * </ul>
+ *
  * <p>
- * Se utiliza para gestionar la autenticación, autorización y administración de
+ * La contraseña se excluye de la representación generada mediante
+ * {@link ToString}.
+ * </p>
+ *
+ * <p>
+ * Se utiliza para la gestión de autenticación, autorización y administración de
  * usuarios.
  * </p>
  *
@@ -65,69 +62,122 @@ import lombok.ToString;
 @ToString(exclude = "password")
 public class User {
 
+    /**
+     * Identificador único del usuario.
+     */
     @Id
     @Column(name = "uuid", nullable = false, unique = true)
     @GeneratedValue
     @UuidGenerator
     private UUID uuid;
 
+    /**
+     * Nombre del usuario.
+     */
     @Column(name = "name", nullable = false)
     private String name;
 
+    /**
+     * Apellido del usuario.
+     */
     @Column(name = "lastname", nullable = false)
     private String lastname;
 
+    /**
+     * Dirección de correo electrónico del usuario.
+     */
     @Column(name = "email", nullable = false)
     private String email;
 
+    /**
+     * Contraseña cifrada del usuario.
+     *
+     * <p>
+     * Este atributo se excluye de la representación generada mediante
+     * {@link ToString}.
+     * </p>
+     */
     @Column(name = "password", nullable = false)
     private String password;
 
+    /**
+     * Conjunto de roles asignados al usuario.
+     *
+     * <p>
+     * Los roles se almacenan como valores de tipo {@link String} y se cargan
+     * de forma inmediata.
+     * </p>
+     */
     @ElementCollection(fetch = FetchType.EAGER)
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)
     private Set<Role> role;
 
+    /**
+     * Indica si el usuario se encuentra habilitado.
+     */
     @Column(name = "enabled", nullable = false)
     private boolean enabled = true;
 
+    /**
+     * Fecha y hora en la que se creó el usuario.
+     *
+     * <p>
+     * Su valor es gestionado automáticamente mediante
+     * {@link CreationTimestamp}.
+     * </p>
+     */
     @CreationTimestamp
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
+    /**
+     * Fecha y hora de la última actualización del usuario.
+     *
+     * <p>
+     * Su valor es gestionado automáticamente mediante {@link UpdateTimestamp}.
+     * </p>
+     */
     @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    /**
+     * Versión actual del usuario.
+     */
     @Column(name = "version", nullable = false)
     private int version = 0;
 
     /**
-     * Constructor sin roles.
+     * Constructor para crear un usuario sin especificar roles.
+     *
      * <p>
      * Asigna automáticamente el rol {@link Role#USER}.
      * </p>
      *
-     * @param name Nombre del usuario
-     * @param lastname Apellido del usuario
-     * @param email Correo electrónico
-     * @param password Contraseña cifrada
+     * @param name Nombre del usuario.
+     * @param lastname Apellido del usuario.
+     * @param email Dirección de correo electrónico del usuario.
+     * @param password Contraseña cifrada del usuario.
      */
     public User(String name, String lastname, String email, String password) {
         this(name, lastname, email, password, null);
     }
 
     /**
-     * Constructor con roles.
+     * Constructor para crear un usuario con los roles especificados.
+     *
      * <p>
-     * Si no se proporcionan roles, se asigna automáticamente {@link Role#USER}.
+     * Si el conjunto de roles recibido es {@code null}, se inicializa un
+     * conjunto vacío. En todos los casos se agrega automáticamente el rol
+     * {@link Role#USER}.
      * </p>
      *
-     * @param name Nombre del usuario
-     * @param lastname Apellido del usuario
-     * @param email Correo electrónico
-     * @param password Contraseña cifrada
-     * @param role ({@link Set}) Conjunto de {@link Role} a asignar
+     * @param name Nombre del usuario.
+     * @param lastname Apellido del usuario.
+     * @param email Dirección de correo electrónico del usuario.
+     * @param password Contraseña cifrada del usuario.
+     * @param role Conjunto de roles a asignar al usuario.
      */
     public User(String name, String lastname, String email, String password, Set<Role> role) {
         this.name = name;
@@ -139,45 +189,45 @@ public class User {
     }
 
     /**
-     * Agrega un rol al usuario.
+     * Agrega un rol al conjunto de roles del usuario.
      *
-     * @param role ({@link Role}) a asignar
+     * @param role Rol a asignar al usuario.
      */
     public void addRole(Role role) {
         this.role.add(role);
     }
 
     /**
-     * Agrega varios roles al usuario.
+     * Agrega varios roles al conjunto de roles del usuario.
      *
-     * @param roles ({@link Set}) Conjunto de {@link Role} a asignar
+     * @param roles Conjunto de roles a asignar al usuario.
      */
     public void addRoles(Set<Role> roles) {
         this.role.addAll(roles);
     }
 
     /**
-     * Verifica si el usuario tiene un rol específico.
+     * Verifica si el usuario tiene asignado un rol específico.
      *
-     * @param role ({@link Role})) Rol a verificar
-     * @return {@code true} si el usuario tiene el rol, {@code false} en caso
-     * contrario
+     * @param role Rol a verificar.
+     * @return {@code true} si el usuario tiene asignado el rol; {@code false}
+     *         en caso contrario.
      */
     public boolean hasRole(Role role) {
         return this.role.contains(role);
     }
 
     /**
-     * Elimina un rol del usuario.
+     * Elimina un rol del conjunto de roles del usuario.
      *
-     * @param role ({@link Role}) a eliminar
+     * @param role Rol a eliminar.
      */
     public void removeRole(Role role) {
         this.role.remove(role);
     }
 
     /**
-     * Incrementa la versión del usuario.
+     * Incrementa en uno la versión actual del usuario.
      */
     public void addVersion() {
         this.version++;

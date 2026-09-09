@@ -10,11 +10,12 @@ import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 
 /**
- * Anotación de validación personalizada que asegura que dos campos de un objeto
- * tengan el mismo valor.
+ * Anotación de validación personalizada que verifica que dos campos de un
+ * objeto tengan el mismo valor.
+ *
  * <p>
- * Útil, por ejemplo, para verificar que un campo "password" y un campo
- * "confirmPassword" sean idénticos al momento de crear o actualizar un usuario.
+ * Permite validar, por ejemplo, que los campos {@code password} y
+ * {@code confirmPassword} sean idénticos al crear o actualizar un usuario.
  * </p>
  *
  * <pre>
@@ -23,52 +24,53 @@ import jakarta.validation.Payload;
  * </pre>
  *
  * <p>
- * Esta anotación se aplica a nivel de clase ({@link ElementType#TYPE}) y es
- * procesada por la clase {@link FieldsMatchValidator}.
+ * Esta anotación se aplica a nivel de clase mediante {@link ElementType#TYPE}
+ * y es procesada por {@link FieldsMatchValidator}.
  * </p>
  */
-@Target({ElementType.TYPE})
+@Target({ ElementType.TYPE })
 @Retention(RetentionPolicy.RUNTIME)
 @Constraint(validatedBy = FieldsMatchValidator.class)
 @Documented
 public @interface FieldsMatch {
 
     /**
-     * Mensaje de error por defecto que se devuelve si los campos no coinciden.
+     * Define el mensaje de error por defecto cuando los campos no coinciden.
      *
-     * @return mensaje de error por defecto
+     * @return mensaje de error por defecto.
      */
     String message() default "Fields do not match";
 
     /**
-     * Nombre del primer campo a comparar.
+     * Define el nombre del primer campo que será comparado.
      *
-     * @return el nombre del campo principal
+     * @return nombre del primer campo a comparar.
      */
     String field();
 
     /**
-     * Nombre del segundo campo que debe coincidir con el primero.
+     * Define el nombre del segundo campo que debe coincidir con el primero.
      *
-     * @return el nombre del campo que debe coincidir
+     * @return nombre del segundo campo a comparar.
      */
     String fieldMatch();
 
     /**
-     * Grupos de validación a los que pertenece esta anotación.
+     * Define los grupos de validación a los que pertenece esta anotación.
+     *
      * <p>
-     * Permite agrupar validaciones para ejecutarlas selectivamente.
+     * Permite agrupar validaciones para ejecutarlas de forma selectiva.
      * </p>
      *
-     * @return un arreglo de clases de grupos de validación
+     * @return arreglo de clases correspondientes a los grupos de validación.
      */
     Class<?>[] groups() default {};
 
     /**
-     * Payload que puede ser usado por los clientes para incluir información
-     * adicional sobre la violación de la restricción.
+     * Define información adicional que puede ser asociada a la violación de
+     * esta restricción.
      *
-     * @return un arreglo de clases que extienden {@link Payload}
+     * @return arreglo de clases que extienden {@link Payload}.
      */
     Class<? extends Payload>[] payload() default {};
 }

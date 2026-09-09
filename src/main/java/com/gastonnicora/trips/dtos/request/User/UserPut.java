@@ -4,42 +4,32 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.NoArgsConstructor;
 
 /**
- * DTO para actualizar los datos básicos de un usuario.
+ * DTO utilizado para solicitar la actualización de los datos básicos de un
+ * usuario.
+ *
  * <p>
- * Hereda de {@link UserBasic} e incluye los campos:
- * </p>
- * <ul>
- * <li>{@code name}: Nombre del usuario</li>
- * <li>{@code lastname}: Apellido del usuario</li>
- * <li>{@code email}: Correo electrónico del usuario</li>
- * </ul>
- * <p>
- * Se utiliza típicamente en los endpoints de actualización de usuarios (PUT).
+ * Hereda de {@link UserBasic} la información básica del usuario, incluyendo su
+ * nombre, apellido y dirección de correo electrónico.
  * </p>
  *
  * <p>
- * Ejemplo de uso:
+ * Se utiliza en los endpoints de actualización de usuarios.
  * </p>
- *
- * <pre>
- * UserPut userPut = new UserPut("Gastón", "Nicora", "gaston@example.com");
- * String nombre = userPut.getName();
- * </pre>
  *
  * @author Gastón
  * @version 1.0
  * @since 2026-05-04
  */
-@Schema(description = "DTO de usuario para actualización (PUT)")
+@Schema(description = "Datos necesarios para actualizar la información básica de un usuario")
 @NoArgsConstructor
 public class UserPut extends UserBasic {
 
     /**
-     * Constructor completo.
+     * Crea una solicitud para actualizar los datos básicos de un usuario.
      *
-     * @param name Nombre del usuario
-     * @param lastname Apellido del usuario
-     * @param email Correo electrónico
+     * @param name nombre del usuario
+     * @param lastname apellido del usuario
+     * @param email dirección de correo electrónico del usuario
      */
     public UserPut(String name, String lastname, String email) {
         super(name, lastname, email);

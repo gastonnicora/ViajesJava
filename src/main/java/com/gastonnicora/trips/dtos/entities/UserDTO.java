@@ -15,42 +15,18 @@ import lombok.Setter;
 import lombok.ToString;
 
 /**
- * Data Transfer Object (DTO) que representa la información de un usuario.
+ * DTO utilizado para representar la información de un usuario en las respuestas
+ * de la API.
+ *
  * <p>
- * Se utiliza para exponer los datos de usuario en respuestas de la API, sin
- * incluir información sensible como la contraseña.
+ * Expone los datos necesarios para identificar y mostrar un usuario sin incluir
+ * información sensible, como su contraseña.
  * </p>
  *
  * <p>
- * Campos principales:
+ * Los roles contenidos en este DTO representan los permisos globales asignados
+ * al usuario dentro de la aplicación.
  * </p>
- * <ul>
- * <li>{@code uuid}: Identificador único del usuario.</li>
- * <li>{@code name}: Nombre del usuario.</li>
- * <li>{@code lastname}: Apellido del usuario.</li>
- * <li>{@code email}: Correo electrónico del usuario.</li>
- * <li>{@code role}: Conjunto de roles asignados al usuario.</li>
- * <li>{@code enabled}: Estado del usuario (habilitado o deshabilitado).</li>
- * <li>{@code createdAt}: Fecha y hora de creación del usuario.</li>
- * <li>{@code updatedAt}: Fecha y hora de última actualización.</li>
- * </ul>
- *
- * <p>
- * Ejemplo de JSON:
- * </p>
- *
- * <pre>
- * {
- *   "uuid": "550e8400-e29b-41d4-a716-446655440000",
- *   "name": "Juan",
- *   "lastname": "Perez",
- *   "email": "juanperez@mail.com",
- *   "role": ["USER"],
- *   "enabled": true,
- *   "createdAt": "2026-01-01T00:00:00",
- *   "updatedAt": "2026-01-01T00:00:00"
- * }
- * </pre>
  *
  * @author Gastón
  * @version 1.0
@@ -60,14 +36,14 @@ import lombok.ToString;
 @Setter
 @ToString
 @NoArgsConstructor
-@Schema(description = "DTO de usuario")
+@Schema(description = "Información pública de un usuario")
 public class UserDTO {
 
     /**
      * Identificador único del usuario.
      */
     @Schema(
-            description = "UUID único del usuario",
+            description = "Identificador único del usuario.",
             example = "550e8400-e29b-41d4-a716-446655440000"
     )
     private UUID uuid;
@@ -75,7 +51,10 @@ public class UserDTO {
     /**
      * Nombre del usuario.
      */
-    @Schema(description = "Nombre del usuario", example = "Juan")
+    @Schema(
+            description = "Nombre del usuario.",
+            example = "Juan"
+    )
     @NotBlank(message = "El nombre no puede quedar en blanco")
     @Size(max = 255, message = "El nombre no puede tener mas de 255 caracteres")
     private String name;
@@ -83,7 +62,10 @@ public class UserDTO {
     /**
      * Apellido del usuario.
      */
-    @Schema(description = "Apellido del usuario", example = "Perez")
+    @Schema(
+            description = "Apellido del usuario.",
+            example = "Perez"
+    )
     @NotBlank(message = "El apellido no puede quedar en blanco")
     @Size(max = 255, message = "El apellido no puede tener mas de 255 caracteres")
     private String lastname;
@@ -91,49 +73,76 @@ public class UserDTO {
     /**
      * Dirección de correo electrónico del usuario.
      */
-    @Schema(description = "Email del usuario", example = "juanperez@mail.com")
+    @Schema(
+            description = "Dirección de correo electrónico del usuario.",
+            example = "juanperez@mail.com"
+    )
     @NotBlank(message = "El email no puede quedar en blanco")
     @Size(max = 255, message = "El email no puede tener mas de 255 caracteres")
     private String email;
 
     /**
-     * Roles asignados al usuario.
+     * Conjunto de roles globales asignados al usuario.
      */
-    @Schema(description = "Roles del usuario", example = "[\"USER\"]")
+    @Schema(
+            description = "Roles globales asignados al usuario.",
+            example = "[\"USER\"]"
+    )
     private Set<Role> role;
 
     /**
-     * Indica si el usuario está habilitado o deshabilitado.
+     * Indica si la cuenta del usuario está habilitada.
+     *
+     * <p>
+     * Un usuario deshabilitado no puede utilizar la cuenta normalmente.
+     * </p>
      */
-    @Schema(description = "Estado del usuario", example = "true")
+    @Schema(
+            description = "Indica si la cuenta del usuario está habilitada.",
+            example = "true"
+    )
     private boolean enabled;
 
     /**
-     * Fecha y hora de creación del usuario.
+     * Fecha y hora en la que se creó el usuario.
      */
-    @Schema(description = "Fecha de creación del usuario", example = "2026-01-01T00:00:00")
+    @Schema(
+            description = "Fecha y hora de creación del usuario.",
+            example = "2026-01-01T00:00:00"
+    )
     private LocalDateTime createdAt;
 
     /**
      * Fecha y hora de la última actualización del usuario.
      */
-    @Schema(description = "Fecha de actualización del usuario", example = "2026-01-01T00:00:00")
+    @Schema(
+            description = "Fecha y hora de la última actualización del usuario.",
+            example = "2026-01-01T00:00:00"
+    )
     private LocalDateTime updatedAt;
 
     /**
-     * Constructor completo del DTO de usuario.
+     * Crea una instancia completa del DTO de usuario.
      *
-     * @param uuid Identificador único del usuario
-     * @param name Nombre del usuario
-     * @param lastname Apellido del usuario
-     * @param email Correo electrónico del usuario
-     * @param role ({@link Set})conjunto de {@link Role} asignados al usuario
-     * @param enabled Estado del usuario (habilitado o no)
-     * @param createdAt Fecha de creación
-     * @param updatedAt Fecha de actualización
+     * @param uuid identificador único del usuario
+     * @param name nombre del usuario
+     * @param lastname apellido del usuario
+     * @param email dirección de correo electrónico del usuario
+     * @param role conjunto de roles globales asignados al usuario
+     * @param enabled indica si la cuenta está habilitada
+     * @param createdAt fecha y hora de creación
+     * @param updatedAt fecha y hora de la última actualización
      */
-    public UserDTO(UUID uuid, String name, String lastname, String email, Set<Role> role, boolean enabled,
-            LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public UserDTO(
+            UUID uuid,
+            String name,
+            String lastname,
+            String email,
+            Set<Role> role,
+            boolean enabled,
+            LocalDateTime createdAt,
+            LocalDateTime updatedAt) {
+
         this.uuid = uuid;
         this.name = name;
         this.lastname = lastname;

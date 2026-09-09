@@ -8,93 +8,141 @@ import jakarta.validation.constraints.Size;
 import lombok.NoArgsConstructor;
 
 /**
- * DTO para crear un nuevo usuario.
- * <p>
- * Hereda de {@link UserBasic} e incluye la contraseña.
- * </p>
- * <ul>
- * <li>{@code name}: Nombre del usuario</li>
- * <li>{@code lastname}: Apellido del usuario</li>
- * <li>{@code email}: Correo electrónico del usuario</li>
- * <li>{@code password}: Contraseña del usuario</li>
- * <li>{@code confirmPassword}: Confirmación de la contraseña</li>
- * </ul>
+ * DTO utilizado para solicitar la creación de un nuevo usuario.
  *
  * <p>
- * Se utiliza en los endpoints de registro de usuarios (POST).
+ * Hereda de {@link UserBasic} la información básica del usuario e incorpora la
+ * contraseña y su confirmación.
  * </p>
  *
- * Ejemplo de JSON:
+ * <p>
+ * Los campos cuentan con validaciones mediante Jakarta Bean Validation para
+ * garantizar que las contraseñas sean obligatorias y cumplan con la longitud
+ * mínima y máxima establecida.
+ * </p>
  *
- * <pre>
- * {
- *   "name": "Gastón",
- *   "lastname": "Nicora",
- *   "email": "gaston@example.com",
- *   "password": "123456",
- *   "confirmPassword": "123456"
- * }
- * </pre>
+ * <p>
+ * La validación {@link FieldsMatch} garantiza que los campos {@code password} y
+ * {@code confirmPassword} contengan el mismo valor.
+ * </p>
+ *
+ * <p>
+ * Se utiliza en los endpoints de registro de usuarios.
+ * </p>
  *
  * @author Gastón
  * @version 1.0
  * @since 2026-05-04
  */
 @FieldsMatch(field = "password", fieldMatch = "confirmPassword", message = "Las contraseñas deben coincidir")
-@Schema(description = "DTO de usuario para creación (POST)")
+@Schema(description = "Datos necesarios para crear un nuevo usuario")
 @NoArgsConstructor
 public class UserCreate extends UserBasic {
 
     /**
-     * Longitud mínima de la contraseña.
+     * Longitud mínima requerida para la contraseña.
      */
     private final int minLengthPass = 8;
 
     /**
      * Contraseña del usuario.
+     *
+     * <p>
+     * Es obligatoria y debe contener entre {@code minLengthPass} y 255
+     * caracteres.
+     * </p>
      */
-    @Schema(description = "Contraseña con mínimo " + minLengthPass + " caracteres.", example = "12345678")
+    @Schema(
+            description = "Contraseña del usuario con un mínimo de " + minLengthPass + " caracteres.",
+            example = "12345678",
+            format = "password",
+            maxLength = 255
+    )
     @NotBlank(message = "La contraseña no puede quedar en blanco")
-    @Size(min = minLengthPass, message = "La contraseña debe contener al menos " + minLengthPass
-            + " y máximo 255 caracteres", max = 255)
+    @Size(
+            min = minLengthPass,
+            max = 255,
+            message = "La contraseña debe contener al menos " + minLengthPass
+            + " y máximo 255 caracteres"
+    )
     private String password;
 
     /**
-     * Confirmación de la contraseña.
+     * Confirmación de la contraseña del usuario.
+     *
+     * <p>
+     * Es obligatoria y debe contener entre {@code minLengthPass} y 255
+     * caracteres. Su valor debe coincidir con {@code password}.
+     * </p>
      */
-    @Schema(description = "Repetición de la contraseña", example = "12345678")
+    @Schema(
+            description = "Confirmación de la contraseña del usuario.",
+            example = "12345678",
+            format = "password",
+            maxLength = 255
+    )
     @NotBlank(message = "La contraseña no puede quedar en blanco")
-    @Size(min = minLengthPass, message = "La contraseña debe contener al menos " + minLengthPass
-            + " y máximo 255 caracteres", max = 255)
+    @Size(
+            min = minLengthPass,
+            max = 255,
+            message = "La contraseña debe contener al menos " + minLengthPass
+            + " y máximo 255 caracteres"
+    )
     private String confirmPassword;
 
     /**
-     * Constructor completo.
+     * Crea una solicitud para registrar un nuevo usuario.
      *
-     * @param name Nombre del usuario
-     * @param lastname Apellido del usuario
-     * @param email Email del usuario
-     * @param password Contraseña del usuario
-     * @param confirmPass Confirmación de la contraseña
+     * @param name nombre del usuario
+     * @param lastname apellido del usuario
+     * @param email dirección de correo electrónico del usuario
+     * @param password contraseña del usuario
+     * @param confirmPass confirmación de la contraseña
      */
-    public UserCreate(String name, String lastname, String email, String password, String confirmPass) {
+    public UserCreate(
+            String name,
+            String lastname,
+            String email,
+            String password,
+            String confirmPass) {
+
         super(name, lastname, email);
         this.password = password;
         this.confirmPassword = confirmPass;
     }
 
+    /**
+     * Obtiene la contraseña del usuario.
+     *
+     * @return contraseña del usuario
+     */
     public String getPassword() {
         return password;
     }
 
+    /**
+     * Establece la contraseña del usuario.
+     *
+     * @param password contraseña del usuario
+     */
     public void setPassword(String password) {
         this.password = password;
     }
 
+    /**
+     * Obtiene la confirmación de la contraseña.
+     *
+     * @return confirmación de la contraseña
+     */
     public String getConfirmPassword() {
         return confirmPassword;
     }
 
+    /**
+     * Establece la confirmación de la contraseña.
+     *
+     * @param confirmPass confirmación de la contraseña
+     */
     public void setConfirmPassword(String confirmPass) {
         this.confirmPassword = confirmPass;
     }

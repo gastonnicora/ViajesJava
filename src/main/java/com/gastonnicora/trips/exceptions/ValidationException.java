@@ -7,28 +7,18 @@ import java.util.Map;
 import org.springframework.http.HttpStatus;
 
 /**
- * Excepción personalizada de la aplicación utilizada para representar errores
- * de validación de múltiples campos en la solicitud (HTTP 400 - Bad Request).
+ * Excepción personalizada de la aplicación para representar errores de
+ * validación de múltiples campos en la solicitud (HTTP 400 - Bad Request).
  *
  * <p>
- * Se utiliza cuando los datos enviados por el cliente no cumplen con las reglas
- * de negocio o con la validación de los campos, por ejemplo:
- * </p>
- * <ul>
- * <li>Campos requeridos faltantes</li>
- * <li>Formato de datos inválido (email, fecha, números)</li>
- * <li>Reglas de negocio incumplidas</li>
- * </ul>
- *
- * <p>
- * Esta excepción permite enviar un mapa de errores donde la clave es el nombre
- * del campo y el valor es una lista de mensajes de error asociados al mismo.
+ * Permite asociar uno o varios mensajes de error a los campos que presentan
+ * errores de validación.
  * </p>
  *
  * <p>
  * Se utiliza en conjunto con
- * {@link com.gastonnicora.trips.exceptions.handler.GlobalExceptionHandler} para
- * generar respuestas API estandarizadas.
+ * {@link com.gastonnicora.trips.exceptions.handler.GlobalExceptionHandler}
+ * para generar respuestas de error estandarizadas con código HTTP 400.
  * </p>
  *
  * @author Gastón
@@ -38,19 +28,24 @@ import org.springframework.http.HttpStatus;
 public class ValidationException extends RuntimeException {
 
     /**
-     * Código HTTP asociado al error (400 - Bad Request)
+     * Código HTTP asociado a la excepción (400 - Bad Request).
      */
     private final int status = HttpStatus.BAD_REQUEST.value();
 
     /**
-     * Mapa de errores por campo
+     * Mapa que contiene los errores asociados a los campos de la solicitud.
+     *
+     * <p>
+     * La clave representa el nombre del campo y el valor contiene la lista de
+     * mensajes de error asociados al mismo.
+     * </p>
      */
     private Map<String, List<String>> errors = null;
 
     /**
      * Constructor que inicializa la excepción con un mensaje descriptivo.
      *
-     * @param message Mensaje de error
+     * @param message Mensaje descriptivo del error.
      */
     public ValidationException(String message) {
         super(message);
@@ -58,10 +53,10 @@ public class ValidationException extends RuntimeException {
 
     /**
      * Constructor que inicializa la excepción con un mensaje descriptivo y un
-     * mapa de errores por campo.
+     * mapa de errores asociados a los campos de la solicitud.
      *
-     * @param message Mensaje de error
-     * @param errors Mapa de errores por campo
+     * @param message Mensaje descriptivo del error.
+     * @param errors  Mapa de errores asociado a los campos de la solicitud.
      */
     public ValidationException(String message, Map<String, List<String>> errors) {
         super(message);
@@ -71,36 +66,41 @@ public class ValidationException extends RuntimeException {
     /**
      * Obtiene el código HTTP asociado a la excepción.
      *
-     * @return Código HTTP 400
+     * @return Código HTTP 400.
      */
     public int getStatus() {
         return status;
     }
 
     /**
-     * Obtiene el mapa de errores por campo.
+     * Obtiene el mapa de errores asociados a los campos de la solicitud.
      *
-     * @return Mapa de errores
+     * @return Mapa que relaciona cada campo con sus respectivos mensajes de error.
      */
     public Map<String, List<String>> getErrors() {
         return errors;
     }
 
     /**
-     * Establece un mapa de errores por campo.
+     * Establece el mapa de errores asociados a los campos de la solicitud.
      *
-     * @param errors Mapa de errores
+     * @param errors Mapa que relaciona cada campo con sus respectivos mensajes de
+     *               error.
      */
     public void setErrors(Map<String, List<String>> errors) {
         this.errors = errors;
     }
 
     /**
-     * Agrega un error para un campo específico. Si el campo no existe en el
-     * mapa, se crea la lista automáticamente.
+     * Agrega un mensaje de error asociado a un campo específico.
      *
-     * @param field Campo asociado al error
-     * @param message Mensaje de error
+     * <p>
+     * Si el mapa de errores no ha sido inicializado, se crea una estructura
+     * inicial para almacenar el campo y su mensaje asociado.
+     * </p>
+     *
+     * @param field   Nombre del campo que presenta el error de validación.
+     * @param message Mensaje descriptivo del error asociado al campo.
      */
     public void addError(String field, String message) {
         if (errors == null) {

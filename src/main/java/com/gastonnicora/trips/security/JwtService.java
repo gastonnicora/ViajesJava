@@ -16,19 +16,18 @@ import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 
 /**
- * Servicio para la generación, validación y extracción de información de tokens
- * JWT.
+ * Servicio encargado de la generación, validación y extracción de información
+ * de tokens JWT.
+ *
  * <p>
- * Utiliza HS256 con una clave secreta definida en
- * {@code application.properties}.
+ * Utiliza una clave secreta configurada mediante la propiedad
+ * {@code jwt.secret} para firmar y validar los tokens.
  * </p>
  *
- * Funcionalidades:
- * <ul>
- * <li>Generar tokens JWT con email, versión y UUID del usuario.</li>
- * <li>Extraer información del token (email, versión, UUID).</li>
- * <li>Validar que un token sea válido.</li>
- * </ul>
+ * <p>
+ * Proporciona operaciones para generar tokens JWT, extraer información de sus
+ * claims y comprobar su validez.
+ * </p>
  *
  * @author Gastón
  * @version 1.0
@@ -43,7 +42,8 @@ public class JwtService {
     private SecretKey key;
 
     /**
-     * Inicializa la clave secreta a partir de la propiedad {@code jwt.secret}.
+     * Inicializa la clave utilizada para firmar y validar los tokens JWT a partir
+     * de la propiedad {@code jwt.secret}.
      */
     @PostConstruct
     public void init() {
@@ -53,10 +53,16 @@ public class JwtService {
     /**
      * Genera un token JWT para un usuario.
      *
-     * @param email Correo electrónico del usuario
-     * @param version Versión del token
-     * @param uuid UUID del usuario
-     * @return JWT como String
+     * <p>
+     * El token contiene el correo electrónico como subject, la versión del
+     * token, el identificador del usuario, un identificador único del token,
+     * la fecha de emisión y la fecha de expiración.
+     * </p>
+     *
+     * @param email   Correo electrónico del usuario.
+     * @param version Versión del token.
+     * @param uuid    Identificador único del usuario.
+     * @return Token JWT generado.
      */
     public String generateToken(String email, int version, UUID uuid) {
         return Jwts.builder()
@@ -71,11 +77,11 @@ public class JwtService {
     }
 
     /**
-     * Parsea un JWT y obtiene sus claims.
+     * Parsea un token JWT y obtiene sus claims.
      *
-     * @param token JWT
-     * @return Claims del token
-     * @throws JwtException si el token no es válido
+     * @param token Token JWT que se desea procesar.
+     * @return Claims contenidos en el token.
+     * @throws JwtException Si el token no es válido.
      */
     private Claims parseClaims(String token) {
         return Jwts.parser()
@@ -86,10 +92,11 @@ public class JwtService {
     }
 
     /**
-     * Extrae el email (subject) del token.
+     * Extrae el correo electrónico del usuario almacenado como subject del
+     * token.
      *
-     * @param token JWT
-     * @return Email del usuario
+     * @param token Token JWT.
+     * @return Correo electrónico del usuario.
      */
     public String extractUsername(String token) {
         return parseClaims(token).getSubject();
@@ -98,28 +105,32 @@ public class JwtService {
     /**
      * Extrae la versión del token.
      *
-     * @param token JWT
-     * @return Versión como Integer
+     * @param token Token JWT.
+     * @return Versión del token.
      */
     public Integer extractVersion(String token) {
         return parseClaims(token).get("ver", Integer.class);
     }
 
     /**
-     * Extrae el UUID del usuario del token.
+     * Extrae el identificador único del usuario almacenado en el token.
      *
-     * @param token JWT
-     * @return UUID del usuario
+     * @param token Token JWT.
+     * @return Identificador único del usuario.
      */
     public UUID extractUUID(String token) {
         return UUID.fromString(parseClaims(token).get("userId", String.class));
     }
 
     /**
-     * Valida si un token es válido.
+     * Verifica si un token JWT es válido.
      *
-     * @param token JWT
-     * @return true si es válido, false si no lo es
+     * <p>
+     * La validación se realiza mediante el análisis de los claims del token.
+     * </p>
+     *
+     * @param token Token JWT que se desea validar.
+     * @return {@code true} si el token es válido; {@code false} en caso contrario.
      */
     public boolean isValid(String token) {
         try {

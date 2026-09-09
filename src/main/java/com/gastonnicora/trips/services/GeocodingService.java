@@ -7,7 +7,13 @@ import com.gastonnicora.trips.dtos.response.company.AddressResponse;
 import com.gastonnicora.trips.exceptions.InternalErrorException;
 
 /**
- * Servicio para obtener direcciones a partir de coordenadas.
+ * Servicio encargado de obtener direcciones a partir de coordenadas
+ * geográficas.
+ *
+ * <p>
+ * Utiliza un cliente HTTP para consultar el servicio de geocodificación
+ * mediante coordenadas de latitud y longitud.
+ * </p>
  *
  * @author Gastón
  * @version 1.0
@@ -19,10 +25,11 @@ public class GeocodingService {
     private final RestClient restClient;
 
     /**
-     * Constructor de la clase GeocodingService.
+     * Crea una instancia del servicio de geocodificación e inicializa el cliente
+     * HTTP utilizado para realizar las consultas.
      *
      * @throws InternalErrorException Si ocurre un error al inicializar el
-     * servicio de geocodificación
+     *         servicio de geocodificación.
      */
     public GeocodingService() {
         try {
@@ -39,12 +46,18 @@ public class GeocodingService {
     }
 
     /**
-     * Obtiene la dirección a partir de coordenadas.
+     * Obtiene una dirección a partir de sus coordenadas geográficas.
      *
-     * @param latitud double con la latitud de la ubicación.
-     * @param longitud double con la longitud de la ubicación.
-     * @return {@link AddressResponse} con la dirección correspondiente
-     * @throws InternalErrorException Si ocurre un error al obtener la dirección
+     * <p>
+     * Realiza una consulta de geocodificación inversa utilizando la latitud y
+     * longitud proporcionadas y devuelve la información obtenida.
+     * </p>
+     *
+     * @param latitud Latitud de la ubicación.
+     * @param longitud Longitud de la ubicación.
+     * @return {@link AddressResponse} con la información de la dirección
+     *         correspondiente.
+     * @throws InternalErrorException Si ocurre un error al obtener la dirección.
      */
     public AddressResponse obtenerDireccion(double latitud, double longitud) {
         try {

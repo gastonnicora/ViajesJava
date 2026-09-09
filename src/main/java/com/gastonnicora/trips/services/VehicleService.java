@@ -20,7 +20,8 @@ import jakarta.transaction.Transactional;
  * Servicio encargado de gestionar los vehículos asociados a empresas.
  *
  * <p>
- * Permite crear, consultar y desactivar vehículos.
+ * Permite crear, consultar y desactivar vehículos, así como validar su
+ * existencia, estado y asociación con la empresa correspondiente.
  * </p>
  *
  * @author Gastón
@@ -36,8 +37,10 @@ public class VehicleService {
     /**
      * Crea una instancia del servicio de vehículos.
      *
-     * @param vehicleRepository repositorio de vehículos
-     * @param vehicleMapper mapper utilizado para convertir vehículos a DTOs
+     * @param vehicleRepository Repositorio utilizado para gestionar los
+     *                          vehículos.
+     * @param vehicleMapper     Mapper utilizado para convertir entidades
+     *                          {@link Vehicle} en {@link VehicleDTO}.
      */
     public VehicleService(VehicleRepository vehicleRepository, VehicleMapper vehicleMapper) {
         this.vehicleRepository = vehicleRepository;
@@ -47,41 +50,57 @@ public class VehicleService {
     /**
      * Busca un vehículo activo mediante su UUID.
      *
-     * @param vehicleUuid UUID del vehículo
-     * @return entidad del vehículo encontrado
-     * @throws NotFoundException si el vehículo no existe o está inactivo
+     * @param vehicleUuid UUID del vehículo que se desea obtener.
+     * @return {@link Vehicle} correspondiente al vehículo encontrado.
+     * @throws NotFoundException Si el vehículo no existe o se encuentra
+     *                           inactivo.
      */
     public Vehicle findByUuid(UUID vehicleUuid) {
-        Vehicle vehicle = vehicleRepository.findByUuidAndActiveTrue(vehicleUuid).orElseThrow(() -> new NotFoundException("Vehículo no encontrado"));
+        Vehicle vehicle = vehicleRepository.findByUuidAndActiveTrue(vehicleUuid)
+                .orElseThrow(() -> new NotFoundException("Vehículo no encontrado"));
         return vehicle;
     }
 
     /**
      * Crea un nuevo vehículo asociado a una empresa.
      *
-     * @param company Empresa a la que se asociará el vehículo.
-     * @param vehicleCreate DTO que contiene los datos del vehículo a crear.
-     * @return DTO del vehículo creado.
-     * @throws ConflictException si ya existe un vehículo con la misma patente
-     * para la empresa.
+     * <p>
+     * Antes de crear el vehículo, verifica que no exista otro vehículo activo
+     * con la misma patente asociado a la empresa.
+     * </p>
+     *
+     * @param company       Empresa a la que se asociará el vehículo.
+     * @param vehicleCreate Datos del vehículo que se desea crear.
+     * @return {@link VehicleDTO} correspondiente al vehículo creado.
+     * @throws ConflictException Si ya existe un vehículo activo con la misma
+     *                           patente para la empresa.
      */
     public VehicleDTO createVehicle(Company company, VehicleCreate vehicleCreate) {
         if (vehicleRepository
                 .findByCompanyUuidAndPlateAndActiveTrue(company.getUuid(), vehicleCreate.getPlate())
                 .isPresent()) {
             throw new ConflictException("Ya existe un vehículo activo con esa patente");
-        } // TODO 🚀:  modificar patentes para sacar espacios y letras en mayusculas
+        } // TODO 🚀: modificar patentes para sacar espacios y letras en mayusculas
 
-        Vehicle vehicle = vehicleRepository.save(new Vehicle(company, vehicleCreate.getPlate(), vehicleCreate.getModel(), vehicleCreate.getCapacity()));
+        Vehicle vehicle = vehicleRepository.save(
+                new Vehicle(company, vehicleCreate.getPlate(), vehicleCreate.getModel(), vehicleCreate.getCapacity()));
         return vehicleMapper.toDTO(vehicle);
     }
 
     /**
-     * Elimina un vehículo existente marcándolo como inactivo.
+     * Desactiva un vehículo existente asociado a una empresa.
      *
-     * @param vehicleUuid UUID del vehículo a eliminar.
-     * @throws NotFoundException si no existe un vehículo con el UUID
-     * proporcionado.
+     * <p>
+     * Verifica que el vehículo exista y que pertenezca a la empresa indicada
+     * antes de marcarlo como inactivo.
+     * </p>
+     *
+     * @param companyUuid UUID de la empresa a la que debe pertenecer el vehículo.
+     * @param vehicleUuid UUID del vehículo que se desea desactivar.
+     * @throws NotFoundException  Si no existe un vehículo activo con el UUID
+     *                            proporcionado.
+     * @throws ForbiddenException Si el vehículo no pertenece a la empresa
+     *                            indicada.
      */
     @Transactional
     public void deleteVehicle(UUID companyUuid, UUID vehicleUuid) {
@@ -94,12 +113,12 @@ public class VehicleService {
     }
 
     /**
-     * Obtiene un vehículo existente por su UUID.
+     * Obtiene un vehículo activo mediante su UUID.
      *
-     * @param vehicleUuid UUID del vehículo a obtener.
-     * @return DTO del vehículo encontrado.
-     * @throws NotFoundException si no existe un vehículo con el UUID
-     * proporcionado.
+     * @param vehicleUuid UUID del vehículo que se desea obtener.
+     * @return {@link VehicleDTO} correspondiente al vehículo encontrado.
+     * @throws NotFoundException Si no existe un vehículo activo con el UUID
+     *                           proporcionado.
      */
     public VehicleDTO getVehicle(UUID vehicleUuid) {
         Vehicle vehicle = findByUuid(vehicleUuid);

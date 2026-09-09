@@ -7,51 +7,47 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.NoArgsConstructor;
 
 /**
- * DTO genérico para respuestas que retornan listas de datos.
- * <p>
- * Contiene la lista de elementos y el total de elementos.
- * </p>
- * <p>
- * Campos principales:
- * </p>
- * <ul>
- * <li>{@code data}: Lista de elementos devueltos.</li>
- * <li>{@code total}: Total de elementos en la lista.</li>
- * </ul>
+ * DTO genérico utilizado para representar respuestas de la API que contienen
+ * una lista de elementos.
  *
  * <p>
- * Ejemplo de uso:
+ * Contiene la lista de elementos devueltos y el total de elementos que contiene
+ * dicha lista.
  * </p>
  *
- * <pre>
- * ListResponse&lt;UserDTO&gt; response = new ListResponse&lt;&gt;(userList);
- * int totalUsers = response.getTotal();
- * List&lt;UserDTO&gt; users = response.getData();
- * </pre>
+ * <p>
+ * Cuando la lista recibida es {@code null}, se inicializa una lista vacía y el
+ * total se establece en {@code 0}.
+ * </p>
  *
- * @param <T> Tipo de los elementos de la lista
+ * @param <T> Tipo de los elementos contenidos en la lista.
  * @author Gastón
  * @version 1.0
  * @since 2026-05-04
  */
-@Schema(description = "DTO de respuesta de lista genérica")
+@Schema(description = "DTO genérico utilizado para representar una respuesta de la API que contiene una lista de elementos.")
 @NoArgsConstructor
 public class ListResponse<T> {
 
     /**
-     * Lista de elementos devueltos
+     * Lista de elementos devueltos en la respuesta.
      */
     private List<T> data = new ArrayList<>();
 
     /**
-     * Total de elementos en la lista
+     * Total de elementos contenidos en la lista.
      */
     private int total = 0;
 
     /**
-     * Constructor que inicializa la lista y calcula automáticamente el total.
+     * Constructor que inicializa la lista de elementos y calcula su total.
      *
-     * @param data Lista de elementos
+     * <p>
+     * Si {@code data} es {@code null}, se inicializa una lista vacía y el total
+     * se establece en {@code 0}.
+     * </p>
+     *
+     * @param data Lista de elementos que contiene la respuesta.
      */
     public ListResponse(List<T> data) {
         this.data = (data != null) ? new ArrayList<>(data) : new ArrayList<>();
@@ -59,19 +55,22 @@ public class ListResponse<T> {
     }
 
     /**
-     * Obtiene la lista de elementos.
+     * Obtiene la lista de elementos devueltos.
      *
-     * @return Lista de elementos
+     * @return Lista de elementos de la respuesta.
      */
     public List<T> getData() {
         return data;
     }
 
     /**
-     * Establece una nueva lista de elementos y actualiza automáticamente el
-     * total.
+     * Establece la lista de elementos y actualiza el total según su cantidad.
      *
-     * @param data Nueva lista de elementos
+     * <p>
+     * Si {@code data} es {@code null}, el total se establece en {@code 0}.
+     * </p>
+     *
+     * @param data Nueva lista de elementos.
      */
     public void setData(List<T> data) {
         this.data = data;
@@ -79,19 +78,20 @@ public class ListResponse<T> {
     }
 
     /**
-     * Obtiene el total de elementos en la lista.
+     * Obtiene el total de elementos contenidos en la lista.
      *
-     * @return Total de elementos
+     * @return Total de elementos de la lista.
      */
     public int getTotal() {
         return total;
     }
 
     /**
-     * Este método recalcula el total según la lista actual. Si se desea
-     * establecer un total manualmente, se puede pasar un valor, pero se
-     * recomienda dejar que se calcule automáticamente.
+     * Recalcula el total de elementos según la lista actual.
      *
+     * <p>
+     * Si la lista es {@code null}, el total se establece en {@code 0}.
+     * </p>
      */
     public void setTotal() {
         this.total = this.data != null ? this.data.size() : 0;

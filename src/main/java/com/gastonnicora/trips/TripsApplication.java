@@ -6,17 +6,38 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
- * Clase principal de la aplicación Trips. Habilita tareas programadas y ejecuta
- * código al iniciar la aplicación.
+ * Clase principal de la aplicación Trips.
+ *
+ * <p>
+ * Habilita la ejecución de tareas programadas y permite ejecutar acciones al
+ * iniciar la aplicación mediante {@link CommandLineRunner}.
+ * </p>
  */
 @EnableScheduling
 @SpringBootApplication
 public class TripsApplication implements CommandLineRunner {
 
+    /**
+     * Punto de entrada principal de la aplicación.
+     *
+     * @param args argumentos recibidos al iniciar la aplicación.
+     */
     public static void main(String[] args) {
         SpringApplication.run(TripsApplication.class, args);
     }
 
+    /**
+     * Ejecuta las acciones configuradas al iniciar la aplicación.
+     *
+     * <p>
+     * Obtiene el perfil activo de Spring y muestra mensajes informativos sobre
+     * el inicio y disponibilidad de la aplicación.
+     * </p>
+     *
+     * @param args argumentos recibidos durante el inicio de la aplicación.
+     * @throws Exception Si ocurre un error durante la ejecución del proceso de
+     *                   inicio.
+     */
     @Override
     public void run(String... args) throws Exception {
         // Obtiene el perfil activo de Spring, 'prod' por defecto

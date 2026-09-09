@@ -8,16 +8,21 @@ import jakarta.validation.constraints.Size;
 import lombok.NoArgsConstructor;
 
 /**
- * DTO para cambiar la contraseña de un usuario.
+ * DTO utilizado para solicitar el cambio de contraseña de un usuario.
  * <p>
- * Contiene la contraseña actual, la nueva contraseña y la confirmación de la
- * nueva contraseña. Aplica validaciones para asegurar que los campos no estén
- * vacíos, tengan una longitud mínima y máxima, y que la nueva contraseña
- * coincida con la confirmación.
+ * Contiene la contraseña actual del usuario, la nueva contraseña y la
+ * confirmación de la nueva contraseña.
  * </p>
+ *
  * <p>
- * La validación {@link FieldsMatch} asegura que {@code password} y
- * {@code confirmPassword} sean iguales.
+ * Los campos cuentan con validaciones mediante Jakarta Bean Validation para
+ * garantizar que las contraseñas sean obligatorias y cumplan con la longitud
+ * mínima y máxima establecida.
+ * </p>
+ *
+ * <p>
+ * La validación {@link FieldsMatch} garantiza que los campos {@code password}
+ * y {@code confirmPassword} contengan el mismo valor.
  * </p>
  *
  * @author Gastón
@@ -25,7 +30,7 @@ import lombok.NoArgsConstructor;
  * @since 2026-05-04
  */
 @FieldsMatch(field = "password", fieldMatch = "confirmPassword", message = "Las contraseñas deben coincidir")
-@Schema(description = "DTO de usuario para cambiar la contraseña")
+@Schema(description = "DTO utilizado para solicitar el cambio de contraseña de un usuario")
 @NoArgsConstructor
 public class UserChangePassword {
 
@@ -33,8 +38,15 @@ public class UserChangePassword {
 
     /**
      * Contraseña actual del usuario.
+     * <p>
+     * Es obligatoria y debe contener entre {@code minLengthPass} y 255
+     * caracteres.
+     * </p>
      */
-    @Schema(description = "Contraseña actual", example = "12345678")
+    @Schema(
+            description = "Contraseña actual del usuario",
+            example = "12345678"
+    )
     @NotBlank(message = "La contraseña actual no puede quedar en blanco")
     @Size(min = minLengthPass, max = 255, message = "La contraseña debe contener al menos " + minLengthPass
             + " y máximo 255 caracteres")
@@ -42,8 +54,15 @@ public class UserChangePassword {
 
     /**
      * Nueva contraseña del usuario.
+     * <p>
+     * Es obligatoria y debe contener entre {@code minLengthPass} y 255
+     * caracteres.
+     * </p>
      */
-    @Schema(description = "Nueva contraseña", example = "12345678")
+    @Schema(
+            description = "Nueva contraseña que reemplazará a la contraseña actual",
+            example = "12345678"
+    )
     @NotBlank(message = "La nueva contraseña no puede quedar en blanco")
     @Size(min = minLengthPass, max = 255, message = "La contraseña debe contener al menos " + minLengthPass
             + " y máximo 255 caracteres")
@@ -51,8 +70,15 @@ public class UserChangePassword {
 
     /**
      * Confirmación de la nueva contraseña.
+     * <p>
+     * Es obligatoria y debe contener entre {@code minLengthPass} y 255
+     * caracteres. Su valor debe coincidir con {@code password}.
+     * </p>
      */
-    @Schema(description = "Repetición de la nueva contraseña", example = "12345678")
+    @Schema(
+            description = "Confirmación de la nueva contraseña",
+            example = "12345678"
+    )
     @NotBlank(message = "La nueva contraseña no puede quedar en blanco")
     @Size(min = minLengthPass, max = 255, message = "La contraseña debe contener al menos " + minLengthPass
             + " y máximo 255 caracteres")
@@ -71,26 +97,56 @@ public class UserChangePassword {
         this.confirmPassword = confirmPassword;
     }
 
+    /**
+     * Obtiene la contraseña actual del usuario.
+     *
+     * @return Contraseña actual
+     */
     public String getPasswordOld() {
         return passwordOld;
     }
 
+    /**
+     * Establece la contraseña actual del usuario.
+     *
+     * @param passwordOld Contraseña actual
+     */
     public void setPasswordOld(String passwordOld) {
         this.passwordOld = passwordOld;
     }
 
+    /**
+     * Obtiene la nueva contraseña del usuario.
+     *
+     * @return Nueva contraseña
+     */
     public String getPassword() {
         return password;
     }
 
+    /**
+     * Establece la nueva contraseña del usuario.
+     *
+     * @param password Nueva contraseña
+     */
     public void setPassword(String password) {
         this.password = password;
     }
 
+    /**
+     * Obtiene la confirmación de la nueva contraseña.
+     *
+     * @return Confirmación de la nueva contraseña
+     */
     public String getConfirmPassword() {
         return confirmPassword;
     }
 
+    /**
+     * Establece la confirmación de la nueva contraseña.
+     *
+     * @param confirmPassword Confirmación de la nueva contraseña
+     */
     public void setConfirmPassword(String confirmPassword) {
         this.confirmPassword = confirmPassword;
     }

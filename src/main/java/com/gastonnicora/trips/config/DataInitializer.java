@@ -9,37 +9,40 @@ import com.gastonnicora.trips.services.UserService;
 
 /**
  * Configuración encargada de inicializar datos al arrancar la aplicación.
+ *
  * <p>
- * Crea un usuario SUPER_ADMIN por defecto si no existe, utilizando las
- * credenciales definidas en las variables de entorno `superadmin.email` y
- * `superadmin.password`. Este usuario tiene acceso completo a todas las
- * funcionalidades de la aplicación.
+ * Crea un usuario con rol {@code SUPER_ADMIN} si no existe, utilizando las
+ * credenciales definidas mediante las propiedades {@code superadmin.email} y
+ * {@code superadmin.password}.
  * </p>
  */
 @Configuration
 public class DataInitializer {
 
     /**
-     * Email del usuario SUPER_ADMIN, obtenido desde la configuración. Se espera
-     * una dirección de correo válida.
+     * Dirección de correo electrónico del usuario {@code SUPER_ADMIN}, obtenida
+     * desde la configuración de la aplicación.
      */
     @Value("${superadmin.email}")
     private String email;
 
     /**
-     * Contraseña del usuario SUPER_ADMIN, obtenida desde la configuración.
+     * Contraseña del usuario {@code SUPER_ADMIN}, obtenida desde la
+     * configuración de la aplicación.
      */
     @Value("${superadmin.password}")
     private String password;
 
     /**
-     * Ejecuta lógica al iniciar la aplicación para crear un usuario SUPER_ADMIN
-     * si no existe. Este método se ejecuta automáticamente al inicio del ciclo
-     * de vida de la aplicación.
+     * Crea un {@link CommandLineRunner} que inicializa el usuario
+     * {@code SUPER_ADMIN} al iniciar la aplicación.
      *
-     * @param userService servicio de usuarios utilizado para crear el
-     * SUPER_ADMIN
-     * @return un {@link CommandLineRunner} que inicializa los datos de usuario.
+     * <p>
+     * Si el usuario ya existe, no se crea uno nuevo.
+     * </p>
+     *
+     * @param userService servicio utilizado para gestionar usuarios
+     * @return ejecutor que inicializa el usuario {@code SUPER_ADMIN}
      */
     @Bean
     CommandLineRunner init(UserService userService) {

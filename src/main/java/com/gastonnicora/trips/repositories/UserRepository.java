@@ -10,63 +10,69 @@ import com.gastonnicora.trips.entities.User;
 import com.gastonnicora.trips.enums.Role;
 
 /**
- * Repositorio para gestionar la entidad {@link User}.
+ * Repositorio encargado de gestionar la persistencia de entidades {@link User}.
+ *
  * <p>
- * Proporciona métodos para consultar usuarios por correo electrónico, UUID y
- * roles entre otras opciones. Utiliza Spring Data JPA para el acceso a la base
- * de datos.
+ * Proporciona operaciones para consultar usuarios por correo electrónico,
+ * identificador único, estado de habilitación y rol.
  * </p>
  */
 public interface UserRepository extends JpaRepository<User, UUID> {
 
     /**
-     * Busca un usuario por su correo electrónico y su estado de habilitación.
+     * Busca usuarios por su correo electrónico y estado de habilitación.
      *
-     * @param email Correo electrónico
-     * @param enabled Estado de habilitación
-     * @return {@link Optional} con el usuario si existe
+     * @param email   Correo electrónico del usuario.
+     * @param enabled Estado de habilitación del usuario.
+     * @return Lista de usuarios que coinciden con el correo electrónico y estado
+     *         indicados.
      */
     List<User> findByEmailAndEnabled(String email, boolean enabled);
 
     /**
-     * Busca un usuario por su correo electrónico solo si está habilitado.
+     * Busca un usuario por su correo electrónico únicamente si se encuentra
+     * habilitado.
      *
-     * @param email Correo electrónico
-     * @return {@link Optional} con el usuario si existe y está habilitado
+     * @param email Correo electrónico del usuario.
+     * @return {@link Optional} que contiene el usuario encontrado, o vacío si no
+     *         existe
+     *         un usuario habilitado con el correo indicado.
      */
     Optional<User> findByEmailAndEnabledTrue(String email);
 
     /**
-     * Verifica si existe un usuario habilitado con el correo electrónico
-     * indicado.
+     * Verifica si existe un usuario habilitado con el correo electrónico indicado.
      *
-     * @param email Correo electrónico
-     * @return true si existe, false en caso contrario
+     * @param email Correo electrónico del usuario.
+     * @return {@code true} si existe un usuario habilitado con el correo indicado;
+     *         {@code false} en caso contrario.
      */
     boolean existsByEmailAndEnabledTrue(String email);
 
     /**
-     * Busca todos los usuarios con el correo electrónico indicado,
-     * independientemente de su estado.
+     * Busca todos los usuarios que coinciden con el correo electrónico indicado,
+     * independientemente de su estado de habilitación.
      *
-     * @param email Correo electrónico
-     * @return Lista de usuarios encontrados
+     * @param email Correo electrónico del usuario.
+     * @return Lista de usuarios que coinciden con el correo indicado.
      */
     List<User> findByEmail(String email);
 
     /**
-     * Busca un usuario por su UUID.
+     * Busca un usuario por su identificador único.
      *
-     * @param uuid UUID del usuario
-     * @return {@link Optional} con el usuario si existe
+     * @param uuid Identificador único del usuario.
+     * @return {@link Optional} que contiene el usuario encontrado, o vacío si no
+     *         existe.
      */
     Optional<User> findByUuid(UUID uuid);
 
     /**
-     * Verifica si existe al menos un usuario con un rol específico.
+     * Verifica si existe al menos un usuario que contenga el rol indicado.
      *
-     * @param role Rol a verificar
-     * @return true si hay usuarios con ese rol, false en caso contrario
+     * @param role Rol que se desea verificar.
+     * @return {@code true} si existe al menos un usuario con el rol indicado;
+     *         {@code false} en caso contrario.
      */
     boolean existsByRoleContains(Role role);
 
