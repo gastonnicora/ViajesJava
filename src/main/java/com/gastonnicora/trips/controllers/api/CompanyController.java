@@ -39,9 +39,9 @@ import jakarta.validation.Valid;
  * </p>
  *
  * <p>
- * La gestión de empresas se realiza mediante {@link CompanyService}, mientras
- * que {@link WorkerService} y {@link UserService} se utilizan para gestionar la
- * relación entre empresas, propietarios y usuarios.
+ * La gestión de empresas se realiza mediante {@link CompanyService}. Los
+ * servicios {@link WorkerService} y {@link UserService} se utilizan para
+ * gestionar las relaciones entre empresas, propietarios y usuarios.
  * </p>
  *
  * @author Gastón
@@ -61,9 +61,9 @@ public class CompanyController {
      * Crea una instancia del controlador de empresas.
      *
      * @param companyService servicio encargado de la gestión de empresas
-     * @param workerService servicio encargado de gestionar trabajadores y
-     * propietarios de empresas
-     * @param userService servicio encargado de consultar y gestionar usuarios
+     * @param workerService  servicio encargado de gestionar trabajadores y
+     *                       propietarios de empresas
+     * @param userService    servicio encargado de consultar y gestionar usuarios
      */
     public CompanyController(CompanyService companyService, WorkerService workerService, UserService userService) {
         this.companyService = companyService;
@@ -72,8 +72,7 @@ public class CompanyController {
     }
 
     /**
-     * Crea una nueva empresa y registra al usuario autenticado como
-     * propietario.
+     * Crea una nueva empresa y registra al usuario autenticado como propietario.
      *
      * <p>
      * La empresa se crea a partir de los datos recibidos y posteriormente se
@@ -84,17 +83,14 @@ public class CompanyController {
      * @param companyCreate datos necesarios para crear la empresa
      * @return datos de la empresa creada
      * @throws ValidationException si los datos proporcionados no cumplen las
-     * validaciones requeridas
+     *                             validaciones requeridas
      * @throws BadRequestException si las coordenadas proporcionadas no permiten
-     * obtener una dirección válida
+     *                             obtener una dirección válida
      * @see CompanyService#createCompany(CompanyCreate)
      */
     @PostMapping
     @SecurityRequirement(name = "bearerAuth")
-    @Operation(
-            summary = "Crear empresa",
-            description = "Crea una nueva empresa para el usuario autenticado y lo registra como propietario."
-    )
+    @Operation(summary = "Crear empresa", description = "Crea una nueva empresa para el usuario autenticado y lo registra como propietario.")
     public CompanyDTO createCompany(@Valid @RequestBody CompanyCreate companyCreate) {
         User currentUser = userService.getUser(getCurrentUserUuid());
 
@@ -114,10 +110,7 @@ public class CompanyController {
      */
     @GetMapping("/{uuid}")
     @SecurityRequirement(name = "bearerAuth")
-    @Operation(
-            summary = "Obtener empresa",
-            description = "Obtiene los datos de una empresa a partir de su UUID."
-    )
+    @Operation(summary = "Obtener empresa", description = "Obtiene los datos de una empresa a partir de su UUID.")
     public CompanyDTO getCompany(@PathVariable UUID uuid) {
         return companyService.getCompany(uuid);
     }
@@ -136,11 +129,8 @@ public class CompanyController {
     @GetMapping("/owner/{uuid}")
     @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN')")
-    @Operation(
-            summary = "Obtener empresas de un usuario",
-            description = "Obtiene las empresas asociadas a un usuario mediante su UUID. "
-            + "Requiere los roles ADMIN o SUPER_ADMIN."
-    )
+    @Operation(summary = "Obtener empresas de un usuario", description = "Obtiene las empresas asociadas a un usuario mediante su UUID. "
+            + "Requiere los roles ADMIN o SUPER_ADMIN.")
     public ListResponse<CompanyDTO> getCompaniesByUser(@PathVariable UUID uuid) {
         userService.getUser(uuid);
         List<Company> companies = workerService.getCompaniesByOwner(uuid);
@@ -155,10 +145,7 @@ public class CompanyController {
      */
     @GetMapping("/me")
     @SecurityRequirement(name = "bearerAuth")
-    @Operation(
-            summary = "Obtener mis empresas",
-            description = "Obtiene las empresas asociadas al usuario autenticado."
-    )
+    @Operation(summary = "Obtener mis empresas", description = "Obtiene las empresas asociadas al usuario autenticado.")
     public ListResponse<CompanyDTO> getCompaniesByCurrentUser() {
         UUID uuid = getCurrentUserUuid();
         userService.getUser(uuid);
@@ -174,7 +161,7 @@ public class CompanyController {
      * empresa para realizar esta operación.
      * </p>
      *
-     * @param uuid UUID de la empresa que se desea actualizar
+     * @param uuid    UUID de la empresa que se desea actualizar
      * @param company nuevos datos de la empresa
      * @return datos de la empresa actualizada
      * @see CompanyService#updateCompany(UUID, CompanyCreate)
@@ -188,11 +175,8 @@ public class CompanyController {
                     T(com.gastonnicora.trips.enums.RoleCompany).ADMIN
                 )
             """)
-    @Operation(
-            summary = "Modificar empresa",
-            description = "Actualiza los datos de una empresa. "
-            + "El usuario debe tener rol OWNER o ADMIN sobre la empresa."
-    )
+    @Operation(summary = "Modificar empresa", description = "Actualiza los datos de una empresa. "
+            + "El usuario debe tener rol OWNER o ADMIN sobre la empresa.")
     public CompanyDTO updateCompany(@PathVariable("uuid") UUID uuid, @Valid @RequestBody CompanyCreate company) {
         return companyService.updateCompany(uuid, company);
     }
@@ -211,13 +195,10 @@ public class CompanyController {
     @DeleteMapping("/{uuid}")
     @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("@companySecurity.hasRole(#uuid, T(com.gastonnicora.trips.enums.RoleCompany).OWNER)")
-    @Operation(
-            summary = "Eliminar empresa",
-            description = "Elimina una empresa. El usuario debe tener rol OWNER sobre la empresa."
-    )
+    @Operation(summary = "Eliminar empresa", description = "Elimina una empresa. El usuario debe tener rol OWNER sobre la empresa.")
     public void deleteCompany(@PathVariable("uuid") UUID uuid) {
         companyService.deleteCompany(uuid);
     }
 
-//TODO: Agregar endpoint para obtener todas las empresas
+    // TODO: Agregar endpoint para obtener todas las empresas
 }

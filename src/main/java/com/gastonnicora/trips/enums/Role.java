@@ -5,9 +5,8 @@ package com.gastonnicora.trips.enums;
  * plataforma.
  *
  * <p>
- * Cada rol identifica un nivel de responsabilidad dentro del sistema y puede
- * utilizarse para determinar el acceso del usuario a las distintas
- * funcionalidades de la aplicación.
+ * Cada valor representa un rol que puede utilizarse para determinar los
+ * permisos y el nivel de acceso de un usuario dentro de la aplicación.
  * </p>
  *
  * @author Gastón
@@ -17,43 +16,42 @@ package com.gastonnicora.trips.enums;
 public enum Role {
 
     /**
-     * Rol correspondiente a un usuario estándar de la plataforma.
+     * Rol correspondiente a un usuario estándar.
      */
     USER,
+
     /**
-     * Rol correspondiente a un administrador con permisos para gestionar
-     * recursos y usuarios básicos del sistema.
+     * Rol correspondiente a un administrador.
      */
     ADMIN,
+
     /**
-     * Rol correspondiente al super administrador, con acceso completo a las
-     * funcionalidades del sistema.
+     * Rol correspondiente a un super administrador.
      */
     SUPER_ADMIN,
+
     /**
-     * Rol correspondiente al administrador de la plataforma, encargado de la
-     * gestión de empresas, usuarios, viajes y reportes generales.
+     * Rol correspondiente a un administrador de la plataforma.
      */
     PLATFORM_ADMIN,
+
     /**
-     * Rol correspondiente al agente de soporte, encargado de la gestión de
-     * tickets de soporte y de los reportes relacionados.
+     * Rol correspondiente a un agente de soporte.
      */
     SUPPORT_AGENT,
+
     /**
-     * Rol correspondiente al analista, encargado de generar y analizar
-     * información relacionada con ventas, usuarios y viajes.
+     * Rol correspondiente a un analista.
      */
     ANALYST,
+
     /**
-     * Rol correspondiente al responsable financiero, encargado de la gestión de
-     * facturación y de los reportes financieros.
+     * Rol correspondiente a un responsable financiero.
      */
     FINANCE_MANAGER,
+
     /**
-     * Rol correspondiente al responsable de recursos humanos, encargado de la
-     * gestión de empleados y de los reportes de personal.
+     * Rol correspondiente a un responsable de recursos humanos.
      */
     HR_MANAGER
-
 }

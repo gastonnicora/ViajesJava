@@ -3,17 +3,18 @@ package com.gastonnicora.trips.exceptions;
 import org.springframework.http.HttpStatus;
 
 /**
- * Excepción personalizada de la aplicación para representar errores internos
- * del servidor (HTTP 500 - Internal Server Error).
+ * Excepción personalizada utilizada para representar errores internos del
+ * servidor.
  * <p>
- * Se utiliza cuando ocurre un error durante el procesamiento de una operación
- * que impide completar la solicitud correctamente.
+ * Corresponde al código de estado HTTP 500 (Internal Server Error) y se utiliza
+ * cuando ocurre un error durante el procesamiento de una operación que impide
+ * completar la solicitud correctamente.
  * </p>
  *
  * <p>
  * Se utiliza en conjunto con
  * {@link com.gastonnicora.trips.exceptions.handler.GlobalExceptionHandler}
- * para generar respuestas de error estandarizadas con código HTTP 500.
+ * para generar respuestas de error estandarizadas.
  * </p>
  *
  * @author Gastón
@@ -23,7 +24,7 @@ import org.springframework.http.HttpStatus;
 public class InternalErrorException extends RuntimeException {
 
     /**
-     * Código HTTP asociado a la excepción (500 - Internal Server Error).
+     * Código de estado HTTP asociado a la excepción.
      */
     private final int status = HttpStatus.INTERNAL_SERVER_ERROR.value();
 
@@ -44,9 +45,9 @@ public class InternalErrorException extends RuntimeException {
     }
 
     /**
-     * Obtiene el código HTTP asociado a la excepción.
+     * Obtiene el código de estado HTTP asociado a la excepción.
      *
-     * @return Código HTTP 500.
+     * @return Código de estado HTTP 500.
      */
     public int getStatus() {
         return status;
@@ -55,7 +56,7 @@ public class InternalErrorException extends RuntimeException {
     /**
      * Obtiene la explicación adicional asociada al error.
      *
-     * @return Explicación del error.
+     * @return Explicación adicional del error.
      */
     public String getExplain() {
         return explain;

@@ -21,31 +21,21 @@ import io.swagger.v3.oas.models.tags.Tag;
  * SpringDoc.
  *
  * <p>
- * Agrega a las operaciones protegidas mediante {@link PreAuthorize} información
- * sobre los roles requeridos para acceder a ellas y permite ordenar
- * alfabéticamente las etiquetas de la documentación.
+ * Agrega información sobre los roles requeridos por las operaciones protegidas
+ * mediante {@link PreAuthorize} y permite ordenar alfabéticamente las etiquetas
+ * de la documentación.
  * </p>
  *
  * <p>
- * Las expresiones de autorización soportadas incluyen tanto las funciones
- * estándar {@code hasRole} y {@code hasAnyRole} como las funciones
- * personalizadas {@code @companySecurity.hasRole} y
- * {@code @companySecurity.hasAnyRole}.
+ * Las expresiones de autorización soportadas incluyen las funciones
+ * {@code hasRole} y {@code hasAnyRole}, así como las funciones personalizadas
+ * {@code @companySecurity.hasRole} y {@code @companySecurity.hasAnyRole}.
  * </p>
  *
  * <p>
  * También reconoce roles definidos mediante referencias SpEL a enumeraciones,
- * por ejemplo:
- * </p>
- *
- * <pre>
- * T(com.gastonnicora.trips.enums.RoleCompany).OWNER
- * T(com.gastonnicora.trips.enums.RoleCompany).ADMIN
- * </pre>
- *
- * <p>
- * Estos roles se muestran de forma simplificada en Swagger, evitando exponer la
- * expresión SpEL completa.
+ * como {@code T(com.gastonnicora.trips.enums.RoleCompany).OWNER}, y los muestra
+ * de forma simplificada en la documentación de Swagger.
  * </p>
  *
  * @author Gastón
@@ -62,32 +52,17 @@ public class SwaggerConfigCustomer {
      * <p>
      * Cuando el método asociado a una operación contiene la anotación
      * {@link PreAuthorize}, se analiza su expresión de autorización y se
-     * extraen los roles requeridos para agregarlos a la descripción de la
+     * extraen los roles reconocidos para agregarlos a la descripción de la
      * operación.
      * </p>
      *
      * <p>
-     * Por ejemplo, una expresión como:
+     * Los roles extraídos se muestran en la descripción de Swagger con el
+     * formato correspondiente a los roles requeridos por la operación.
      * </p>
-     *
-     * <pre>
-     * @companySecurity.hasAnyRole(
-     *     #uuid,
-     *     T(com.gastonnicora.trips.enums.RoleCompany).OWNER,
-     *     T(com.gastonnicora.trips.enums.RoleCompany).ADMIN
-     * )
-     * </pre>
-     *
-     * <p>
-     * se mostrará en Swagger como:
-     * </p>
-     *
-     * <pre>
-     * 🔒 Requiere rol: OWNER, ADMIN
-     * </pre>
      *
      * @return {@link OperationCustomizer} encargado de personalizar las
-     * operaciones de OpenAPI
+     *         operaciones de OpenAPI
      */
     @Bean
     public OperationCustomizer customizePreAuthorize() {
@@ -106,9 +81,9 @@ public class SwaggerConfigCustomer {
 
                 operation.setDescription(
                         (existingDescription == null || existingDescription.isBlank()
-                        ? ""
-                        : existingDescription + "\n\n")
-                        + securityInfo);
+                                ? ""
+                                : existingDescription + "\n\n")
+                                + securityInfo);
             }
 
             return operation;
@@ -144,32 +119,16 @@ public class SwaggerConfigCustomer {
      * Extrae los roles definidos en una expresión de {@link PreAuthorize}.
      *
      * <p>
-     * Reconoce roles definidos mediante:
+     * Reconoce roles definidos mediante las funciones {@code hasRole} y
+     * {@code hasAnyRole}, así como mediante las funciones personalizadas
+     * utilizadas para validar roles dentro de una empresa.
      * </p>
-     *
-     * <ul>
-     * <li>{@code hasRole('ADMIN')}</li>
-     * <li>{@code hasAnyRole('ADMIN', 'SUPER_ADMIN')}</li>
-     * <li>{@code @companySecurity.hasRole(#uuid, T(...).OWNER)}</li>
-     * <li>{@code @companySecurity.hasAnyRole(#uuid, T(...).OWNER, T(...).ADMIN)}</li>
-     * </ul>
      *
      * <p>
-     * Para las referencias SpEL a enumeraciones, únicamente se extrae el nombre
-     * de la constante. Por ejemplo:
+     * También reconoce roles definidos mediante referencias SpEL a
+     * enumeraciones. En estos casos, únicamente se extrae el nombre de la
+     * constante.
      * </p>
-     *
-     * <pre>
-     * T(com.gastonnicora.trips.enums.RoleCompany).OWNER
-     * </pre>
-     *
-     * <p>
-     * se transforma en:
-     * </p>
-     *
-     * <pre>
-     * OWNER
-     * </pre>
      *
      * <p>
      * Si no se encuentra ningún rol reconocido, se devuelve la expresión
@@ -177,9 +136,9 @@ public class SwaggerConfigCustomer {
      * </p>
      *
      * @param expression expresión de {@link PreAuthorize} que contiene las
-     * reglas de autorización
+     *                   reglas de autorización
      * @return roles extraídos de la expresión, separados por comas, o la
-     * expresión original si no se encuentra ningún rol
+     *         expresión original si no se encuentra ningún rol
      */
     private String extractRoles(String expression) {
         List<String> roles = new ArrayList<>();

@@ -4,9 +4,8 @@ package com.gastonnicora.trips.enums;
  * Enumeración que define los roles disponibles dentro de una empresa.
  *
  * <p>
- * Cada rol representa un conjunto de responsabilidades y permisos dentro de la
- * empresa. Los roles pueden asignarse a los trabajadores para determinar el
- * acceso a las distintas funcionalidades disponibles.
+ * Cada valor representa un rol que puede asignarse a un trabajador para
+ * determinar su función dentro de la empresa.
  * </p>
  *
  * @author Gastón
@@ -16,47 +15,28 @@ package com.gastonnicora.trips.enums;
 public enum RoleCompany {
 
     /**
-     * Rol correspondiente al propietario de la empresa, con todos los permisos
-     * sobre la misma.
+     * Rol correspondiente al propietario de la empresa.
      */
     OWNER,
 
     /**
-     * Rol correspondiente al vendedor, encargado de gestionar viajes y
-     * reservas, además de generar reportes de ventas.
-     *
-     * <p>
-     * Puede crear, modificar y eliminar viajes, así como consultar y cancelar
-     * reservas.
-     * </p>
+     * Rol correspondiente a un vendedor dentro de la empresa.
      */
     SELLER,
 
     /**
-     * Rol correspondiente al conductor, encargado de gestionar los viajes que
-     * tiene asignados y actualizar su estado.
-     *
-     * <p>
-     * Puede actualizar los viajes a los estados correspondientes a su
-     * ejecución, como en curso o completado, y gestionar su perfil.
-     * </p>
+     * Rol correspondiente a un conductor dentro de la empresa.
      */
     DRIVER,
 
     /**
-     * Rol correspondiente al administrador de la empresa, encargado de
-     * gestionar usuarios, viajes y reportes dentro de su empresa.
-     *
-     * <p>
-     * Puede generar reportes relacionados con las ventas y los usuarios de la
-     * empresa.
-     * </p>
+     * Rol correspondiente a un administrador de la empresa.
      */
     ADMIN,
 
     /**
-     * Rol correspondiente al responsable de recursos humanos, encargado de la
-     * gestión de empleados y de los reportes de personal dentro de la empresa.
+     * Rol correspondiente al responsable de recursos humanos dentro de la
+     * empresa.
      */
     HR_MANAGER
 }

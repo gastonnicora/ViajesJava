@@ -51,16 +51,19 @@ public class SecurityConfig {
     /**
      * Crea una instancia de la configuración de seguridad.
      *
-     * @param userService servicio utilizado por Spring Security para cargar los
-     * datos de los usuarios
-     * @param jwtFilter filtro encargado de procesar la autenticación mediante
-     * JWT
-     * @param accessDeniedHandler handler encargado de gestionar accesos
-     * denegados
+     * @param userService              servicio utilizado por Spring Security para
+     *                                 cargar los
+     *                                 datos de los usuarios
+     * @param jwtFilter                filtro encargado de procesar la autenticación
+     *                                 mediante
+     *                                 JWT
+     * @param accessDeniedHandler      handler encargado de gestionar accesos
+     *                                 denegados
      * @param authenticationEntryPoint handler encargado de gestionar
-     * solicitudes no autenticadas
+     *                                 solicitudes no autenticadas
      */
-    public SecurityConfig(UserDetailsServiceImpl userService,
+    public SecurityConfig(
+            UserDetailsServiceImpl userService,
             JwtAuthenticationFilter jwtFilter,
             CustomAccessDeniedHandler accessDeniedHandler,
             CustomAuthenticationEntryPoint authenticationEntryPoint) {
@@ -74,7 +77,7 @@ public class SecurityConfig {
      * Proporciona el codificador de contraseñas utilizado por la aplicación.
      *
      * <p>
-     * Utiliza {@link BCryptPasswordEncoder} para aplicar un hash seguro a las
+     * Utiliza {@link BCryptPasswordEncoder} para aplicar un hash a las
      * contraseñas antes de almacenarlas.
      * </p>
      *
@@ -89,13 +92,14 @@ public class SecurityConfig {
      * Proporciona el administrador de autenticación de Spring Security.
      *
      * @param config configuración utilizada por Spring Security para construir
-     * el administrador de autenticación
+     *               el administrador de autenticación
      * @return instancia de {@link AuthenticationManager}
      * @throws Exception si no es posible obtener el administrador de
-     * autenticación
+     *                   autenticación
      */
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+    public AuthenticationManager authenticationManager(
+            AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
 
@@ -123,7 +127,7 @@ public class SecurityConfig {
      * @param http objeto utilizado para configurar la seguridad HTTP
      * @return cadena de filtros de seguridad configurada para la API
      * @throws Exception si ocurre un error durante la configuración de
-     * seguridad
+     *                   seguridad
      * @see JwtAuthenticationFilter
      */
     @Bean
@@ -133,14 +137,14 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .securityMatcher("/api/**")
                 .exceptionHandling(ex -> ex
-                .authenticationEntryPoint(authenticationEntryPoint)
-                .accessDeniedHandler(accessDeniedHandler))
+                        .authenticationEntryPoint(authenticationEntryPoint)
+                        .accessDeniedHandler(accessDeniedHandler))
                 .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/error", "/api/auth/refresh").permitAll()
-                .requestMatchers(HttpMethod.POST, "/api/users").anonymous()
-                .requestMatchers("/api/auth/login").anonymous()
-                .requestMatchers("/api/**").authenticated()
-                .anyRequest().authenticated())
+                        .requestMatchers("/error", "/api/auth/refresh").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/users").anonymous()
+                        .requestMatchers("/api/auth/login").anonymous()
+                        .requestMatchers("/api/**").authenticated()
+                        .anyRequest().authenticated())
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
@@ -161,42 +165,44 @@ public class SecurityConfig {
      * {@code JSESSIONID}.
      * </p>
      *
-     * @param http objeto utilizado para configurar la seguridad HTTP
+     * @param http                  objeto utilizado para configurar la seguridad
+     *                              HTTP
      * @param authenticationManager administrador utilizado para autenticar
-     * usuarios
+     *                              usuarios
      * @return cadena de filtros de seguridad configurada para la interfaz web
      * @throws Exception si ocurre un error durante la configuración de
-     * seguridad
+     *                   seguridad
      */
     @Bean
     @Order(2)
-    public SecurityFilterChain securityChain(HttpSecurity http,
+    public SecurityFilterChain securityChain(
+            HttpSecurity http,
             AuthenticationManager authenticationManager) throws Exception {
 
         http
                 .csrf(csrf -> csrf.disable())
                 .exceptionHandling(ex -> ex
-                .authenticationEntryPoint(authenticationEntryPoint)
-                .accessDeniedHandler(accessDeniedHandler))
+                        .authenticationEntryPoint(authenticationEntryPoint)
+                        .accessDeniedHandler(accessDeniedHandler))
                 .securityMatcher("/**")
                 .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/error", "/auth/**").permitAll()
-                .requestMatchers("/v3/api-docs/**", "/swagger-ui/**",
-                        "/swagger-ui.html", "/public/**")
-                .permitAll()
-                .requestMatchers("/**").hasAnyRole("ADMIN", "USER")
-                .anyRequest().authenticated())
+                        .requestMatchers("/error", "/auth/**").permitAll()
+                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**",
+                                "/swagger-ui.html", "/public/**")
+                        .permitAll()
+                        .requestMatchers("/**").hasAnyRole("ADMIN", "USER")
+                        .anyRequest().authenticated())
                 .authenticationManager(authenticationManager)
                 .userDetailsService(userService)
                 .formLogin(form -> form.permitAll())
                 .httpBasic(basic -> {
                 })
                 .logout(logout -> logout
-                .logoutUrl("/logout")
-                .logoutSuccessUrl("/login")
-                .invalidateHttpSession(true)
-                .deleteCookies("JSESSIONID")
-                .permitAll());
+                        .logoutUrl("/logout")
+                        .logoutSuccessUrl("/login")
+                        .invalidateHttpSession(true)
+                        .deleteCookies("JSESSIONID")
+                        .permitAll());
 
         return http.build();
     }

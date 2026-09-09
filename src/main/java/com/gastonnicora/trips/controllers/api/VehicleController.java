@@ -26,8 +26,8 @@ import jakarta.validation.Valid;
  * Controlador REST encargado de la gestión de vehículos asociados a empresas.
  *
  * <p>
- * Permite consultar, registrar y eliminar vehículos pertenecientes a una
- * empresa.
+ * Proporciona operaciones para consultar, registrar y eliminar vehículos
+ * pertenecientes a una empresa.
  * </p>
  *
  * <p>
@@ -96,7 +96,7 @@ public class VehicleController {
      * dentro de la empresa indicada.
      * </p>
      *
-     * @param companyUuid UUID de la empresa a la que se asociará el vehículo
+     * @param companyUuid  UUID de la empresa a la que se asociará el vehículo
      * @param vehicleCreate datos necesarios para crear el vehículo
      * @return datos del vehículo creado
      * @see VehicleService#createVehicle(Company, VehicleCreate)

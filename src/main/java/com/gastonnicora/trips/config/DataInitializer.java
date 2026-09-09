@@ -34,7 +34,7 @@ public class DataInitializer {
     private String password;
 
     /**
-     * Crea un {@link CommandLineRunner} que inicializa el usuario
+     * Crea un {@link CommandLineRunner} encargado de inicializar el usuario
      * {@code SUPER_ADMIN} al iniciar la aplicación.
      *
      * <p>
@@ -42,7 +42,7 @@ public class DataInitializer {
      * </p>
      *
      * @param userService servicio utilizado para gestionar usuarios
-     * @return ejecutor que inicializa el usuario {@code SUPER_ADMIN}
+     * @return ejecutor encargado de inicializar el usuario {@code SUPER_ADMIN}
      */
     @Bean
     CommandLineRunner init(UserService userService) {

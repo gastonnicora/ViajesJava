@@ -71,10 +71,7 @@ public class UserController {
     @GetMapping
     @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN')")
-    @Operation(
-            summary = "Obtener usuarios",
-            description = "Obtiene todos los usuarios registrados en el sistema."
-    )
+    @Operation(summary = "Obtener usuarios", description = "Obtiene todos los usuarios registrados en el sistema.")
     public ListResponse<UserDTO> getUsers() {
         return userService.getUsers();
     }
@@ -82,15 +79,12 @@ public class UserController {
     /**
      * Obtiene los datos del usuario autenticado.
      *
-     * @return datos del usuario actual
+     * @return datos del usuario autenticado
      * @see UserService#getCurrentUser()
      */
     @GetMapping("/me")
     @SecurityRequirement(name = "bearerAuth")
-    @Operation(
-            summary = "Obtener usuario actual",
-            description = "Devuelve los datos del usuario autenticado."
-    )
+    @Operation(summary = "Obtener usuario actual", description = "Devuelve los datos del usuario autenticado.")
     public UserDTO currentUser() {
         return userService.getCurrentUser();
     }
@@ -109,10 +103,7 @@ public class UserController {
     @GetMapping("/{uuid}")
     @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN')")
     @SecurityRequirement(name = "bearerAuth")
-    @Operation(
-            summary = "Obtener usuario",
-            description = "Obtiene los datos de un usuario a partir de su UUID."
-    )
+    @Operation(summary = "Obtener usuario", description = "Obtiene los datos de un usuario a partir de su UUID.")
     public UserDTO getUserByUuid(@PathVariable UUID uuid) {
         return userService.getUserByUuid(uuid);
     }
@@ -130,10 +121,7 @@ public class UserController {
      * @see UserService#createUser(UserCreate)
      */
     @PostMapping
-    @Operation(
-            summary = "Crear usuario",
-            description = "Crea un nuevo usuario a partir de los datos proporcionados."
-    )
+    @Operation(summary = "Crear usuario", description = "Crea un nuevo usuario a partir de los datos proporcionados.")
     public UserDTO createUser(@Valid @RequestBody UserCreate userCreateRequest) {
         return userService.createUser(userCreateRequest);
     }
@@ -151,10 +139,7 @@ public class UserController {
      */
     @PutMapping
     @SecurityRequirement(name = "bearerAuth")
-    @Operation(
-            summary = "Actualizar perfil",
-            description = "Actualiza los datos del perfil del usuario autenticado."
-    )
+    @Operation(summary = "Actualizar perfil", description = "Actualiza los datos del perfil del usuario autenticado.")
     public UserDTO updateUserProfile(@Valid @RequestBody UserPut userPutRequest) {
         return userService.updateCurrentUser(userPutRequest);
     }
@@ -167,17 +152,13 @@ public class UserController {
      * del usuario.
      * </p>
      *
-     * @param userChangePasswordRequest datos necesarios para cambiar la
-     * contraseña
+     * @param userChangePasswordRequest datos necesarios para cambiar la contraseña
      * @return datos del usuario actualizado
      * @see UserService#updatePassword(UserChangePassword)
      */
     @PutMapping("/me/password")
     @SecurityRequirement(name = "bearerAuth")
-    @Operation(
-            summary = "Cambiar contraseña",
-            description = "Cambia la contraseña del usuario autenticado y revoca sus sesiones activas."
-    )
+    @Operation(summary = "Cambiar contraseña", description = "Cambia la contraseña del usuario autenticado y revoca sus sesiones activas.")
     public UserDTO changePassword(@Valid @RequestBody UserChangePassword userChangePasswordRequest) {
         return userService.updatePassword(userChangePasswordRequest);
     }
@@ -190,7 +171,7 @@ public class UserController {
      * {@code HR_MANAGER}.
      * </p>
      *
-     * @param uuid UUID del usuario cuyos roles se modificarán
+     * @param uuid                  UUID del usuario cuyos roles se modificarán
      * @param userChangeRoleRequest nuevos roles globales del usuario
      * @return datos actualizados del usuario
      * @see UserService#setRole(UUID, UserChangeRole)
@@ -198,10 +179,7 @@ public class UserController {
     @PutMapping("/{uuid}/role")
     @PreAuthorize("hasAnyRole('ADMIN','SUPER_ADMIN','HR_MANAGER')")
     @SecurityRequirement(name = "bearerAuth")
-    @Operation(
-            summary = "Modificar roles de usuario",
-            description = "Modifica los roles globales de un usuario."
-    )
+    @Operation(summary = "Modificar roles de usuario", description = "Modifica los roles globales de un usuario.")
     public UserDTO changeUserRole(@PathVariable UUID uuid, @Valid @RequestBody UserChangeRole userChangeRoleRequest) {
         return userService.setRole(uuid, userChangeRoleRequest);
     }
@@ -218,10 +196,7 @@ public class UserController {
      */
     @DeleteMapping
     @SecurityRequirement(name = "bearerAuth")
-    @Operation(
-            summary = "Eliminar mi usuario",
-            description = "Elimina la cuenta del usuario autenticado."
-    )
+    @Operation(summary = "Eliminar mi usuario", description = "Elimina la cuenta del usuario autenticado.")
     public void deleteCurrentUserAccount() {
         userService.deleteCurrentUser();
     }
