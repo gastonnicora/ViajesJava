@@ -35,6 +35,16 @@ public class TokenCleanupService {
 
     private final RefreshTokenRepository repo;
 
+    /**
+     * Crea una instancia del servicio de limpieza tokens de refresco e inicializa las
+     * dependencias
+     * necesarias.
+     *
+     * @param RefreshRepository Repositorio de tokens de refresco utilizado para
+     *                          acceder a
+     *                          la
+     *                          base de datos.
+     */
     public TokenCleanupService(RefreshTokenRepository repo) {
         this.repo = repo;
     }

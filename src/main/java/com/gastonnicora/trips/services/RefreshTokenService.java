@@ -42,6 +42,17 @@ public class RefreshTokenService {
 
     private final RefreshTokenRepository repo;
 
+    /**
+     * Crea una instancia del servicio de tokens de refresco e inicializa las
+     * dependencias
+     * necesarias para la gestión de tokens de refresco y
+     * conversión de entidades a DTOs.
+     *
+     * @param RefreshRepository Repositorio de tokens de refresco utilizado para
+     *                          acceder a
+     *                          la
+     *                          base de datos.
+     */
     public RefreshTokenService(RefreshTokenRepository repo) {
         this.repo = repo;
     }
